@@ -27,18 +27,60 @@ export default {
         primaryIndex: { partitionKey: "id", sortKey: "userId" },
       });
 
+      const usersTable = new Table(stack, "Users", {
+        fields: {
+          id: "number",
+        },
+        primaryIndex: { partitionKey: "id" },
+      });
+
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
         bind: [chatsTable, channelsTable],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        environment: {
+          BOT_TOKEN: process.env.BOT_TOKEN as string,
+        },
+      });
+
+      const stripeAccountHandler = new Function(stack, "StripeAccountHandler", {
+        handler: "functions/stripeAccount/handler.handler",
+        bind: [usersTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+      });
+
+      const channelsHandler = new Function(stack, "ChannelsHandler", {
+        handler: "functions/channels/handler.handler",
+        bind: [channelsTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+      });
+
+      const telegramAuthHandler = new Function(stack, "TelegramAuthHandler", {
+        handler: "functions/telegramAuth/handler.handler",
+        environment: {
+          BOT_TOKEN: process.env.BOT_TOKEN as string,
+        },
       });
 
       const api = new Api(stack, "Api", {
+        authorizers: {
+          telegramAuth: {
+            type: "lambda",
+            function: telegramAuthHandler,
+            resultsCacheTtl: "30 seconds",
+          },
+        },
         defaults: {
-          function: {},
+          authorizer: "telegramAuth",
         },
         routes: {
-          "POST /webhook": webhookHandler,
+          "POST /webhook": {
+            function: webhookHandler,
+            authorizer: "none",
+          },
+          "POST /stripeAccount": stripeAccountHandler,
+          "GET /stripeAccount": stripeAccountHandler,
+          "GET /channels": channelsHandler,
         },
       });
 

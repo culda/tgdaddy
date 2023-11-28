@@ -10,11 +10,9 @@ import {
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel, StChat, StLinkChat } from "./types";
+import { StChannel, StChat, StLinkChat } from "../types";
 
-const telegram = Telegram.fromToken(
-  "6595076636:AAGua37f0xbobgkwyiszo5vOoc8c6r1nvk4"
-);
+const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 

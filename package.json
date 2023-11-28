@@ -14,9 +14,11 @@
     "@types/aws-lambda": "^8.10.129",
     "aws-lambda": "^1.0.7",
     "next": "14.0.3",
+    "next-auth": "^4.24.5",
     "puregram": "^2.20.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "stripe": "^14.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",

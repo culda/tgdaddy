@@ -13,3 +13,9 @@ export type StChannel = {
   userId: number;
   title?: string;
 };
+
+export type StUser = {
+  id: number;
+  stripeAccountId?: string;
+  channels?: StChannel[];
+};
