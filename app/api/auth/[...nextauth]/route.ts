@@ -1,36 +1,52 @@
-import NextAuth, { Session } from "next-auth";
+import NextAuth from "next-auth";
+import { encode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 
 const handler = NextAuth({
-  // Configure one or more authentication providers
   providers: [
     Credentials({
       name: "Telegram",
       credentials: {
-        // Define the credentials you expect to receive from your Telegram sign-in process
-        hash: { label: "Hash", type: "text" },
-        userData: { label: "User data", type: "text" },
+        id: { label: "User ID", type: "text" },
+        username: { label: "Username", type: "text" },
+        firstName: { label: "First Name", type: "text" },
+        lastName: { label: "Last Name", type: "text" },
       },
       authorize: async (credentials) => {
-        console.log("auth", credentials);
-        if (!credentials) return null;
-        return { id: credentials.hash, user: credentials.userData };
+        if (!credentials) return Promise.reject("no credentials");
+        return {
+          id: credentials.id,
+          username: credentials.username,
+          firstName: credentials.firstName,
+          lastName: credentials.lastName,
+        };
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session: async ({ session, token }) => {
-      session.user = token.usr;
+    session: async ({ session, token, user }) => {
+      session.accessToken = await encode({
+        token,
+        secret: Buffer.from(process.env.NEXTAUTH_SECRET as string),
+      });
+
+      // Attach user details from the JWT token to the session
+      if (token.user) {
+        session.user = token.user;
+      }
+
       return session;
     },
-    jwt: async ({ user, token }) => {
+    jwt: async ({ user, token, session }) => {
       if (user) {
-        token.usr = user.user;
+        token.user = user; // Attach user details to the JWT token
       }
       return token;
     },
   },
-  // Add any other NextAuth configuration here
 });
 
 export { handler as GET, handler as POST };

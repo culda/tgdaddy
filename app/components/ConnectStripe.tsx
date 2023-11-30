@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 
 export default function ConnectStripe() {
-  const [loading, setLoading] = useState(false);
-
   const connectStripeAccount = async () => {
-    setLoading(true);
     try {
       const res = await fetch("/connect-stripe", { method: "POST" });
       const link = await res.json();
@@ -14,16 +13,13 @@ export default function ConnectStripe() {
       window.location.href = link.url;
     } catch (error) {
       console.error("Failed to connect to Stripe:", error);
-      setLoading(false);
     }
   };
 
   return (
     <div>
       <h1>Connect Your Stripe Account</h1>
-      <button onClick={connectStripeAccount} disabled={loading}>
-        {loading ? "Loading..." : "Connect to Stripe"}
-      </button>
+      <button onClick={connectStripeAccount}>"Connect to Stripe"</button>
     </div>
   );
 }

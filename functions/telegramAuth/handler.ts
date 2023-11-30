@@ -1,43 +1,21 @@
 import {
-  APIGatewayAuthorizerEvent,
   APIGatewayAuthorizerHandler,
   APIGatewayAuthorizerResult,
 } from "aws-lambda";
-import crypto from "crypto";
+import { decode } from "next-auth/jwt";
 
 export const handler: APIGatewayAuthorizerHandler = async (event) => {
-  console.log(event);
+  console.log("authing");
   if (event.type === "REQUEST") {
-    if (!event.headers) {
-      return generatePolicy("user", "Deny", event.methodArn);
-    }
-    const token = event.headers["Authorization"];
+    const auth = event.headers?.["authorization"];
+    const token = auth?.split("Bearer ")[1];
 
-    // Extract the user data from the request
-    const userData = JSON.parse(event.headers["X-User-Data"] as string);
-    // Construct the data-check-string
-    const dataCheckString = Object.keys(userData)
-      .filter((key) => key !== "hash")
-      .sort()
-      .map((key) => `${key}=${userData[key]}`)
-      .join("\n");
+    await decode({
+      token,
+      secret: Buffer.from(process.env.NEXTAUTH_SECRET as string),
+    });
 
-    const secretKey = crypto
-      .createHash("sha256")
-      .update(process.env.BOT_TOKEN as string)
-      .digest();
-
-    // Calculate HMAC-SHA-256 signature
-    const hmac = crypto
-      .createHmac("sha256", secretKey)
-      .update(dataCheckString)
-      .digest("hex");
-
-    if (hmac === token) {
-      return generatePolicy("user", "Allow", event.methodArn);
-    } else {
-      return generatePolicy("user", "Deny", event.methodArn);
-    }
+    return generatePolicy("user", "Allow", event.methodArn);
   }
 
   return generatePolicy("user", "Deny", event.methodArn);

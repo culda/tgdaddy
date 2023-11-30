@@ -10,8 +10,6 @@ export default {
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
-      const site = new NextjsSite(stack, "site");
-
       const chatsTable = new Table(stack, "Chats", {
         fields: {
           id: "number",
@@ -25,6 +23,9 @@ export default {
           userId: "number",
         },
         primaryIndex: { partitionKey: "id", sortKey: "userId" },
+        localIndexes: {
+          userId: { sortKey: "userId" },
+        },
       });
 
       const usersTable = new Table(stack, "Users", {
@@ -59,6 +60,7 @@ export default {
         handler: "functions/telegramAuth/handler.handler",
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
+          NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
         },
       });
 
@@ -81,6 +83,13 @@ export default {
           "POST /stripeAccount": stripeAccountHandler,
           "GET /stripeAccount": stripeAccountHandler,
           "GET /channels": channelsHandler,
+        },
+      });
+
+      const site = new NextjsSite(stack, "site", {
+        bind: [api],
+        environment: {
+          NEXT_PUBLIC_API_ENDPOINT: api.url,
         },
       });
 
