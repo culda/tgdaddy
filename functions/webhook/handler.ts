@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { Keyboard, Telegram, Update, Chat, InlineKeyboard } from "puregram";
+import { Keyboard, Telegram, InlineKeyboard } from "puregram";
 import { Table } from "sst/node/table";
 import { LinkChannelText } from "./utils";
 import { TelegramUpdate } from "puregram/generated";
@@ -10,7 +10,7 @@ import {
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel, StChat, StLinkChat } from "../types";
+import { StChannel, StChat, StLinkChat } from "../../app/model/types";
 
 const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 

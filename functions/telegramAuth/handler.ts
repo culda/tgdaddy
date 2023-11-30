@@ -4,18 +4,24 @@ import {
 } from "aws-lambda";
 import { decode } from "next-auth/jwt";
 
+export type AuthorizerContext = {
+  userId?: string;
+};
+
 export const handler: APIGatewayAuthorizerHandler = async (event) => {
-  console.log("authing");
   if (event.type === "REQUEST") {
     const auth = event.headers?.["authorization"];
     const token = auth?.split("Bearer ")[1];
 
-    await decode({
+    // Throws error if token is invalid
+    const jwt = await decode({
       token,
       secret: Buffer.from(process.env.NEXTAUTH_SECRET as string),
     });
 
-    return generatePolicy("user", "Allow", event.methodArn);
+    console.log(jwt);
+
+    return generatePolicy("user", "Allow", event.methodArn, jwt?.sub);
   }
 
   return generatePolicy("user", "Deny", event.methodArn);
@@ -24,7 +30,8 @@ export const handler: APIGatewayAuthorizerHandler = async (event) => {
 function generatePolicy(
   principalId: string,
   effect: string,
-  resource: string
+  resource: string,
+  userId?: string
 ): APIGatewayAuthorizerResult {
   const policyDocument = {
     Version: "2012-10-17",
@@ -40,6 +47,9 @@ function generatePolicy(
   return {
     principalId: principalId,
     policyDocument: policyDocument,
+    context: {
+      userId,
+    },
   };
 }
 

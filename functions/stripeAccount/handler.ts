@@ -6,7 +6,7 @@ import {
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StUser } from "../types";
+import { StUser } from "../../app/model/types";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 

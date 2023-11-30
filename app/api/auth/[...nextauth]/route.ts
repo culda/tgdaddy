@@ -27,7 +27,7 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    session: async ({ session, token, user }) => {
+    session: async ({ session, token }) => {
       session.accessToken = await encode({
         token,
         secret: Buffer.from(process.env.NEXTAUTH_SECRET as string),
@@ -40,7 +40,7 @@ const handler = NextAuth({
 
       return session;
     },
-    jwt: async ({ user, token, session }) => {
+    jwt: async ({ user, token }) => {
       if (user) {
         token.user = user; // Attach user details to the JWT token
       }

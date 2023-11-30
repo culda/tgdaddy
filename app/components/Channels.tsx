@@ -2,14 +2,12 @@
 
 import { useSession } from "next-auth/react";
 import React, { useState, useEffect } from "react";
-
-console.log(process.env.NEXT_PUBLIC_API_ENDPOINT);
+import { StChannel } from "../model/types";
 
 const Channels = () => {
   const session = useSession();
-  console.log("sss", session.data);
 
-  const [channels, setChannels] = useState([]);
+  const [channels, setChannels] = useState<StChannel[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +18,7 @@ const Channels = () => {
     const fetchChannels = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels?id=${session.data?.user?.id}`,
+          `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -31,7 +29,7 @@ const Channels = () => {
           throw new Error("Failed to fetch channels");
         }
         const data = await response.json();
-        setChannels(data); // Adjust this to match the structure of your data
+        setChannels(data.channels);
       } catch (error) {
         console.error("Error fetching channels:", error);
       } finally {
@@ -50,9 +48,9 @@ const Channels = () => {
     <div>
       <h1>Your Channels</h1>
       <ul>
-        {/* {channels.map((channel) => (
-          <li key={channel.id}>{channel.title}</li> // Adjust according to your data structure
-        ))} */}
+        {channels.map((channel) => (
+          <li key={channel.id}>{channel.title}</li>
+        ))}
       </ul>
     </div>
   );

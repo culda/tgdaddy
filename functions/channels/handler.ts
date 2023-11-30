@@ -1,14 +1,20 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import {
+  APIGatewayProxyHandlerV2,
+  APIGatewayProxyHandlerV2WithLambdaAuthorizer,
+} from "aws-lambda";
 import { Table } from "sst/node/table";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel, StUser } from "../types";
+import { StChannel } from "../../app/model/types";
+import { AuthorizerContext } from "../telegramAuth/handler";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
+  AuthorizerContext
+> = async (event) => {
   console.log(event);
-  const id = event.queryStringParameters?.id;
+  const id = event.requestContext.authorizer.lambda.userId;
   if (!id) {
     return {
       statusCode: 400,
