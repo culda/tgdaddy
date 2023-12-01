@@ -3,7 +3,11 @@ import {
   APIGatewayProxyHandlerV2WithLambdaAuthorizer,
 } from "aws-lambda";
 import { Table } from "sst/node/table";
-import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  QueryCommand,
+  ScanCommand,
+} from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
@@ -14,27 +18,62 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
   console.log(event);
-  const id = event.requestContext.authorizer.lambda.userId;
-  if (!id) {
+  const userId = event.requestContext.authorizer.lambda.userId;
+  if (!userId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: "User ID is required" }),
+      body: JSON.stringify({ message: "No userId on the token" }),
     };
   }
 
-  const channels = await dbGetUserChannels(id);
-  if (!channels) {
+  let data;
+
+  const channelId = event.queryStringParameters?.id;
+
+  if (channelId) {
+    data = await dbGetChannel(channelId, userId);
+  } else {
+    data = await dbGetUserChannels(userId);
+  }
+
+  if (!data) {
     return {
       statusCode: 404,
-      body: JSON.stringify({ message: "User not found" }),
+      body: JSON.stringify({ message: "No channels" }),
     };
   }
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ channels }),
+    body: JSON.stringify({ data }),
   };
 };
+
+async function dbGetChannel(
+  channelId: string,
+  userId: string
+): Promise<StChannel | undefined> {
+  try {
+    const { Items } = await dynamoDb.send(
+      new QueryCommand({
+        TableName: Table.Channels.tableName,
+        KeyConditionExpression: "id = :id AND userId = :userId",
+        ExpressionAttributeValues: {
+          ":id": { S: channelId },
+          ":userId": { N: userId },
+        },
+      })
+    );
+
+    if (!Items) {
+      return undefined;
+    }
+
+    return unmarshall(Items[0]) as StChannel;
+  } catch (error) {
+    return undefined;
+  }
+}
 
 async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
   const { Items } = await dynamoDb.send(

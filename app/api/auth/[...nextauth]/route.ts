@@ -1,8 +1,13 @@
-import NextAuth from "next-auth";
+import {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
+import NextAuth, { NextAuthOptions, getServerSession } from "next-auth";
 import { encode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 
-const handler = NextAuth({
+export const config = {
   providers: [
     Credentials({
       name: "Telegram",
@@ -47,6 +52,17 @@ const handler = NextAuth({
       return token;
     },
   },
-});
+} satisfies NextAuthOptions;
+
+const handler = NextAuth(config);
+
+export function auth(
+  ...args:
+    | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
+    | [NextApiRequest, NextApiResponse]
+    | []
+) {
+  return getServerSession(...args, config);
+}
 
 export { handler as GET, handler as POST };

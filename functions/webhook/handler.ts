@@ -86,9 +86,12 @@ async function handleUpdate(u: TelegramUpdate) {
           forwardedMessage.chat?.title
         );
         await dbDeleteChat(chat.id);
+        const count = await telegram.api.getChatMemberCount({
+          chat_id: forwardedMessage.chat.id,
+        });
         return await telegram.api.sendMessage({
           chat_id: chat.id,
-          text: `Channel linked successfully\n**Title**: ${forwardedMessage.chat?.title}\n**ID**: ${forwardedMessage.chat.id}`,
+          text: `Channel linked successfully\n**Title**: ${forwardedMessage.chat?.title}\n**ID**: ${forwardedMessage.chat.id}\n**Users**: ${count}`,
           parse_mode: "Markdown",
         });
       }

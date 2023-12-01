@@ -89,7 +89,8 @@ export default {
       const site = new NextjsSite(stack, "site", {
         bind: [api],
         environment: {
-          NEXT_PUBLIC_API_ENDPOINT: api.url,
+          NEXT_PUBLIC_API_ENDPOINT: api.url, // available on the client
+          API_ENDPOINT: api.url, // available on the server
         },
       });
 
