@@ -4,9 +4,11 @@ import {
 } from "aws-lambda";
 import { Table } from "sst/node/table";
 import {
+  AttributeValue,
   DynamoDBClient,
   QueryCommand,
   ScanCommand,
+  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
@@ -14,10 +16,15 @@ import { AuthorizerContext } from "../telegramAuth/handler";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
+type GetParams = {
+  id?: string;
+};
+
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
   console.log(event);
+
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {
@@ -26,41 +33,63 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     };
   }
 
-  let data;
+  switch (event.requestContext.http.method) {
+    case "POST": {
+      if (!event.body) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Request body is required" }),
+        };
+      }
+      const req = JSON.parse(event.body) as StChannel;
+      const id = `${req.id}/${userId}`;
+      const res = await ddbUpdateChannel(id, req);
 
-  const channelId = event.queryStringParameters?.id;
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ data: res }),
+      };
+    }
+    case "GET": {
+      if (event.body) {
+        const req = JSON.parse(event.body) as StChannel;
+        const id = `${req.id}/${userId}`;
+        const data = await dbGetChannel(id);
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ data }),
+        };
+      }
 
-  if (channelId) {
-    data = await dbGetChannel(channelId, userId);
-  } else {
-    data = await dbGetUserChannels(userId);
+      const data = await dbGetUserChannels(userId);
+      // if (!data) {
+      //   return {
+      //     statusCode: 404,
+      //     body: JSON.stringify({ message: "No channels" }),
+      //   };
+      // }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ data }),
+      };
+    }
+    default:
+      return {
+        statusCode: 405,
+        body: JSON.stringify({ message: "Method not allowed" }),
+      };
   }
-
-  if (!data) {
-    return {
-      statusCode: 404,
-      body: JSON.stringify({ message: "No channels" }),
-    };
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ data }),
-  };
 };
 
-async function dbGetChannel(
-  channelId: string,
-  userId: string
-): Promise<StChannel | undefined> {
+async function dbGetChannel(channelId: string): Promise<StChannel | undefined> {
   try {
     const { Items } = await dynamoDb.send(
       new QueryCommand({
         TableName: Table.Channels.tableName,
-        KeyConditionExpression: "id = :id AND userId = :userId",
+        KeyConditionExpression: "id = :id",
         ExpressionAttributeValues: {
           ":id": { S: channelId },
-          ":userId": { N: userId },
         },
       })
     );
@@ -91,4 +120,43 @@ async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
   }
 
   return Items.map((item) => unmarshall(item)) as StChannel[];
+}
+
+async function ddbUpdateChannel(
+  id: string,
+  channel: StChannel
+): Promise<StChannel | undefined> {
+  const updateExpressionParts = [];
+  const expressionAttributeValues: Record<string, AttributeValue> = {};
+  const expressionAttributeNames: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(channel)) {
+    if (key !== "id") {
+      const attributeName = `#${key}`;
+      const attributeValue = `:${key}`;
+
+      updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
+      expressionAttributeNames[attributeName] = key;
+      expressionAttributeValues[attributeValue] = { S: value.toString() };
+    }
+  }
+
+  const { Attributes } = await dynamoDb.send(
+    new UpdateItemCommand({
+      TableName: Table.Channels.tableName,
+      Key: {
+        id: { S: id },
+      },
+      UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: "ALL_NEW",
+    })
+  );
+
+  if (!Attributes) {
+    return undefined;
+  }
+
+  return unmarshall(Attributes) as StChannel;
 }

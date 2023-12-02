@@ -145,7 +145,7 @@ async function dbSetChannelInfo(
   title: string | undefined
 ) {
   const channel: StChannel = {
-    id: channelId,
+    id: `${channelId}/${id}`,
     userId: id,
     title,
   };

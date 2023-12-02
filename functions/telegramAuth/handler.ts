@@ -19,8 +19,6 @@ export const handler: APIGatewayAuthorizerHandler = async (event) => {
       secret: Buffer.from(process.env.NEXTAUTH_SECRET as string),
     });
 
-    console.log(jwt);
-
     return generatePolicy("user", "Allow", event.methodArn, jwt?.sub);
   }
 

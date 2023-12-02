@@ -20,11 +20,13 @@ export default {
       const channelsTable = new Table(stack, "Channels", {
         fields: {
           id: "string",
-          userId: "number",
+          username: "string",
         },
-        primaryIndex: { partitionKey: "id", sortKey: "userId" },
-        localIndexes: {
-          userId: { sortKey: "userId" },
+        primaryIndex: { partitionKey: "id" },
+        globalIndexes: {
+          UsernameIndex: {
+            partitionKey: "username",
+          },
         },
       });
 
@@ -83,6 +85,7 @@ export default {
           "POST /stripeAccount": stripeAccountHandler,
           "GET /stripeAccount": stripeAccountHandler,
           "GET /channels": channelsHandler,
+          "POST /channels": channelsHandler,
         },
       });
 
