@@ -17,8 +17,24 @@ export type StChannel = {
   joinFee?: string;
 };
 
+export type StUserAuth = Pick<
+  StUser,
+  "id" | "username" | "firstName" | "lastName"
+>;
+
 export type StUser = {
-  id: number;
+  id: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  plan: StPlan;
   stripeAccountId?: string;
   channels?: StChannel[];
 };
+
+export enum StPlan {
+  Starter = "Starter",
+  Growth = "Growth",
+  Pro = "Pro",
+  Business = "Business",
+}

@@ -51,6 +51,13 @@ export const config = {
       }
       return token;
     },
+    signIn: async ({ user }) => {
+      await fetch(`${process.env.API_ENDPOINT}/login`, {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      return true;
+    },
   },
 } satisfies NextAuthOptions;
 

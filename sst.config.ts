@@ -32,7 +32,7 @@ export default {
 
       const usersTable = new Table(stack, "Users", {
         fields: {
-          id: "number",
+          id: "string",
         },
         primaryIndex: { partitionKey: "id" },
       });
@@ -58,12 +58,24 @@ export default {
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
+      const userHandler = new Function(stack, "UserHandler", {
+        handler: "functions/user/handler.handler",
+        bind: [usersTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+      });
+
       const telegramAuthHandler = new Function(stack, "TelegramAuthHandler", {
         handler: "functions/telegramAuth/handler.handler",
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
           NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
         },
+      });
+
+      const loginHandler = new Function(stack, "LoginHandler", {
+        handler: "functions/login/handler.handler",
+        bind: [usersTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
       const api = new Api(stack, "Api", {
@@ -84,8 +96,14 @@ export default {
           },
           "POST /stripeAccount": stripeAccountHandler,
           "GET /stripeAccount": stripeAccountHandler,
-          "GET /channels": channelsHandler,
           "POST /channels": channelsHandler,
+          "GET /channels": channelsHandler,
+          "POST /user": userHandler,
+          "GET /user": userHandler,
+          "POST /login": {
+            function: loginHandler,
+            authorizer: "none",
+          },
         },
       });
 

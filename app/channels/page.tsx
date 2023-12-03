@@ -1,7 +1,7 @@
 import Channels from "../components/Channels";
 import { auth } from "../api/auth/[...nextauth]/route";
 import { StChannel } from "../model/types";
-import { SessionProvider } from "next-auth/react";
+import PageLayout from "../components/PageLayout";
 
 export default async function Page() {
   const session = await auth();
@@ -13,5 +13,9 @@ export default async function Page() {
   const data = await res.json();
   const channels: StChannel[] = data.data;
 
-  return <Channels channels={channels} />;
+  return (
+    <PageLayout title="Channels">
+      <Channels channels={channels} />
+    </PageLayout>
+  );
 }

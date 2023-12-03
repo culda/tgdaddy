@@ -26,7 +26,7 @@ export default function RootLayout({
             className="md:hidden absolute bottom-5 right-5 z-50"
             onClick={toggleMenu}
           >
-            <span className="hamburger-icon">☰</span>
+            <span>☰</span>
           </button>
 
           {/* Menu */}
@@ -39,14 +39,13 @@ export default function RootLayout({
               <li className="mb-4">
                 <img
                   loading="lazy"
-                  srcSet="https://cdn.builder.io/api/v1/image/assets/TEMP/ba903add72a7308c7980001b7893728d9dd97d4e69972225bb5e1571a59a131d?apiKey=1ce0a2f518a7411992f1f40d8ab03118&width=100 100w, ..."
                   className="aspect-[2.22] object-contain object-center w-[102px] overflow-hidden"
                   alt="Channel Logo"
                 />
               </li>
               <li className="mb-4">
                 <a
-                  href="#"
+                  href="/channels"
                   className="text-black text-xl font-semibold whitespace-nowrap"
                 >
                   Channels
@@ -54,7 +53,7 @@ export default function RootLayout({
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/plan"
                   className="text-black text-xl font-semibold whitespace-nowrap"
                 >
                   Plan
