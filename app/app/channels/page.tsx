@@ -1,7 +1,7 @@
-import Channels from "../components/Channels";
-import { auth } from "../api/auth/[...nextauth]/route";
-import { StChannel } from "../model/types";
-import PageLayout from "../components/PageLayout";
+import Channels from "../../components/Channels";
+import { auth } from "../../api/auth/[...nextauth]/route";
+import { StChannel } from "../../model/types";
+import PageLayout from "../../components/PageLayout";
 
 export default async function Page() {
   const session = await auth();

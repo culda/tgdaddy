@@ -14,13 +14,13 @@
 import {
   TpCreateSubscriptionRequest,
   TpCreateSubscriptionResponse,
-} from "../api/stripe/subscribe/route";
-import { StConnectStatus, StPlan, StUser } from "../model/types";
+} from "../../api/stripe/subscribe/route";
+import { StConnectStatus, StPlan, StUser } from "../../model/types";
 import { useSession } from "next-auth/react";
-import { TpConnectStripeResponse } from "../api/stripe/connect/route";
+import { TpConnectStripeResponse } from "../../api/stripe/connect/route";
 import { useCallback, useEffect, useState } from "react";
-import PageLayout from "../components/PageLayout";
-import Button from "../components/Button";
+import PageLayout from "../../components/PageLayout";
+import Button from "../../components/Button";
 
 const plans = [
   {
@@ -49,8 +49,6 @@ export default function Plans() {
   const session = useSession();
   const [user, setUser] = useState<StUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  console.log(session.data?.accessToken);
 
   const fetchUser = async () => {
     const userRes = await fetch(

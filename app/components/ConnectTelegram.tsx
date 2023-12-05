@@ -16,7 +16,7 @@ export default function ConnectTelegram() {
       username: data.username,
       firstName: data.first_name,
       lastName: data.last_name,
-      callbackUrl: "/channels",
+      callbackUrl: "/app",
     });
   };
   return (
