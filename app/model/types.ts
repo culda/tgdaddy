@@ -28,9 +28,17 @@ export type StUser = {
   firstName?: string;
   lastName?: string;
   plan: StPlan;
+  stripeSubscriptionId?: string;
   stripeAccountId?: string;
+  stripeAccountStatus?: StConnectStatus;
+  stripeCustomerId?: string;
   channels?: StChannel[];
 };
+
+export enum StConnectStatus {
+  Connected = "connected",
+  Pending = "pending",
+}
 
 export enum StPlan {
   Starter = "Starter",

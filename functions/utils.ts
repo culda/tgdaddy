@@ -3,16 +3,15 @@ import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 
-export async function dbGetUser(
-  id: string,
-  client: DynamoDBClient
-): Promise<StUser | undefined> {
-  const { Item } = await client.send(
+export const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
+
+export async function dbGetUser(id: string): Promise<StUser | undefined> {
+  const { Item } = await dynamoDb.send(
     new GetItemCommand({
       TableName: Table.Users.tableName,
       Key: {
         id: {
-          N: `${id}`,
+          S: id,
         },
       },
     })

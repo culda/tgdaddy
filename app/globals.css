@@ -25,3 +25,38 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.loader {
+  display: inline-block;
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Light grey */
+  border-top-color: #3498db; /* Blue */
+  border-radius: 50%;
+  width: 1em; /* Use em units for scalability */
+  height: 1em; /* Use em units for scalability */
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radio-button {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.skeleton-radio-button {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+}

@@ -2,16 +2,13 @@ import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
 import { Table } from "sst/node/table";
 import {
   AttributeValue,
-  DynamoDBClient,
   UpdateItemCommand,
   UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StUser } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { dbGetUser } from "../utils";
-
-const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
+import { dbGetUser, dynamoDb } from "../utils";
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
@@ -44,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       };
     }
     case "GET": {
-      const data = await dbGetUser(userId, dynamoDb);
+      const data = await dbGetUser(userId);
 
       return {
         statusCode: 200,
@@ -81,7 +78,7 @@ async function ddbUpdateUser(
   const input: UpdateItemCommandInput = {
     TableName: Table.Users.tableName,
     Key: {
-      id: { N: id },
+      id: { S: id },
     },
     ReturnValues: "ALL_NEW",
   };

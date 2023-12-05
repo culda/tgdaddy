@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { Session } from "inspector";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -64,7 +65,9 @@ export default function RootLayout({
 
           {/* Main Content */}
           <div className="flex flex-col items-stretch w-full md:w-[65%]">
-            <div className="flex grow flex-col">{children}</div>
+            <div className="flex grow flex-col">
+              <SessionProvider>{children}</SessionProvider>
+            </div>
           </div>
         </div>
       </body>

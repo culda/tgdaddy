@@ -37,6 +37,29 @@ export default {
         primaryIndex: { partitionKey: "id" },
       });
 
+      const stripeWebhookHandler = new Function(stack, "StripeWebhookHandler", {
+        handler: "functions/stripeWebhook/handler.handler",
+        bind: [usersTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        environment: {
+          STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
+        },
+      });
+
+      const stripeConnectWebhookHandler = new Function(
+        stack,
+        "StripeConnectWebhookHandler",
+        {
+          handler: "functions/stripeConnectWebhook/handler.handler",
+          bind: [usersTable],
+          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+          environment: {
+            STRIPE_CONNECT_WEBHOOK_SECRET: process.env
+              .STRIPE_CONNECT_WEBHOOK_SECRET as string,
+          },
+        }
+      );
+
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
         bind: [chatsTable, channelsTable],
@@ -44,12 +67,6 @@ export default {
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
-      });
-
-      const stripeAccountHandler = new Function(stack, "StripeAccountHandler", {
-        handler: "functions/stripeAccount/handler.handler",
-        bind: [usersTable],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
       const channelsHandler = new Function(stack, "ChannelsHandler", {
@@ -83,19 +100,24 @@ export default {
           telegramAuth: {
             type: "lambda",
             function: telegramAuthHandler,
-            resultsCacheTtl: "30 seconds",
           },
         },
         defaults: {
           authorizer: "telegramAuth",
         },
         routes: {
+          "POST /stripeWebhook": {
+            function: stripeWebhookHandler,
+            authorizer: "none", // auth is handled inside the function
+          },
+          "POST /stripeConnectWebhook": {
+            function: stripeConnectWebhookHandler,
+            authorizer: "none", // auth is handled inside the function
+          },
           "POST /webhook": {
             function: webhookHandler,
             authorizer: "none",
           },
-          "POST /stripeAccount": stripeAccountHandler,
-          "GET /stripeAccount": stripeAccountHandler,
           "POST /channels": channelsHandler,
           "GET /channels": channelsHandler,
           "POST /user": userHandler,

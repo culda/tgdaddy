@@ -3,14 +3,9 @@ import { Table } from "sst/node/table";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StPlan, StUser, StUserAuth } from "../../app/model/types";
-import { AuthorizerContext } from "../telegramAuth/handler";
-import { dbGetUser } from "../utils";
+import { dbGetUser, dynamoDb } from "../utils";
 
-const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
-
-export const handler: APIGatewayProxyHandlerV2<AuthorizerContext> = async (
-  event
-) => {
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   console.log(event);
 
   if (!event.body) {
@@ -23,12 +18,10 @@ export const handler: APIGatewayProxyHandlerV2<AuthorizerContext> = async (
   let user: StUser | undefined;
   const req = JSON.parse(event.body) as StUserAuth;
 
-  console.log(req);
-
-  user = await dbGetUser(req.id, dynamoDb); // Check if user already exists
+  user = await dbGetUser(req.id); // Check if user already exists
   if (!user) {
     user = {
-      id: req.id,
+      ...req,
       plan: StPlan.Starter,
     };
     await dynamoDb.send(
