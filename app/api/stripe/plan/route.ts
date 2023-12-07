@@ -3,25 +3,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { client } from "../stripe";
 import Stripe from "stripe";
 
-export type TpSubscribeRequest = {
-  stripeAccountId: string;
+export type TpPlanRequest = {
+  user: StUser;
+  plan: StPlan;
 };
 
-export type TpSubscribeResponse = {
+export type TpPlanResponse = {
   paymentLink: Stripe.PaymentLink;
 };
 
 export async function POST(req: NextRequest) {
   try {
-    const { stripeAccountId } = (await req.json()) as TpSubscribeRequest;
+    const { user, plan } = (await req.json()) as TpPlanRequest;
 
-    const products = await client.products.list(
-      {},
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-    console.log(products);
+    const products = await client.products.list();
     const product = products.data[0];
 
     let customerId = user.stripeCustomerId;
@@ -46,28 +41,24 @@ export async function POST(req: NextRequest) {
       customerId = customer.id;
     }
 
-    const paymentLink = await client.paymentLinks.create(
-      {
-        line_items: [
-          {
-            price: price.id,
-            quantity: 1,
-          },
-        ],
-        metadata: {
-          userId: user.id,
+    const paymentLink = await client.paymentLinks.create({
+      line_items: [
+        {
+          price: price.id,
+          quantity: 1,
         },
-        after_completion: {
-          type: "redirect",
-          redirect: {
-            url: `${process.env.NEXT_PUBLIC_HOST}/plan`,
-          },
+      ],
+      metadata: {
+        userId: user.id,
+        plan,
+      },
+      after_completion: {
+        type: "redirect",
+        redirect: {
+          url: `${process.env.NEXT_PUBLIC_HOST}/plan`,
         },
       },
-      {
-        stripeAccount: connectedAccountId,
-      }
-    );
+    });
 
     return NextResponse.json({ paymentLink });
   } catch (err) {

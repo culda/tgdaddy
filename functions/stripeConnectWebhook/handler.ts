@@ -10,6 +10,8 @@ import { Table } from "sst/node/table";
 import { dynamoDb } from "../utils";
 import { StConnectStatus } from "@/app/model/types";
 
+export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+
 export type AccountCreatedMetadata = {
   userId: string;
 };
@@ -36,6 +38,19 @@ async function handleAccountCreated(
   data: Stripe.AccountExternalAccountCreatedEvent
 ) {
   await ddbConnectAccount(data.account as string);
+  await createProduct(data.account as string);
+}
+
+async function createProduct(accountId: string) {
+  await client.products.create(
+    {
+      name: "Channel Subscription",
+      description: "Join my channel",
+    },
+    {
+      stripeAccount: accountId,
+    }
+  );
 }
 
 async function ddbConnectAccount(accountId: string) {

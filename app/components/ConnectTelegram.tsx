@@ -6,16 +6,8 @@ import { TelegramAuthData } from "./telegramLogin/types";
 
 export default function ConnectTelegram() {
   const handleAuthCallback = async (user: TelegramAuthData) => {
-    const res = await fetch("/api/auth/telegram", {
-      method: "POST",
-      body: JSON.stringify(user),
-    });
-    const data = await res.json();
     signIn("credentials", {
-      id: data.id,
-      username: data.username,
-      firstName: data.first_name,
-      lastName: data.last_name,
+      ...user,
       callbackUrl: "/app",
     });
   };

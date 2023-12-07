@@ -15,6 +15,7 @@ export type StChannel = {
   title?: string;
   username?: string;
   joinFee?: string;
+  stripeAccountId?: string;
 };
 
 export type StUserAuth = Pick<
@@ -32,7 +33,11 @@ export type StUser = {
   stripeAccountId?: string;
   stripeAccountStatus?: StConnectStatus;
   stripeCustomerId?: string;
-  channels?: StChannel[];
+};
+
+export type StPage = {
+  username: string;
+  stripeAccountId: string;
 };
 
 export enum StConnectStatus {

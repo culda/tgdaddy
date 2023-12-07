@@ -56,6 +56,7 @@ export default {
           environment: {
             STRIPE_CONNECT_WEBHOOK_SECRET: process.env
               .STRIPE_CONNECT_WEBHOOK_SECRET as string,
+            STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
           },
         }
       );
@@ -93,6 +94,9 @@ export default {
         handler: "functions/login/handler.handler",
         bind: [usersTable],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        environment: {
+          BOT_TOKEN: process.env.BOT_TOKEN as string,
+        },
       });
 
       const api = new Api(stack, "Api", {

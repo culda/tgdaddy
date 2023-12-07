@@ -1,20 +1,5 @@
-// import { auth } from "../api/auth/[...nextauth]/route";
-// import Plans from "../components/Plans";
-// import { StUser } from "../model/types";
-
-// export default async function Page() {
-//   const session = await auth();
-
-//   const user = (await userRes.json()).data as StUser;
-
-//   return <Plans user={user} />;
-// }
-
 "use client";
-import {
-  TpCreateSubscriptionRequest,
-  TpCreateSubscriptionResponse,
-} from "../../api/stripe/subscribe/route";
+import { TpPlanRequest, TpPlanResponse } from "../../api/stripe/plan/route";
 import { StConnectStatus, StPlan, StUser } from "../../model/types";
 import { useSession } from "next-auth/react";
 import { TpConnectStripeResponse } from "../../api/stripe/connect/route";
@@ -82,15 +67,14 @@ export default function Plans() {
   const handlePlanChange = async (plan: StPlan) => {
     setIsLoading(true);
 
-    const subRes = await fetch("/api/stripe/subscribe", {
+    const planRes = await fetch("/api/stripe/plan", {
       method: "POST",
       body: JSON.stringify({
         user,
         plan,
-      } as TpCreateSubscriptionRequest),
+      } as TpPlanRequest),
     });
-    const { paymentLink } =
-      (await subRes.json()) as TpCreateSubscriptionResponse;
+    const { paymentLink } = (await planRes.json()) as TpPlanResponse;
 
     window.location.href = paymentLink.url;
   };

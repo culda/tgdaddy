@@ -12,7 +12,10 @@ export default function Channels({ channels }: PpChannels) {
   return (
     <div className="justify-center items-stretch bg-white flex flex-col px-14 py-12 max-md:px-5">
       {channels?.map((channel) => (
-        <Button key={channel.id} href={`/channels/${channel.id.split("/")[0]}`}>
+        <Button
+          key={channel.id}
+          href={`/app/channels/${channel.id.split("/")[0]}`}
+        >
           {channel.title}
         </Button>
       ))}
