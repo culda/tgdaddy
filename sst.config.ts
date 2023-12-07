@@ -30,6 +30,13 @@ export default {
         },
       });
 
+      const uniqueChannelsTable = new Table(stack, "UniqueChannels", {
+        fields: {
+          username: "string",
+        },
+        primaryIndex: { partitionKey: "username" },
+      });
+
       const usersTable = new Table(stack, "Users", {
         fields: {
           id: "string",
@@ -72,9 +79,19 @@ export default {
 
       const channelsHandler = new Function(stack, "ChannelsHandler", {
         handler: "functions/channels/handler.handler",
-        bind: [channelsTable],
+        bind: [channelsTable, uniqueChannelsTable],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
+
+      const channelUsernameHandler = new Function(
+        stack,
+        "ChannelUsernameHandler",
+        {
+          handler: "functions/channelUsername/handler.handler",
+          bind: [channelsTable, uniqueChannelsTable],
+          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        }
+      );
 
       const userHandler = new Function(stack, "UserHandler", {
         handler: "functions/user/handler.handler",
@@ -124,6 +141,7 @@ export default {
           },
           "POST /channels": channelsHandler,
           "GET /channels": channelsHandler,
+          "POST /channelUsername": channelUsernameHandler,
           "POST /user": userHandler,
           "GET /user": userHandler,
           "POST /login": {

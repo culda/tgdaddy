@@ -144,10 +144,15 @@ async function dbSetChannelInfo(
   channelId: string,
   title: string | undefined
 ) {
+  const username = title
+    ? encodeURIComponent(title.replace(/\s/g, "").replace(/[^\w-]/g, ""))
+    : undefined;
+
   const channel: StChannel = {
-    id: `${channelId}/${id}`,
+    id: channelId,
     userId: id,
     title,
+    username,
   };
   await dynamoDb.send(
     new PutItemCommand({

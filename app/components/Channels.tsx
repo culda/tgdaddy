@@ -19,7 +19,7 @@ export default function Channels({ channels }: PpChannels) {
           {channel.title}
         </Button>
       ))}
-      <Button href={`/channels/add`}>+</Button>
+      <Button href={`/app/channels/add`}>+</Button>
     </div>
   );
 }

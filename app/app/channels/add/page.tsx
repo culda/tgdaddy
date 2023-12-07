@@ -12,7 +12,7 @@ export default function Page() {
             1
           </div>
           <div className="text-black text-base text-left">
-            Launch tgdaddybot
+            Launch <b>tgdaddybot</b>
           </div>
         </div>
         <a
@@ -31,8 +31,8 @@ export default function Page() {
             2
           </div>
           <div className="text-black text-base text-left flex-1">
-            Press Link Channel and forward a message from your channel to the
-            bot
+            Press <b>Link Channel</b> and forward a message from your channel to
+            the bot
           </div>
         </div>
       </section>
@@ -46,7 +46,7 @@ export default function Page() {
           <div className="text-black text-base text-left">You’re done!</div>
         </div>
         <Link
-          href="/channels"
+          href="/app/channels"
           className="w-full bg-orange-200 text-black text-center text-sm mt-3 mb-40 px-10 py-2.5 max-md:mb-10 max-md:px-5"
         >
           View Channels

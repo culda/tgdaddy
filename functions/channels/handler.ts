@@ -32,9 +32,10 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           body: JSON.stringify({ message: "Request body is required" }),
         };
       }
+
       const req = JSON.parse(event.body) as Partial<StChannel>;
-      const id = `${req.id}/${userId}`;
-      const res = await ddbUpdateChannel(id, req);
+      console.log(req);
+      const res = await ddbUpdateChannel(req.id as string, req);
 
       return {
         statusCode: 200,
@@ -43,7 +44,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     }
     case "GET": {
       if (event.queryStringParameters?.id) {
-        const id = `${event.queryStringParameters?.id}/${userId}`;
+        const id = event.queryStringParameters?.id;
         const data = await dbGetChannel(id);
         return {
           statusCode: 200,
