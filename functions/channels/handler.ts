@@ -42,9 +42,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       };
     }
     case "GET": {
-      if (event.body) {
-        const req = JSON.parse(event.body) as StChannel;
-        const id = `${req.id}/${userId}`;
+      if (event.queryStringParameters?.id) {
+        const id = `${event.queryStringParameters?.id}/${userId}`;
         const data = await dbGetChannel(id);
         return {
           statusCode: 200,
