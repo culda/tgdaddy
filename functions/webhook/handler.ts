@@ -10,7 +10,12 @@ import {
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel, StChat, StLinkChat } from "../../app/model/types";
+import {
+  StChannel,
+  StChat,
+  StLinkChat,
+  StPriceFrequency,
+} from "../../app/model/types";
 
 const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
@@ -81,7 +86,7 @@ async function handleUpdate(u: TelegramUpdate) {
           });
         }
         await dbSetChannelInfo(
-          chat.id,
+          chat.id.toString(),
           forwardedMessage.chat?.id.toString(),
           forwardedMessage.chat?.title
         );
@@ -117,11 +122,7 @@ async function dbDeleteChat(id: number) {
   await dynamoDb.send(
     new DeleteItemCommand({
       TableName: Table.Chats.tableName,
-      Key: {
-        id: {
-          N: `${id}`,
-        },
-      },
+      Key: marshall({ id }),
     })
   );
 }
@@ -140,7 +141,7 @@ async function dbStartLinkChat(id: number) {
 }
 
 async function dbSetChannelInfo(
-  id: number,
+  id: string,
   channelId: string,
   title: string | undefined
 ) {

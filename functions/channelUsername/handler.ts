@@ -1,17 +1,11 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
 import { Table } from "sst/node/table";
 import {
-  AttributeValue,
-  DeleteItemCommand,
   DynamoDBClient,
-  PutItemCommand,
-  QueryCommand,
-  ScanCommand,
   TransactWriteItem,
   TransactWriteItemsCommand,
-  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { marshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 
@@ -91,21 +85,7 @@ async function ddbUpdateChannelUsername(
     })
   );
 
-  console.log(response);
-
   if (!response) {
     return undefined;
   }
-
-  // // Retrieve the updated channel
-  // const updatedChannelResponse = await dynamoDb.send(
-  //   new GetItemCommand({
-  //     TableName: Table.Channels.tableName,
-  //     Key: { id: { S: id } },
-  //   })
-  // );
-
-  // return updatedChannelResponse.Item
-  //   ? (unmarshall(updatedChannelResponse.Item) as StChannel)
-  //   : undefined;
 }

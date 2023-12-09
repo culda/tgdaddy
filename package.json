@@ -20,6 +20,7 @@
     "puregram": "^2.20.1",
     "react": "^18",
     "react-dom": "^18",
+    "react-icons": "^4.12.0",
     "stripe": "^14.5.0"
   },
   "devDependencies": {

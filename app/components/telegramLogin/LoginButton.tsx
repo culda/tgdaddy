@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { LoginButtonProps, TTelegramAuthLogin } from "./types";
 import { createScript } from "./createScript";
+import { useSession } from "next-auth/react";
 
 /**
  * It takes an object with a bunch of properties and assigns it to the global variable
@@ -23,22 +24,28 @@ function initTelegramAuthLogin(options: TTelegramAuthLogin) {
  * @returns A React component that renders the Telegram login button.
  */
 export default function LoginButton(props: LoginButtonProps) {
+  const { data, status } = useSession();
   const hiddenDivRef = useRef<HTMLDivElement>(null);
   const scriptRef = useRef<HTMLScriptElement>();
 
   useEffect(() => {
-    // destry the existing script element
-    scriptRef.current?.remove();
+    if (status === "unauthenticated") {
+      // destry the existing script element
+      scriptRef.current?.remove();
 
-    // init the global variable
-    initTelegramAuthLogin({ onAuthCallback: props.onAuthCallback });
+      // init the global variable
+      initTelegramAuthLogin({ onAuthCallback: props.onAuthCallback });
 
-    // create a new script element and save it
-    scriptRef.current = createScript(props);
+      // create a new script element and save it
+      scriptRef.current = createScript(props);
 
-    // add the script element to the DOM
-    hiddenDivRef.current?.after(scriptRef.current);
-  }, [props]);
+      // add the script element to the DOM
+      hiddenDivRef.current?.after(scriptRef.current);
+    } else {
+      // If the condition is false, remove the script element from the DOM
+      scriptRef.current?.remove();
+    }
+  }, [props, status]);
 
   return <div ref={hiddenDivRef} hidden />;
 }

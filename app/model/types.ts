@@ -10,13 +10,24 @@ export type StLinkChat = {
 
 export type StChannel = {
   id: string; // ChannelId/UserId
-  userId: number;
+  userId: string;
   imageUrl?: string;
   title?: string;
   username?: string;
-  joinFee?: string;
-  stripeAccountId?: string;
+  description?: string;
+  pricing?: StChannelPrice[];
 };
+
+export type StChannelPrice = {
+  id: string;
+  usd: number; // Price in USD cents
+  frequency: StPriceFrequency;
+};
+
+export enum StPriceFrequency {
+  Monthly = "monthly",
+  Yearly = "yearly",
+}
 
 export type StUserAuth = Pick<
   StUser,
@@ -28,6 +39,7 @@ export type StUser = {
   username?: string;
   firstName?: string;
   lastName?: string;
+  photoUrl?: string;
   plan: StPlan;
   stripeSubscriptionId?: string;
   stripeAccountId?: string;

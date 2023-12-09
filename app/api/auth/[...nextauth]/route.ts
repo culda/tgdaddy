@@ -39,8 +39,6 @@ export const config = {
         hash: { label: "Hash", type: "text" },
       },
       authorize: async (credentials) => {
-        console.log("got creds", credentials);
-
         if (!credentials) return Promise.reject("no credentials");
         const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
           method: "POST",
@@ -56,13 +54,14 @@ export const config = {
         });
 
         const user = (await res.json()).data;
-        console.log(user);
+        console.log("user", user);
 
         return {
           id: user.id,
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
+          photoUrl: user.photoUrl,
         };
       },
     }),

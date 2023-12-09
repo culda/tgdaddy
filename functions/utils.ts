@@ -1,19 +1,15 @@
-import { StUser } from "@/app/model/types";
+import { StChannel, StUser } from "@/app/model/types";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 
 export const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
-export async function dbGetUser(id: string): Promise<StUser | undefined> {
+export async function dbGetUserById(id: string): Promise<StUser | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({
       TableName: Table.Users.tableName,
-      Key: {
-        id: {
-          S: id,
-        },
-      },
+      Key: marshall({ id }),
     })
   );
 
@@ -22,4 +18,40 @@ export async function dbGetUser(id: string): Promise<StUser | undefined> {
   }
 
   return unmarshall(Item) as StUser;
+}
+
+export async function dbGetChannelById(
+  id: string
+): Promise<StChannel | undefined> {
+  const { Item } = await dynamoDb.send(
+    new GetItemCommand({
+      TableName: Table.Channels.tableName,
+      Key: marshall({ id }),
+    })
+  );
+
+  if (!Item) {
+    return undefined;
+  }
+
+  return unmarshall(Item) as StChannel;
+}
+
+export async function dbGetChannelIdByUsername(
+  username: string
+): Promise<string | undefined> {
+  const { Item } = await dynamoDb.send(
+    new GetItemCommand({
+      TableName: Table.UniqueChannels.tableName,
+      Key: marshall({ username }),
+    })
+  );
+
+  if (!Item) {
+    return undefined;
+  }
+
+  const data = unmarshall(Item) as { username: string; channelId: string };
+
+  return data.channelId;
 }

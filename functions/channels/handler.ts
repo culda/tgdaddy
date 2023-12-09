@@ -7,9 +7,10 @@ import {
   ScanCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
+import { dbGetChannelById } from "../utils";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
@@ -45,7 +46,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     case "GET": {
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
-        const data = await dbGetChannel(id);
+        const data = await dbGetChannelById(id);
         return {
           statusCode: 200,
           body: JSON.stringify({ data }),
@@ -66,28 +67,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       };
   }
 };
-
-async function dbGetChannel(channelId: string): Promise<StChannel | undefined> {
-  try {
-    const { Items } = await dynamoDb.send(
-      new QueryCommand({
-        TableName: Table.Channels.tableName,
-        KeyConditionExpression: "id = :id",
-        ExpressionAttributeValues: {
-          ":id": { S: channelId },
-        },
-      })
-    );
-
-    if (!Items) {
-      return undefined;
-    }
-
-    return unmarshall(Items[0]) as StChannel;
-  } catch (error) {
-    return undefined;
-  }
-}
 
 async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
   const { Items } = await dynamoDb.send(
@@ -122,7 +101,22 @@ async function ddbUpdateChannel(
 
       updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
       expressionAttributeNames[attributeName] = key;
-      expressionAttributeValues[attributeValue] = { S: value.toString() };
+
+      if (typeof value === "string") {
+        expressionAttributeValues[attributeValue] = { S: value };
+      } else if (Array.isArray(value)) {
+        // Handle pricing array separately
+        if (key === "pricing") {
+          const pricingArray = value.map((item) => ({
+            M: {
+              id: { S: item.id },
+              usd: { N: item.usd.toString() },
+              frequency: { S: item.frequency },
+            },
+          }));
+          expressionAttributeValues[attributeValue] = { L: pricingArray };
+        }
+      }
     }
   }
 

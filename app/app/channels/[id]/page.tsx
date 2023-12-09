@@ -16,11 +16,11 @@ export default async function Page({ params }: PpChannel) {
       {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
+          ContentType: "application/json",
         },
       }
     );
     const channel = await res.json();
-    console.log(channel);
     return channel.data as StChannel;
   };
 
@@ -28,7 +28,7 @@ export default async function Page({ params }: PpChannel) {
 
   return (
     <PageLayout title={channel?.title}>
-      <Channel channel={channel} />;
+      <Channel channel={channel} />
     </PageLayout>
   );
 }

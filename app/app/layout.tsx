@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     // <html lang="en">
     <body className={inter.className}>
-      <div className="relative bg-white flex flex-col md:flex-row md:items-stretch max-md:px-5 min-h-screen">
+      <div className="relative flex flex-col md:flex-row md:items-stretch max-md:px-5 min-h-screen">
         {/* Hamburger Icon */}
         <button
           className="md:hidden absolute bottom-5 right-5 z-50"
@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Menu */}
         <nav
-          className={`fixed inset-0 z-40 bg-white flex text-center items-center justify-center ${
+          className={`fixed inset-0 z-40 flex text-center items-center justify-center ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
           } md:relative md:translate-x-0 md:w-1/3 lg:w-[35%]`}
         >

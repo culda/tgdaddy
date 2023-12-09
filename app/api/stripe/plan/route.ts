@@ -1,7 +1,6 @@
 import { StPlan, StUser } from "@/app/model/types";
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "../stripe";
-import Stripe from "stripe";
 
 export type TpPlanRequest = {
   user: StUser;
@@ -9,61 +8,120 @@ export type TpPlanRequest = {
 };
 
 export type TpPlanResponse = {
-  paymentLink: Stripe.PaymentLink;
+  url: string;
 };
 
 export async function POST(req: NextRequest) {
   try {
     const { user, plan } = (await req.json()) as TpPlanRequest;
 
+    const customerId = user.stripeCustomerId;
     const products = await client.products.list();
     const product = products.data[0];
-
-    let customerId = user.stripeCustomerId;
-
     const prices = await client.prices.list({
       product: product.id,
     });
     const price = prices.data.find((p) => p.nickname === plan);
 
-    if (!price) {
-      return NextResponse.json({ error: "Invalid plan" });
+    if (!customerId) {
+      if (!price) {
+        return NextResponse.error();
+      }
+      const paymentLink = await client.paymentLinks.create({
+        line_items: [
+          {
+            price: price.id,
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          userId: user.id,
+          plan,
+        },
+        after_completion: {
+          type: "redirect",
+          redirect: {
+            url: `${process.env.NEXT_PUBLIC_HOST}/app/plan`,
+          },
+        },
+      });
+
+      return NextResponse.json({ url: paymentLink.url });
     }
 
-    if (!customerId) {
-      const customer = await client.customers.create({
-        name: [user.firstName, user.lastName].filter(Boolean).join(" "),
+    const subscriptions = await client.subscriptions.list({
+      customer: customerId,
+      status: "active",
+    });
+    const currentSubscription = subscriptions.data[0];
+
+    if (plan === StPlan.Starter) {
+      if (currentSubscription) {
+        await client.subscriptions.update(currentSubscription.id, {
+          pause_collection: {
+            behavior: "void",
+          },
+          metadata: {
+            userId: user.id,
+          },
+        });
+      }
+      return NextResponse.json({
+        success: true,
+        message: "Subscription updated successfully",
+      });
+    }
+
+    if (!price) {
+      return NextResponse.error();
+    }
+
+    /**
+     * A subscription plan was selected and there is an existing subscription
+     */
+    if (currentSubscription) {
+      console.log("update current", currentSubscription);
+      if (currentSubscription.pause_collection?.behavior === "void") {
+        console.log("resuming first");
+        await client.subscriptions.update(currentSubscription.id, {
+          pause_collection: null,
+        });
+      }
+      const update = await client.subscriptions.update(currentSubscription.id, {
+        items: [
+          {
+            id: currentSubscription.items.data[0].id,
+            price: price.id,
+          },
+        ],
         metadata: {
           userId: user.id,
         },
       });
 
-      customerId = customer.id;
+      console.log(update);
+
+      return NextResponse.json({
+        success: true,
+        message: "Subscription updated successfully",
+      });
     }
 
-    const paymentLink = await client.paymentLinks.create({
-      line_items: [
-        {
-          price: price.id,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        userId: user.id,
-        plan,
-      },
-      after_completion: {
-        type: "redirect",
-        redirect: {
-          url: `${process.env.NEXT_PUBLIC_HOST}/plan`,
-        },
-      },
+    /**
+     * A subscription plan was selected by an existing customer with NO active subscriptions
+     */
+    const session = await client.checkout.sessions.create({
+      payment_method_types: ["card"],
+      customer: customerId,
+      line_items: [{ price: price.id, quantity: 1 }],
+      mode: "subscription",
+      success_url: `${process.env.NEXT_PUBLIC_HOST}/app/plan`,
+      cancel_url: `${process.env.NEXT_PUBLIC_HOST}/app/plan`,
     });
 
-    return NextResponse.json({ paymentLink });
+    return NextResponse.json({ url: session.url });
   } catch (err) {
-    if (err instanceof Error) {
-      return NextResponse.json({ error: err.message });
-    }
+    console.log(err);
+    return NextResponse.error();
   }
 }

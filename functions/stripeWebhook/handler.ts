@@ -25,11 +25,70 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     case "checkout.session.completed": {
       handleCheckoutCompleted(verify.data.object);
     }
+    case "customer.subscription.updated": {
+      if (verify.data.object.object === "subscription") {
+        handleSubscriptionUpdated(verify.data.object);
+      }
+    }
+    case "customer.subscription.deleted": {
+      if (verify.data.object.object === "subscription") {
+        handleSubscriptionDeleted(verify.data.object);
+      }
+    }
   }
   return {
     statusCode: 200,
   };
 };
+
+async function handleSubscriptionDeleted(data: Stripe.Subscription) {
+  const { userId } = data.metadata as CheckoutCompletedMetadata;
+  const input: UpdateItemCommandInput = {
+    TableName: Table.Users.tableName,
+    Key: {
+      id: { S: userId },
+    },
+    UpdateExpression: `SET #plan = :plan REMOVE stripeSubscriptionId`,
+    ExpressionAttributeValues: {
+      ":plan": { S: StPlan.Starter },
+    },
+    ExpressionAttributeNames: {
+      "#plan": "plan",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  const { Attributes } = await dynamoDb.send(new UpdateItemCommand(input));
+
+  if (!Attributes) {
+    return undefined;
+  }
+}
+
+async function handleSubscriptionUpdated(data: Stripe.Subscription) {
+  const { userId } = data.metadata as CheckoutCompletedMetadata;
+  const input: UpdateItemCommandInput = {
+    TableName: Table.Users.tableName,
+    Key: {
+      id: { S: userId },
+    },
+    UpdateExpression: `SET #plan = :plan, stripeSubscriptionId = :stripeSubscriptionId`,
+    ExpressionAttributeValues: {
+      ":plan": { S: data.items.data[0].plan.nickname as string },
+      ":stripeSubscriptionId": { S: data.id as string },
+    },
+    ExpressionAttributeNames: {
+      "#plan": "plan",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  const { Attributes } = await dynamoDb.send(new UpdateItemCommand(input));
+
+  if (!Attributes) {
+    return undefined;
+  }
+}
 
 async function handleCheckoutCompleted(data: Stripe.Checkout.Session) {
   const { plan, userId } = data.metadata as CheckoutCompletedMetadata;
@@ -38,11 +97,10 @@ async function handleCheckoutCompleted(data: Stripe.Checkout.Session) {
     Key: {
       id: { S: userId },
     },
-    UpdateExpression: `SET #plan = :plan, stripeSubscriptionId = :stripeSubscriptionId, stripeSubscriptionStatus = :stripeSubscriptionStatus, stripeCustomerId = :stripeCustomerId`,
+    UpdateExpression: `SET #plan = :plan, stripeSubscriptionId = :stripeSubscriptionId, stripeCustomerId = :stripeCustomerId`,
     ExpressionAttributeValues: {
       ":plan": { S: plan as string },
       ":stripeSubscriptionId": { S: data.subscription as string },
-      ":stripeSubscriptionStatus": { S: data.status as string },
       ":stripeCustomerId": { S: data.customer as string },
     },
     ExpressionAttributeNames: {

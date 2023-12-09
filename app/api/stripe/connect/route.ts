@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "../stripe";
-import { StUser } from "@/app/model/types";
+import { StConnectStatus, StUser } from "@/app/model/types";
+import { auth } from "../../auth/[...nextauth]/route";
 
 export type TpConnectStripeRequest = {
   user: StUser;
 };
 
-export type TpConnectStripeResponse = {
-  accountId: string;
-  connectUrl: string;
-};
-
 export async function POST(req: NextRequest) {
+  const session = await auth();
   try {
     const { user } = (await req.json()) as TpConnectStripeRequest;
 
@@ -27,17 +24,26 @@ export async function POST(req: NextRequest) {
       accountId = account.id;
     }
 
+    await fetch(`${process.env.API_ENDPOINT}/user`, {
+      method: "POST",
+      body: JSON.stringify({
+        stripeAccountId: accountId,
+        stripeAccountStatus: StConnectStatus.Pending,
+      } as StUser),
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
     const accountLink = await client.accountLinks.create({
       account: accountId,
-      refresh_url: `${process.env.NEXT_PUBLIC_HOST}/plan`,
-      return_url: `${process.env.NEXT_PUBLIC_HOST}/plan`,
+      refresh_url: `${process.env.NEXT_PUBLIC_HOST}/app/plan`,
+      return_url: `${process.env.NEXT_PUBLIC_HOST}/app/plan`,
       type: "account_onboarding",
     });
 
-    return NextResponse.json({
-      accountId: accountId,
-      connectUrl: accountLink.url,
-    });
+    return NextResponse.redirect(accountLink.url);
   } catch (error) {
     console.log(error);
     return NextResponse.error();

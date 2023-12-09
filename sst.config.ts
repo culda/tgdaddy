@@ -77,6 +77,12 @@ export default {
         },
       });
 
+      const channelHandler = new Function(stack, "ChannelHandler", {
+        handler: "functions/channel/handler.handler",
+        bind: [channelsTable, uniqueChannelsTable],
+        permissions: ["dynamodb:GetItem"],
+      });
+
       const channelsHandler = new Function(stack, "ChannelsHandler", {
         handler: "functions/channels/handler.handler",
         bind: [channelsTable, uniqueChannelsTable],
@@ -93,6 +99,15 @@ export default {
         }
       );
 
+      const joinChannelHandler = new Function(stack, "JoinChannelHandler", {
+        handler: "functions/joinChannel/handler.handler",
+        bind: [channelsTable, usersTable],
+        permissions: ["dynamodb:GetItem"],
+        environment: {
+          STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+        },
+      });
+
       const userHandler = new Function(stack, "UserHandler", {
         handler: "functions/user/handler.handler",
         bind: [usersTable],
@@ -104,6 +119,13 @@ export default {
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
           NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
+        },
+      });
+
+      const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
+        handler: "functions/adminAuth/handler.handler",
+        environment: {
+          ADMIN_AUTH_TOKEN: process.env.ADMIN_AUTH_TOKEN as string,
         },
       });
 
@@ -121,6 +143,11 @@ export default {
           telegramAuth: {
             type: "lambda",
             function: telegramAuthHandler,
+          },
+          admin: {
+            type: "lambda",
+            function: adminAuthHandler,
+            identitySource: ["$request.header.admintoken"],
           },
         },
         defaults: {
@@ -141,12 +168,22 @@ export default {
           },
           "POST /channels": channelsHandler,
           "GET /channels": channelsHandler,
+          "GET /channels/{username}": {
+            function: channelHandler,
+            authorizer: "none",
+          },
           "POST /channelUsername": channelUsernameHandler,
           "POST /user": userHandler,
           "GET /user": userHandler,
           "POST /login": {
             function: loginHandler,
             authorizer: "none",
+          },
+
+          // Payment endpoints
+          "POST /joinChannel": {
+            authorizer: "admin",
+            function: joinChannelHandler,
           },
         },
       });
