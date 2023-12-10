@@ -4,7 +4,7 @@ import { client } from "../stripe";
 
 export type TpPlanRequest = {
   user: StUser;
-  plan: StPlan;
+  creatorPlan: StPlan;
 };
 
 export type TpPlanResponse = {
@@ -13,15 +13,15 @@ export type TpPlanResponse = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, plan } = (await req.json()) as TpPlanRequest;
+    const { user, creatorPlan } = (await req.json()) as TpPlanRequest;
 
-    const customerId = user.stripeCustomerId;
+    const customerId = user.creatorStripeCustomerId;
     const products = await client.products.list();
     const product = products.data[0];
     const prices = await client.prices.list({
       product: product.id,
     });
-    const price = prices.data.find((p) => p.nickname === plan);
+    const price = prices.data.find((p) => p.nickname === creatorPlan);
 
     if (!customerId) {
       if (!price) {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         ],
         metadata: {
           userId: user.id,
-          plan,
+          creatorPlan,
         },
         after_completion: {
           type: "redirect",
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     });
     const currentSubscription = subscriptions.data[0];
 
-    if (plan === StPlan.Starter) {
+    if (creatorPlan === StPlan.Starter) {
       if (currentSubscription) {
         await client.subscriptions.update(currentSubscription.id, {
           pause_collection: {

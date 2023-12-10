@@ -1,56 +1,90 @@
-import { TpSubscribeRequest } from "@/app/api/stripe/subscribe/route";
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import {
+  APIGatewayProxyHandlerV2,
+  APIGatewayProxyHandlerV2WithLambdaAuthorizer,
+} from "aws-lambda";
 import { dbGetUserById } from "../utils";
 import Stripe from "stripe";
+import { AuthorizerContext } from "../telegramAuth/handler";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
+export type TpJoinChannelRequest = {
+  redirectUrl: string;
+  creatorUserId: string;
+  priceId: string;
+  channelId: string;
+};
+
+export type TpJoinChannelResponse = {
+  paymentLink: string;
+};
+
+export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
+  AuthorizerContext
+> = async (event) => {
+  const userId = event.requestContext.authorizer.lambda.userId;
+  if (!userId) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "No userId on the token" }),
+    };
+  }
+
   if (!event.body) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "Request body is required" }),
     };
   }
-  const req = JSON.parse(event.body) as TpSubscribeRequest;
 
-  const user = await dbGetUserById(req.channelUserId);
-  const stripeAccountId = user?.stripeAccountId;
+  const { priceId, creatorUserId, channelId, redirectUrl } = JSON.parse(
+    event.body
+  ) as TpJoinChannelRequest;
 
-  if (!stripeAccountId) {
+  const user = await dbGetUserById(userId);
+  const creatorUser = await dbGetUserById(creatorUserId);
+  const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
+
+  if (!creatorStripeAccountId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "No Stripe account found" }),
     };
   }
 
-  const products = await client.products.list(
+  let customerId = user?.consumerStripeCustomerId;
+  if (!customerId) {
+    const customer = await client.customers.create(
+      {},
+      {
+        stripeAccount: creatorStripeAccountId,
+      }
+    );
+    customerId = customer.id;
+  }
+
+  const session = await client.checkout.sessions.create(
     {
-      ids: [req.channelId],
+      payment_method_types: ["card"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      mode: "subscription",
+      success_url: redirectUrl,
+      cancel_url: redirectUrl,
+      customer: customerId,
+      metadata: {
+        userId,
+        channelId,
+      },
     },
     {
-      stripeAccount: stripeAccountId,
+      stripeAccount: creatorStripeAccountId,
     }
   );
 
-  if (products.object === "list" && products.data.length > 0) {
-  } else {
-    await client.products.create(
-      {
-        name: `Subscribe to ${req.username}`,
-        id: req.channelId,
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
-  }
-
-  console.log(products);
-
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: "Hello from joinChannel" }),
+    body: JSON.stringify({
+      paymentLink: session.url,
+    } as TpJoinChannelResponse),
   };
 };

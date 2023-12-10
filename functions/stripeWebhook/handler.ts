@@ -24,16 +24,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   switch (verify.type) {
     case "checkout.session.completed": {
       handleCheckoutCompleted(verify.data.object);
+      break;
     }
     case "customer.subscription.updated": {
-      if (verify.data.object.object === "subscription") {
-        handleSubscriptionUpdated(verify.data.object);
-      }
+      handleSubscriptionUpdated(verify.data.object);
+      break;
     }
     case "customer.subscription.deleted": {
-      if (verify.data.object.object === "subscription") {
-        handleSubscriptionDeleted(verify.data.object);
-      }
+      handleSubscriptionDeleted(verify.data.object);
+      break;
     }
   }
   return {
@@ -48,7 +47,7 @@ async function handleSubscriptionDeleted(data: Stripe.Subscription) {
     Key: {
       id: { S: userId },
     },
-    UpdateExpression: `SET #plan = :plan REMOVE stripeSubscriptionId`,
+    UpdateExpression: `SET #plan = :plan REMOVE creatorStripeSubscriptionId`,
     ExpressionAttributeValues: {
       ":plan": { S: StPlan.Starter },
     },
@@ -72,10 +71,10 @@ async function handleSubscriptionUpdated(data: Stripe.Subscription) {
     Key: {
       id: { S: userId },
     },
-    UpdateExpression: `SET #plan = :plan, stripeSubscriptionId = :stripeSubscriptionId`,
+    UpdateExpression: `SET #plan = :plan, creatorStripeSubscriptionId = :creatorStripeSubscriptionId`,
     ExpressionAttributeValues: {
       ":plan": { S: data.items.data[0].plan.nickname as string },
-      ":stripeSubscriptionId": { S: data.id as string },
+      ":creatorStripeSubscriptionId": { S: data.id as string },
     },
     ExpressionAttributeNames: {
       "#plan": "plan",
@@ -97,11 +96,11 @@ async function handleCheckoutCompleted(data: Stripe.Checkout.Session) {
     Key: {
       id: { S: userId },
     },
-    UpdateExpression: `SET #plan = :plan, stripeSubscriptionId = :stripeSubscriptionId, stripeCustomerId = :stripeCustomerId`,
+    UpdateExpression: `SET #plan = :plan, creatorStripeSubscriptionId = :creatorStripeSubscriptionId, creatorStripeCustomerId = :creatorStripeCustomerId`,
     ExpressionAttributeValues: {
       ":plan": { S: plan as string },
-      ":stripeSubscriptionId": { S: data.subscription as string },
-      ":stripeCustomerId": { S: data.customer as string },
+      ":creatorStripeSubscriptionId": { S: data.subscription as string },
+      ":creatorStripeCustomerId": { S: data.customer as string },
     },
     ExpressionAttributeNames: {
       "#plan": "plan",

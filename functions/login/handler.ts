@@ -52,7 +52,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       firstName: req.first_name,
       lastName: req.last_name,
       username: req.username,
-      plan: StPlan.Starter,
+      creatorPlan: StPlan.Starter,
       photoUrl: req.photo_url,
     };
     await dynamoDb.send(

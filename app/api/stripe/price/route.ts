@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     },
   });
   const user = (await userRes.json()).data as StUser;
-  if (!user.stripeAccountId) {
+  if (!user.creatorStripeAccountId) {
     return NextResponse.json({ needsStripeConnect: true });
   }
   const { username, channelId, priceUsd, frequency } =
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         ids: [channelId],
       },
       {
-        stripeAccount: user.stripeAccountId,
+        stripeAccount: user.creatorStripeAccountId,
       }
     );
 
@@ -47,11 +47,11 @@ export async function POST(req: NextRequest) {
     if (products.data.length === 0) {
       product = await client.products.create(
         {
-          name: `Subscribe to ${username}`,
+          name: username,
           id: channelId,
         },
         {
-          stripeAccount: user.stripeAccountId,
+          stripeAccount: user.creatorStripeAccountId,
         }
       );
     } else {
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         product: product.id,
       },
       {
-        stripeAccount: user.stripeAccountId,
+        stripeAccount: user.creatorStripeAccountId,
       }
     );
 
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
           recurring: { interval: frequencyToInterval(frequency) },
         },
         {
-          stripeAccount: user.stripeAccountId,
+          stripeAccount: user.creatorStripeAccountId,
         }
       );
     }

@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { Keyboard, Telegram, InlineKeyboard } from "puregram";
+import { Keyboard, Telegram, InlineKeyboard, APIError } from "puregram";
 import { Table } from "sst/node/table";
 import { LinkChannelText } from "./utils";
 import { TelegramUpdate } from "puregram/generated";
@@ -8,6 +8,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
@@ -16,6 +17,7 @@ import {
   StLinkChat,
   StPriceFrequency,
 } from "../../app/model/types";
+import { dbGetChannelById } from "../utils";
 
 const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
@@ -40,6 +42,7 @@ async function handleUpdate(u: TelegramUpdate) {
 
   if (context?.is("message")) {
     const { text, chat, forwardedMessage } = context;
+
     const stChat = await dbGetActiveChat(chat.id);
 
     if (text === "/start") {
@@ -85,20 +88,46 @@ async function handleUpdate(u: TelegramUpdate) {
             parse_mode: "Markdown",
           });
         }
-        await dbSetChannelInfo(
-          chat.id.toString(),
-          forwardedMessage.chat?.id.toString(),
-          forwardedMessage.chat?.title
-        );
-        await dbDeleteChat(chat.id);
-        const count = await telegram.api.getChatMemberCount({
-          chat_id: forwardedMessage.chat.id,
-        });
-        return await telegram.api.sendMessage({
-          chat_id: chat.id,
-          text: `Channel linked successfully\n**Title**: ${forwardedMessage.chat?.title}\n**ID**: ${forwardedMessage.chat.id}\n**Users**: ${count}`,
-          parse_mode: "Markdown",
-        });
+
+        try {
+          const channelId = forwardedMessage.chat?.id.toString();
+          const channel = await dbGetChannelById(channelId);
+
+          if (!!channel) {
+            return await telegram.api.sendMessage({
+              chat_id: chat.id,
+              text: "Channel already linked",
+              parse_mode: "Markdown",
+            });
+          }
+
+          const count = await telegram.api.getChatMemberCount({
+            chat_id: forwardedMessage.chat.id,
+          });
+
+          await dbSetChannelInfo(
+            chat.id.toString(),
+            forwardedMessage.chat?.id.toString(),
+            forwardedMessage.chat?.title
+          );
+
+          return await telegram.api.sendMessage({
+            chat_id: chat.id,
+            text: `Channel linked successfully\n**Title**: ${forwardedMessage.chat?.title}\n**ID**: ${forwardedMessage.chat.id}\n**Users**: ${count}`,
+            parse_mode: "Markdown",
+          });
+        } catch (err) {
+          console.log(err);
+          if (err instanceof APIError) {
+            await telegram.api.sendMessage({
+              chat_id: chat.id,
+              text: err.message,
+              parse_mode: "Markdown",
+            });
+          }
+        } finally {
+          return await dbDeleteChat(chat.id);
+        }
       }
     }
   }
@@ -146,8 +175,13 @@ async function dbSetChannelInfo(
   title: string | undefined
 ) {
   const username = title
-    ? encodeURIComponent(title.replace(/\s/g, "").replace(/[^\w-]/g, ""))
-    : undefined;
+    ? encodeURIComponent(
+        title
+          .replace(/\s/g, "")
+          .replace(/[^\w-]/g, "")
+          .concat(channelId)
+      )
+    : channelId;
 
   const channel: StChannel = {
     id: channelId,
@@ -155,10 +189,24 @@ async function dbSetChannelInfo(
     title,
     username,
   };
+
   await dynamoDb.send(
-    new PutItemCommand({
-      TableName: Table.Channels.tableName,
-      Item: marshall(channel),
+    new TransactWriteItemsCommand({
+      TransactItems: [
+        {
+          Put: {
+            TableName: Table.UniqueChannels.tableName,
+            Item: marshall({ username, channelId }),
+            ConditionExpression: "attribute_not_exists(username)",
+          },
+        },
+        {
+          Put: {
+            TableName: Table.Channels.tableName,
+            Item: marshall(channel),
+          },
+        },
+      ],
     })
   );
 }

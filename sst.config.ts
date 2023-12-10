@@ -44,6 +44,17 @@ export default {
         primaryIndex: { partitionKey: "id" },
       });
 
+      const consumerSubscriptionsTable = new Table(
+        stack,
+        "ConsumerSubscriptions",
+        {
+          fields: {
+            id: "string",
+          },
+          primaryIndex: { partitionKey: "id" },
+        }
+      );
+
       const stripeWebhookHandler = new Function(stack, "StripeWebhookHandler", {
         handler: "functions/stripeWebhook/handler.handler",
         bind: [usersTable],
@@ -58,7 +69,7 @@ export default {
         "StripeConnectWebhookHandler",
         {
           handler: "functions/stripeConnectWebhook/handler.handler",
-          bind: [usersTable],
+          bind: [usersTable, consumerSubscriptionsTable],
           permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
           environment: {
             STRIPE_CONNECT_WEBHOOK_SECRET: process.env
@@ -70,7 +81,7 @@ export default {
 
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
-        bind: [chatsTable, channelsTable],
+        bind: [chatsTable, channelsTable, uniqueChannelsTable],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
@@ -105,6 +116,7 @@ export default {
         permissions: ["dynamodb:GetItem"],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+          NEXT_PUBLIC_HOST: process.env.NEXT_PUBLIC_HOST as string,
         },
       });
 
@@ -120,6 +132,12 @@ export default {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
           NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
         },
+      });
+
+      const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
+        handler: "functions/subscriptions/handler.handler",
+        bind: [consumerSubscriptionsTable],
+        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
       const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
@@ -175,16 +193,14 @@ export default {
           "POST /channelUsername": channelUsernameHandler,
           "POST /user": userHandler,
           "GET /user": userHandler,
+          "POST /subscriptions": subscriptionsHandler,
           "POST /login": {
             function: loginHandler,
             authorizer: "none",
           },
 
           // Payment endpoints
-          "POST /joinChannel": {
-            authorizer: "admin",
-            function: joinChannelHandler,
-          },
+          "POST /joinChannel": joinChannelHandler,
         },
       });
 

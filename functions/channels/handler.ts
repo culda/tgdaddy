@@ -35,7 +35,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
 
       const req = JSON.parse(event.body) as Partial<StChannel>;
-      console.log(req);
       const res = await ddbUpdateChannel(req.id as string, req);
 
       return {
@@ -47,6 +46,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
         const data = await dbGetChannelById(id);
+        console.log(data);
         return {
           statusCode: 200,
           body: JSON.stringify({ data }),
@@ -74,7 +74,7 @@ async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
       TableName: Table.Channels.tableName,
       FilterExpression: "userId = :userId",
       ExpressionAttributeValues: {
-        ":userId": { N: id },
+        ":userId": { S: id },
       },
     })
   );

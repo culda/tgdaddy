@@ -5,14 +5,18 @@ import React from "react";
 export default function Page() {
   return (
     <PageLayout title="Add Channel">
-      {/* Step 1 */}
       <section className="flex flex-col items-center mt-20 px-5 max-md:mt-10">
         <div className="flex flex-row items-center justify-start w-full gap-4 mb-2">
           <div className="text-black text-xl font-semibold rounded-full border-[5px] border-solid border-black flex justify-center items-center w-10 h-10">
             1
           </div>
           <div className="text-black text-base text-left">
-            Launch <b>tgdaddybot</b>
+            Launch{" "}
+            <b>
+              <a target="_blank" href="https://t.me/tgdaddybot">
+                tgdaddybot
+              </a>
+            </b>
           </div>
         </div>
         <a
@@ -24,11 +28,23 @@ export default function Page() {
         </a>
       </section>
 
-      {/* Step 2 */}
       <section className="flex flex-col items-center mt-20 px-5 max-md:mt-10">
         <div className="flex flex-row items-start justify-start w-full gap-4 mb-2">
           <div className="text-black text-xl font-semibold rounded-full border-[5px] border-solid border-black flex justify-center items-center w-10 h-10">
             2
+          </div>
+          <div className="text-black text-base text-left flex-1">
+            Add <b>tgdaddybot</b> as an admin to your channel.
+            <br />
+            <b>Note:</b> You only need to enable <i>Add Members</i>
+          </div>
+        </div>
+      </section>
+
+      <section className="flex flex-col items-center mt-20 px-5 max-md:mt-10">
+        <div className="flex flex-row items-start justify-start w-full gap-4 mb-2">
+          <div className="text-black text-xl font-semibold rounded-full border-[5px] border-solid border-black flex justify-center items-center w-10 h-10">
+            3
           </div>
           <div className="text-black text-base text-left flex-1">
             Press <b>Link Channel</b> and forward a message from your channel to
@@ -37,7 +53,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Step 3 */}
       <section className="flex flex-col items-center mt-20 px-5 max-md:mt-10">
         <div className="flex flex-row items-center justify-start w-full gap-4 mb-2">
           <div className="text-black text-xl font-semibold rounded-full border-[5px] border-solid border-black flex justify-center items-center w-10 h-10">

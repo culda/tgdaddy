@@ -1,11 +1,14 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { StChannel, StPriceFrequency } from "../model/types";
-import EditableInput from "./EditableInput";
+import { StChannel, StPriceFrequency } from "../../../model/types";
+import EditableInput from "../../../components/EditableInput";
 import { TpUpdateUsername } from "@/functions/channelUsername/handler";
 import { useCallback, useState } from "react";
-import PriceInput from "./PriceInput";
-import { TpPriceRequest, TpPriceResponse } from "../api/stripe/price/route";
+import PriceInput from "../../../components/PriceInput";
+import {
+  TpPriceRequest,
+  TpPriceResponse,
+} from "../../../api/stripe/price/route";
 
 type PpChannel = {
   channel?: StChannel;

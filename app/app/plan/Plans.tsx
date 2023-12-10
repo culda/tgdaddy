@@ -1,8 +1,8 @@
 "use client";
-import { StPlan, StUser } from "../../../model/types";
+import { StPlan, StUser } from "../../model/types";
 import { useState } from "react";
-import { TpPlanRequest } from "./route";
-import Button from "../../../components/Button";
+import { TpPlanRequest } from "../../api/stripe/plan/route";
+import Button from "../../components/Button";
 
 const plans = [
   {
@@ -35,14 +35,14 @@ export default function Plans({ user }: PpPlans) {
   const [us, setUs] = useState(user);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePlanChange = async (plan: StPlan) => {
+  const handlePlanChange = async (creatorPlan: StPlan) => {
     setIsLoading(true);
 
     const res = await fetch("/api/stripe/plan", {
       method: "POST",
       body: JSON.stringify({
         user,
-        plan,
+        creatorPlan,
       } as TpPlanRequest),
     });
 
@@ -53,32 +53,11 @@ export default function Plans({ user }: PpPlans) {
     }
 
     if (res.status === 200) {
-      setUs({ ...us, plan });
+      setUs({ ...us, creatorPlan });
     }
 
     setIsLoading(false);
   };
-
-  const connectStripe = async () => {
-    setIsLoading(true);
-
-    await fetch("/api/stripe/connect", {
-      method: "POST",
-      body: JSON.stringify({ user }),
-    });
-
-    setIsLoading(false);
-  };
-
-  if (!!user && user?.stripeAccountStatus !== "connected") {
-    return (
-      <div>
-        <Button loading={isLoading} onClick={connectStripe}>
-          Connect Stripe
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -116,7 +95,7 @@ export default function Plans({ user }: PpPlans) {
                   type="radio"
                   name="plan"
                   value={plan.name}
-                  checked={us?.plan === plan.name}
+                  checked={us?.creatorPlan === plan.name}
                   onChange={() => handlePlanChange(plan.name)}
                   disabled={isLoading}
                   hidden={isLoading}

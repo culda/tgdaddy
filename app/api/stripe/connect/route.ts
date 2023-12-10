@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const { user } = (await req.json()) as TpConnectStripeRequest;
 
-    let accountId = user.stripeAccountId;
+    let accountId = user.creatorStripeAccountId;
     if (!accountId) {
       const account = await client.accounts.create({
         type: "express",
@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
     await fetch(`${process.env.API_ENDPOINT}/user`, {
       method: "POST",
       body: JSON.stringify({
-        stripeAccountId: accountId,
-        stripeAccountStatus: StConnectStatus.Pending,
+        creatorStripeAccountId: accountId,
       } as StUser),
       headers: {
         Authorization: `Bearer ${session?.accessToken}`,

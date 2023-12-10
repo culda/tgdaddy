@@ -1,7 +1,8 @@
 import PageLayout from "@/app/components/PageLayout";
 import { StChannel } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
-import Channel from "@/app/components/Channel";
+import Channel from "./Channel";
+import { notFound } from "next/navigation";
 
 type PpChannel = {
   params: { id: string };
@@ -25,6 +26,10 @@ export default async function Page({ params }: PpChannel) {
   };
 
   const channel = await fetchChannel();
+
+  if (!channel) {
+    return notFound();
+  }
 
   return (
     <PageLayout title={channel?.title}>

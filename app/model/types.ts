@@ -9,13 +9,20 @@ export type StLinkChat = {
 };
 
 export type StChannel = {
-  id: string; // ChannelId/UserId
+  id: string;
   userId: string;
   imageUrl?: string;
   title?: string;
   username?: string;
   description?: string;
   pricing?: StChannelPrice[];
+};
+
+export type StInviteLink = {
+  id: string; // userId/channelId
+  userId: string;
+  channelId: string;
+  link: string;
 };
 
 export type StChannelPrice = {
@@ -40,16 +47,18 @@ export type StUser = {
   firstName?: string;
   lastName?: string;
   photoUrl?: string;
-  plan: StPlan;
-  stripeSubscriptionId?: string;
-  stripeAccountId?: string;
-  stripeAccountStatus?: StConnectStatus;
-  stripeCustomerId?: string;
+  creatorPlan: StPlan;
+  creatorStripeSubscriptionId?: string;
+  creatorStripeAccountId?: string;
+  creatorStripeCustomerId?: string;
+  consumerStripeCustomerId?: string;
 };
 
-export type StPage = {
-  username: string;
-  stripeAccountId: string;
+export type StConsumerSubscription = {
+  id: string; // userId/channelId
+  consumerStripeCustomerId: string;
+  consumerStripeSubscriptionId: string;
+  accessUrl: string;
 };
 
 export enum StConnectStatus {

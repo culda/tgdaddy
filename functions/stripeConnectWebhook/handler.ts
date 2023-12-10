@@ -1,4 +1,5 @@
 import {
+  PutItemCommand,
   ScanCommand,
   ScanCommandInput,
   UpdateItemCommand,
@@ -8,12 +9,18 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { Stripe } from "stripe";
 import { Table } from "sst/node/table";
 import { dynamoDb } from "../utils";
-import { StConnectStatus } from "@/app/model/types";
+import { StConnectStatus, StConsumerSubscription } from "@/app/model/types";
+import { marshall } from "@aws-sdk/util-dynamodb";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export type AccountCreatedMetadata = {
   userId: string;
+};
+
+export type CheckoutCompletedMetadata = {
+  userId: string;
+  channelId: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -27,12 +34,37 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   switch (verify.type) {
     case "account.external_account.created": {
       handleAccountCreated(verify);
+      break;
+    }
+    case "checkout.session.completed": {
+      handleCheckoutCompleted(verify);
+      break;
     }
   }
   return {
     statusCode: 200,
   };
 };
+
+async function handleCheckoutCompleted(
+  data: Stripe.CheckoutSessionCompletedEvent
+) {
+  const { userId, channelId } = data.data.object
+    .metadata as CheckoutCompletedMetadata;
+
+  const consumerSub: StConsumerSubscription = {
+    id: `${userId}/${channelId}`,
+    consumerStripeCustomerId: data.data.object.customer as string,
+    consumerStripeSubscriptionId: data.data.object.subscription as string,
+  };
+
+  await dynamoDb.send(
+    new PutItemCommand({
+      TableName: Table.ConsumerSubscriptions.tableName,
+      Item: marshall(consumerSub),
+    })
+  );
+}
 
 async function handleAccountCreated(
   data: Stripe.AccountExternalAccountCreatedEvent
@@ -56,9 +88,9 @@ async function createProduct(accountId: string) {
 async function ddbConnectAccount(accountId: string) {
   const scanInput: ScanCommandInput = {
     TableName: Table.Users.tableName,
-    FilterExpression: "stripeAccountId = :stripeAccountId",
+    FilterExpression: "creatorStripeAccountId = :creatorStripeAccountId",
     ExpressionAttributeValues: {
-      ":stripeAccountId": { S: accountId },
+      ":creatorStripeAccountId": { S: accountId },
     },
   };
 
@@ -72,12 +104,10 @@ async function ddbConnectAccount(accountId: string) {
     const userId = item.id.S as string;
     const updateInput: UpdateItemCommandInput = {
       TableName: Table.Users.tableName,
-      Key: {
-        id: { S: userId },
-      },
-      UpdateExpression: `SET stripeAccountStatus = :stripeAccountStatus`,
+      Key: marshall({ id: userId }),
+      UpdateExpression: `SET creatorStripeAccountStatus = :creatorStripeAccountStatus`,
       ExpressionAttributeValues: {
-        ":stripeAccountStatus": { S: StConnectStatus.Connected },
+        ":creatorStripeAccountStatus": { S: StConnectStatus.Connected },
       },
       ReturnValues: "ALL_NEW",
     };

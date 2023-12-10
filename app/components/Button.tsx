@@ -1,4 +1,5 @@
 import Link, { LinkProps } from "next/link";
+import { AnchorHTMLAttributes } from "react";
 
 const className =
   "flex mx-auto h-11 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg relative";
@@ -15,12 +16,12 @@ export default function Button({
   loading,
   onClick,
   ...props
-}: Omit<LinkProps, "href"> & {
+}: {
   href?: string;
   loading?: boolean;
   onClick?: () => void;
   children: React.ReactNode;
-}) {
+} & Omit<LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
   const content = loading ? <LoadingSpinner /> : children;
 
   if (href) {
