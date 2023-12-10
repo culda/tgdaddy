@@ -9,6 +9,8 @@ import {
   TpPriceRequest,
   TpPriceResponse,
 } from "../../../api/stripe/price/route";
+import { FaSmile } from "react-icons/fa";
+import AddImage from "@/app/components/AddImage";
 
 type PpChannel = {
   channel?: StChannel;
@@ -121,9 +123,9 @@ export default function Channel({ channel }: PpChannel) {
   );
 
   return (
-    <section class="text-gray-600 body-font">
+    <div class="text-gray-600 body-font">
       <div class="container py-24 mx-auto flex flex-wrap">
-        <div class="flex flex-grow relative pb-20 sm:items-center">
+        <section class="flex flex-grow relative pb-10 sm:items-center">
           <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
             <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
             <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
@@ -156,9 +158,9 @@ export default function Channel({ channel }: PpChannel) {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="flex flex-grow relative pb-20 sm:items-center">
+        <section class="flex flex-grow relative pb-10 sm:items-center">
           <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
             <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
             <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
@@ -192,9 +194,9 @@ export default function Channel({ channel }: PpChannel) {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="flex flex-grow relative pb-20 sm:items-center">
+        <section class="flex flex-grow relative pb-10 sm:items-center">
           <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
             <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
             <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
@@ -243,8 +245,30 @@ export default function Channel({ channel }: PpChannel) {
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section className="flex flex-grow relative pb-10 sm:items-center">
+          <div className="h-full w-20 absolute inset-0 flex items-center justify-center">
+            <div className="h-full w-1 bg-gray-200 pointer-events-none"></div>
+            <div className="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
+              <FaSmile className="text-5xl" />
+            </div>
+          </div>
+          <div className="flex-grow pl-24 flex sm:items-center items-start flex-col sm:flex-row">
+            <div className="flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
+              <h2 className="font-medium title-font text-gray-900 mb-1 text-xl">
+                Profile
+              </h2>
+              <p className="leading-relaxed">
+                Add an image to showcase your channel.
+              </p>
+              <div className="mt-6">
+                <AddImage onSave={() => {}} />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
   );
 }

@@ -2,7 +2,6 @@
 import { StPlan, StUser } from "../../model/types";
 import { useState } from "react";
 import { TpPlanRequest } from "../../api/stripe/plan/route";
-import Button from "../../components/Button";
 
 const plans = [
   {

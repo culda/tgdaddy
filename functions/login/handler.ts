@@ -7,6 +7,10 @@ import { ddbGetUserById, dynamoDb } from "../utils";
 import crypto from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
 
+export type LoginRequest = TelegramAuthData & {
+  platformLogin?: boolean;
+};
+
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (!event.body) {
     return {
@@ -16,12 +20,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   let user: StUser | undefined;
-  const req = JSON.parse(event.body) as TelegramAuthData;
+  const req = JSON.parse(event.body) as LoginRequest;
 
   const dataCheckString = Object.keys(req)
-    .filter((key) => key !== "hash")
+    .filter((key) => key !== "hash" && key !== "platformLogin")
     .sort()
-    .map((key) => `${key}=${req[key as keyof TelegramAuthData]}`)
+    .map((key) => `${key}=${req[key as keyof LoginRequest]}`)
     .join("\n");
 
   const secretKey = crypto
@@ -53,6 +57,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       lastName: req.last_name,
       username: req.username,
       creatorPlan: StPlan.Starter,
+      platformLogin: req.platformLogin,
       photoUrl: req.photo_url,
     };
     await dynamoDb.send(

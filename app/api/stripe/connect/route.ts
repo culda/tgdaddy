@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "../stripe";
-import { StConnectStatus, StUser } from "@/app/model/types";
+import { StUser } from "@/app/model/types";
 import { auth } from "../../auth/[...nextauth]/route";
 
 export type TpConnectStripeRequest = {

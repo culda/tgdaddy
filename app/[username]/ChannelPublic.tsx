@@ -9,13 +9,10 @@ import {
   StPriceFrequency,
 } from "../model/types";
 import Button from "../components/Button";
-import { FaArrowRight, FaCheckCircle, FaLock, FaUnlock } from "react-icons/fa";
-import {
-  TpInviteLinkRequest,
-  TpInviteLinkResponse,
-} from "../api/channel/inviteLink/route";
+import { FaArrowRight, FaCheckCircle } from "react-icons/fa";
 import { useSnackbar } from "../components/SnackbarProvider";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 type PpChannel = {
   channel?: StChannel;
@@ -24,6 +21,7 @@ type PpChannel = {
 };
 
 export default function Channel({ channel, sub, link }: PpChannel) {
+  const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const snack = useSnackbar();
 
@@ -37,13 +35,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     }
   }, [snack, channel?.pricing]);
 
-  console.log(link);
-
   const joinChannel = async (priceId: string) => {
-    if (!channel?.pricing) {
-      return;
-    }
-
     setIsLoading(true);
 
     const joinRes = await fetch("/api/stripe/subscribe", {
@@ -58,6 +50,8 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         redirectUrl: window.location.href,
       } as TpSubscribeRequest),
     });
+
+    console.log("res", joinRes);
 
     const { paymentLink } = (await joinRes.json()) as TpSubscribeResponse;
 
@@ -78,8 +72,6 @@ export default function Channel({ channel, sub, link }: PpChannel) {
       }),
     });
 
-    console.log(res);
-
     if (res.status === 200) {
       snack({
         key: "channel-cancel",
@@ -93,6 +85,9 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         variant: "error",
       });
     }
+
+    setIsLoading(false);
+    window.location.reload();
   };
 
   return (

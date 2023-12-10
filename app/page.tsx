@@ -21,12 +21,10 @@ export default function Home() {
             <span class="ml-3 text-xl">Tailblocks</span>
           </a>
           <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-            <a class="mr-5 hover:text-white">First Link</a>
-            <a class="mr-5 hover:text-white">Second Link</a>
-            <a class="mr-5 hover:text-white">Third Link</a>
-            <a class="mr-5 hover:text-white">Fourth Link</a>
+            <a class="mr-5 hover:text-white">Pricing</a>
+            <a class="mr-5 hover:text-white">FAQ</a>
           </nav>
-          <ConnectTelegram />
+          <ConnectTelegram platformLogin callbackUrl="/app" />
         </div>
       </header>
 

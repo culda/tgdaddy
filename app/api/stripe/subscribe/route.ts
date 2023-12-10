@@ -1,7 +1,4 @@
-import { StPlan, StUser } from "@/app/model/types";
 import { NextRequest, NextResponse } from "next/server";
-import { client } from "../stripe";
-import Stripe from "stripe";
 import { auth } from "../../auth/[...nextauth]/route";
 import {
   TpJoinChannelRequest,

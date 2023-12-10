@@ -4,6 +4,7 @@ import ConnectTelegram from "../components/ConnectTelegram";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
 import { auth } from "../api/auth/[...nextauth]/route";
 import { Telegram } from "puregram";
+import Button from "../components/Button";
 
 type PpChannel = {
   params: { username: string };
@@ -45,17 +46,27 @@ export default async function Page({ params }: PpChannel) {
   const channel = await fetchChannel();
   const sub = await fetchSubscription(channel.id);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
-  const link = await telegram.api.createChatInviteLink({
-    chat_id: channel.id,
-    member_limit: 1,
-  });
+  const link =
+    sub &&
+    (await telegram.api.createChatInviteLink({
+      chat_id: channel.id,
+      member_limit: 1,
+    }));
+
+  const myChannel = channel.userId === session?.user?.id;
 
   return (
     <div className="relative">
-      <div className="absolute top-0 right-0 pt-4 pr-4">
+      <div className="absolute top-0 right-0 pt-4 pr-4 flex flex-row gap-2">
+        {myChannel && (
+          <Button variant="secondary" href={`/app/channels/${channel.id}`}>
+            {" "}
+            Manage{" "}
+          </Button>
+        )}
         <ConnectTelegram />
       </div>
-      <ChannelPublic channel={channel} sub={sub} link={link.invite_link} />
+      <ChannelPublic channel={channel} sub={sub} link={link?.invite_link} />
     </div>
   );
 }

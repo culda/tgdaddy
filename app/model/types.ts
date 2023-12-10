@@ -43,6 +43,7 @@ export type StUserAuth = Pick<
 
 export type StUser = {
   id: string;
+  platformLogin?: boolean;
   username?: string;
   firstName?: string;
   lastName?: string;

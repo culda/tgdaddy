@@ -33,11 +33,12 @@ export default function EditableInput({
         setIsEditing(false);
         setErrorMessage("");
       } catch (error) {
-        setIsEditing(false);
         setIsSubmitting(false);
         if (error instanceof Error) {
           setErrorMessage(error.message || "An error occurred while saving");
         }
+      } finally {
+        setIsEditing(false);
       }
     }
   };

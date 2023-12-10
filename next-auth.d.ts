@@ -16,6 +16,7 @@ declare module "next-auth" {
     id?: string;
     username?: string;
     photoUrl?: string;
+    platformLogin?: string;
   }
 }
 

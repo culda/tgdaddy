@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import { StChannel } from "../../model/types";
+import { StChannel } from "../model/types";
 import Link from "next/link";
-import Button from "../../components/Button";
+import Button from "../components/Button";
 
 type PpChannels = {
   channels?: StChannel[];

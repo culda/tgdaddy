@@ -34,20 +34,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         >
           <ul className="list-none p-0 m-0">
             <li className="mb-4">
-              <Link href={"/"}>
+              <Link href={"/app"}>
                 <img
                   loading="lazy"
                   className="aspect-[2.22] object-contain object-center w-[102px] overflow-hidden"
                   alt="Channel Logo"
                 />
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link
-                href="/app/channels"
-                className="text-black text-xl font-semibold whitespace-nowrap"
-              >
-                Channels
               </Link>
             </li>
             <li>
@@ -64,9 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Main Content */}
         <div className="flex flex-col items-stretch w-full md:w-[65%]">
           <div className="flex grow flex-col">
-            <SnackbarProvider>
-              <SessionProvider>{children}</SessionProvider>
-            </SnackbarProvider>
+            <SnackbarProvider>{children}</SnackbarProvider>
           </div>
         </div>
       </div>

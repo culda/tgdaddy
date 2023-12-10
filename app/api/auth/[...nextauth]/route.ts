@@ -31,6 +31,7 @@ export const config = {
       name: "Telegram",
       credentials: {
         id: { label: "User ID", type: "text" },
+        platformLogin: { label: "Platform Login", type: "text" },
         username: { label: "Username", type: "text" },
         first_name: { label: "First Name", type: "text" },
         last_name: { label: "Last Name", type: "text" },
@@ -40,10 +41,12 @@ export const config = {
       },
       authorize: async (credentials) => {
         if (!credentials) return Promise.reject("no credentials");
+        console.log("credentials", credentials);
         const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
           method: "POST",
           body: JSON.stringify({
             id: credentials.id,
+            platformLogin: credentials.platformLogin,
             username: credentials.username,
             first_name: credentials.first_name,
             last_name: credentials.last_name,
@@ -58,6 +61,7 @@ export const config = {
 
         return {
           id: user.id,
+          platformLogin: user.platformLogin,
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
