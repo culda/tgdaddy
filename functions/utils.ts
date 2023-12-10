@@ -5,7 +5,7 @@ import { Table } from "sst/node/table";
 
 export const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
-export async function dbGetUserById(id: string): Promise<StUser | undefined> {
+export async function ddbGetUserById(id: string): Promise<StUser | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({
       TableName: Table.Users.tableName,
@@ -20,7 +20,7 @@ export async function dbGetUserById(id: string): Promise<StUser | undefined> {
   return unmarshall(Item) as StUser;
 }
 
-export async function dbGetChannelById(
+export async function ddbGetChannelById(
   id: string
 ): Promise<StChannel | undefined> {
   const { Item } = await dynamoDb.send(
@@ -37,7 +37,7 @@ export async function dbGetChannelById(
   return unmarshall(Item) as StChannel;
 }
 
-export async function dbGetChannelIdByUsername(
+export async function ddbGetChannelIdByUsername(
   username: string
 ): Promise<string | undefined> {
   const { Item } = await dynamoDb.send(

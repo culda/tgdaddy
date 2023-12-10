@@ -20,7 +20,7 @@ export type TpSubscribeResponse = {
 };
 
 export async function POST(req: NextRequest) {
-  const sesssion = await auth();
+  const session = await auth();
   const { channelId, creatorUserId, priceId, redirectUrl } =
     (await req.json()) as TpSubscribeRequest;
   const joinRes = await fetch(`${process.env.API_ENDPOINT}/joinChannel`, {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     } as TpJoinChannelRequest),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${sesssion?.accessToken}`,
+      Authorization: `Bearer ${session?.accessToken}`,
     },
   });
 

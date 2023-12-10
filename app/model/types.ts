@@ -58,7 +58,6 @@ export type StConsumerSubscription = {
   id: string; // userId/channelId
   consumerStripeCustomerId: string;
   consumerStripeSubscriptionId: string;
-  accessUrl: string;
 };
 
 export enum StConnectStatus {

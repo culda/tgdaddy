@@ -10,7 +10,7 @@ import {
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { dbGetChannelById } from "../utils";
+import { ddbGetChannelById } from "../utils";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
@@ -45,7 +45,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     case "GET": {
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
-        const data = await dbGetChannelById(id);
+        const data = await ddbGetChannelById(id);
         console.log(data);
         return {
           statusCode: 200,

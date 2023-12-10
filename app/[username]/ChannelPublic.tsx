@@ -9,13 +9,13 @@ import {
   StPriceFrequency,
 } from "../model/types";
 import Button from "../components/Button";
-import { FaCheckCircle, FaLock, FaUnlock } from "react-icons/fa";
+import { FaArrowRight, FaCheckCircle, FaLock, FaUnlock } from "react-icons/fa";
 import {
   TpInviteLinkRequest,
   TpInviteLinkResponse,
 } from "../api/channel/inviteLink/route";
 import { useSnackbar } from "../components/SnackbarProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type PpChannel = {
   channel?: StChannel;
@@ -24,6 +24,7 @@ type PpChannel = {
 };
 
 export default function Channel({ channel, sub, link }: PpChannel) {
+  const [isLoading, setIsLoading] = useState(false);
   const snack = useSnackbar();
 
   useEffect(() => {
@@ -36,7 +37,15 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     }
   }, [snack, channel?.pricing]);
 
+  console.log(link);
+
   const joinChannel = async (priceId: string) => {
+    if (!channel?.pricing) {
+      return;
+    }
+
+    setIsLoading(true);
+
     const joinRes = await fetch("/api/stripe/subscribe", {
       method: "POST",
       headers: {
@@ -51,10 +60,40 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     });
 
     const { paymentLink } = (await joinRes.json()) as TpSubscribeResponse;
+
+    setIsLoading(false);
     window.location.href = paymentLink;
   };
 
-  console.log(sub);
+  const cancelMembership = async () => {
+    setIsLoading(true);
+    const res = await fetch("/api/stripe/cancel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        creatorUserId: channel?.userId,
+        channelId: channel?.id,
+      }),
+    });
+
+    console.log(res);
+
+    if (res.status === 200) {
+      snack({
+        key: "channel-cancel",
+        text: "Canceled",
+        variant: "success",
+      });
+    } else {
+      snack({
+        key: "channel-cancel",
+        text: "Failed",
+        variant: "error",
+      });
+    }
+  };
 
   return (
     <div>
@@ -70,28 +109,16 @@ export default function Channel({ channel, sub, link }: PpChannel) {
               {channel?.title}
             </h1>
             <p class="mb-8 leading-relaxed">{channel?.description}</p>
-            <div class="flex justify-center">
-              {!sub && (
-                <Button
-                  onClick={() =>
-                    joinChannel(channel?.pricing?.[0].id as string)
-                  }
-                >
-                  <div class="flex items-center gap-2">
-                    Join {channel?.username}
-                    <FaLock />
-                  </div>
-                </Button>
-              )}
-              {sub && link && (
+            {sub && link && (
+              <div class="flex justify-center">
                 <Button href={link} target="_blank">
                   <div class="flex items-center gap-2">
                     Access {channel?.username}
-                    <FaUnlock />
+                    <FaArrowRight />
                   </div>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -117,13 +144,29 @@ export default function Channel({ channel, sub, link }: PpChannel) {
                       Cancel anytime.
                     </p>
 
-                    <Button>Access Now</Button>
+                    <Button
+                      loading={isLoading}
+                      onClick={() => joinChannel(p.id)}
+                    >
+                      Join Now
+                    </Button>
                   </div>
                 </div>
               ))}
           </div>
         </div>
       </section>
+      {sub && (
+        <section class="text-gray-600 body-font">
+          <Button
+            loading={isLoading}
+            variant="text"
+            onClick={() => cancelMembership()}
+          >
+            Cancel membership
+          </Button>
+        </section>
+      )}
     </div>
   );
 }

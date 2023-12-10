@@ -1,7 +1,9 @@
 import {
+  DeleteItemCommand,
   PutItemCommand,
   ScanCommand,
   ScanCommandInput,
+  TransactWriteItemsCommand,
   UpdateItemCommand,
   UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
@@ -14,11 +16,12 @@ import { marshall } from "@aws-sdk/util-dynamodb";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export type AccountCreatedMetadata = {
+export type CheckoutCompletedMetadata = {
   userId: string;
+  channelId: string;
 };
 
-export type CheckoutCompletedMetadata = {
+export type SubscriptionDeletedMetadata = {
   userId: string;
   channelId: string;
 };
@@ -40,11 +43,28 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       handleCheckoutCompleted(verify);
       break;
     }
+    case "customer.subscription.deleted": {
+      handleSubscriptionDeleted(verify.data.object);
+      break;
+    }
   }
   return {
     statusCode: 200,
   };
 };
+
+async function handleSubscriptionDeleted(data: Stripe.Subscription) {
+  const { userId, channelId } = data.metadata as SubscriptionDeletedMetadata;
+  const subId = `${userId}/${channelId}`;
+
+  // delete subscription
+  await dynamoDb.send(
+    new DeleteItemCommand({
+      TableName: Table.ConsumerSubscriptions.tableName,
+      Key: marshall({ id: subId }),
+    })
+  );
+}
 
 async function handleCheckoutCompleted(
   data: Stripe.CheckoutSessionCompletedEvent
@@ -59,9 +79,27 @@ async function handleCheckoutCompleted(
   };
 
   await dynamoDb.send(
-    new PutItemCommand({
-      TableName: Table.ConsumerSubscriptions.tableName,
-      Item: marshall(consumerSub),
+    new TransactWriteItemsCommand({
+      TransactItems: [
+        {
+          Put: {
+            TableName: Table.ConsumerSubscriptions.tableName,
+            Item: marshall(consumerSub),
+          },
+        },
+        {
+          Update: {
+            TableName: Table.Users.tableName,
+            Key: marshall({ id: userId }),
+            UpdateExpression: `SET consumerStripeCustomerId = :consumerStripeCustomerId`,
+            ExpressionAttributeValues: {
+              ":consumerStripeCustomerId": {
+                S: data.data.object.customer as string,
+              },
+            },
+          },
+        },
+      ],
     })
   );
 }
@@ -77,7 +115,6 @@ async function createProduct(accountId: string) {
   await client.products.create(
     {
       name: "Channel Subscription",
-      description: "Join my channel",
     },
     {
       stripeAccount: accountId,

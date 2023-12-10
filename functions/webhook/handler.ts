@@ -11,13 +11,8 @@ import {
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import {
-  StChannel,
-  StChat,
-  StLinkChat,
-  StPriceFrequency,
-} from "../../app/model/types";
-import { dbGetChannelById } from "../utils";
+import { StChannel, StChat, StLinkChat } from "../../app/model/types";
+import { ddbGetChannelById } from "../utils";
 
 const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
@@ -91,7 +86,7 @@ async function handleUpdate(u: TelegramUpdate) {
 
         try {
           const channelId = forwardedMessage.chat?.id.toString();
-          const channel = await dbGetChannelById(channelId);
+          const channel = await ddbGetChannelById(channelId);
 
           if (!!channel) {
             return await telegram.api.sendMessage({

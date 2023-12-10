@@ -116,7 +116,15 @@ export default {
         permissions: ["dynamodb:GetItem"],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
-          NEXT_PUBLIC_HOST: process.env.NEXT_PUBLIC_HOST as string,
+        },
+      });
+
+      const unjoinChannelHandler = new Function(stack, "UnjoinChannelHandler", {
+        handler: "functions/unjoinChannel/handler.handler",
+        bind: [consumerSubscriptionsTable, usersTable],
+        permissions: ["dynamodb:GetItem", "dynamodb:PutItem"],
+        environment: {
+          STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
       });
 
@@ -199,8 +207,9 @@ export default {
             authorizer: "none",
           },
 
-          // Payment endpoints
+          // Consumer endpoints
           "POST /joinChannel": joinChannelHandler,
+          "POST /unjoinChannel": unjoinChannelHandler,
         },
       });
 

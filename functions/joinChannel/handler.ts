@@ -2,7 +2,7 @@ import {
   APIGatewayProxyHandlerV2,
   APIGatewayProxyHandlerV2WithLambdaAuthorizer,
 } from "aws-lambda";
-import { dbGetUserById } from "../utils";
+import { ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 
@@ -41,8 +41,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     event.body
   ) as TpJoinChannelRequest;
 
-  const user = await dbGetUserById(userId);
-  const creatorUser = await dbGetUserById(creatorUserId);
+  const user = await ddbGetUserById(userId);
+  const creatorUser = await ddbGetUserById(creatorUserId);
   const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
 
   if (!creatorStripeAccountId) {
@@ -71,6 +71,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       success_url: redirectUrl,
       cancel_url: redirectUrl,
       customer: customerId,
+      subscription_data: {
+        metadata: {
+          userId,
+          channelId,
+        },
+      },
       metadata: {
         userId,
         channelId,

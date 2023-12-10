@@ -8,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StUser } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { dbGetUserById, dynamoDb } from "../utils";
+import { ddbGetUserById, dynamoDb } from "../utils";
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
@@ -41,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       };
     }
     case "GET": {
-      const data = await dbGetUserById(userId);
+      const data = await ddbGetUserById(userId);
 
       return {
         statusCode: 200,

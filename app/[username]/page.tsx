@@ -9,8 +9,6 @@ type PpChannel = {
   params: { username: string };
 };
 
-const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
-
 export default async function Page({ params }: PpChannel) {
   const session = await auth();
 
@@ -46,6 +44,7 @@ export default async function Page({ params }: PpChannel) {
 
   const channel = await fetchChannel();
   const sub = await fetchSubscription(channel.id);
+  const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
   const link = await telegram.api.createChatInviteLink({
     chat_id: channel.id,
     member_limit: 1,
@@ -56,7 +55,7 @@ export default async function Page({ params }: PpChannel) {
       <div className="absolute top-0 right-0 pt-4 pr-4">
         <ConnectTelegram />
       </div>
-      <ChannelPublic channel={channel} sub={sub} link={link} />
+      <ChannelPublic channel={channel} sub={sub} link={link.invite_link} />
     </div>
   );
 }

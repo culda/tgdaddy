@@ -1,10 +1,13 @@
-import { FaWindowClose } from "react-icons/fa";
+import { useEffect } from "react";
+import { FaXing } from "react-icons/fa";
 
 export type SnackbarType = {
   key: string;
   text: React.ReactNode;
   icon?: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   variant: "success" | "error" | "warning" | "info";
+  dismissable?: boolean;
+  autodeleteTime?: number;
 };
 
 export type TSnackbarProps = Omit<SnackbarType, "key"> & {
@@ -18,6 +21,8 @@ export default function Snackbar({
   icon: Icon,
   handleClose,
   variant,
+  dismissable = false,
+  autodeleteTime = 3000,
 }: TSnackbarProps) {
   const variants = {
     success: "bg-green-500",
@@ -25,6 +30,18 @@ export default function Snackbar({
     warning: "bg-yellow-500",
     info: "bg-blue-500",
   };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (open && !dismissable) {
+      timer = setTimeout(() => {
+        handleClose();
+      }, autodeleteTime);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [open, dismissable, autodeleteTime, handleClose]);
 
   return open ? (
     <div
@@ -36,12 +53,14 @@ export default function Snackbar({
         </span>
       )}
       <span>{text}</span>
-      <button
-        className="bg-transparent !p-0 text-current underline"
-        onClick={handleClose}
-      >
-        <FaWindowClose />
-      </button>
+      {dismissable && (
+        <button
+          className="bg-transparent !p-0 text-current underline"
+          onClick={handleClose}
+        >
+          <FaXing />
+        </button>
+      )}
     </div>
   ) : null;
 }

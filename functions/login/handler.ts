@@ -3,7 +3,7 @@ import { Table } from "sst/node/table";
 import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StPlan, StUser } from "../../app/model/types";
-import { dbGetUserById, dynamoDb } from "../utils";
+import { ddbGetUserById, dynamoDb } from "../utils";
 import crypto from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
 
@@ -45,7 +45,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   /**
    * Check if user exists in DynamoDB, if not, create a new user
    */
-  user = await dbGetUserById(req.id.toString());
+  user = await ddbGetUserById(req.id.toString());
   if (!user) {
     user = {
       id: req.id.toString(),
