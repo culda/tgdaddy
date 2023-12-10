@@ -1,5 +1,5 @@
 import { SSTConfig } from "sst";
-import { NextjsSite, Function, Api, Table } from "sst/constructs";
+import { NextjsSite, Function, Api, Table, Bucket } from "sst/constructs";
 
 export default {
   config(_input) {
@@ -163,6 +163,8 @@ export default {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
       });
+
+      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {});
 
       const api = new Api(stack, "Api", {
         authorizers: {

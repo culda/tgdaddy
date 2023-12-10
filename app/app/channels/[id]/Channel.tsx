@@ -122,6 +122,27 @@ export default function Channel({ channel }: PpChannel) {
     [session.data?.accessToken]
   );
 
+  const setChannelImage = async (
+    fileBuffer: ArrayBuffer,
+    fileName: string,
+    fileType: string
+  ) => {
+    console.log(fileName, fileType);
+    // await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${session.data?.accessToken}`,
+    //   },
+    //   body: JSON.stringify({
+    //     id: ch?.id,
+    //     image,
+    //   }),
+    // });
+
+    // setCh({ ...ch, image } as StChannel);
+  };
+
   return (
     <div class="text-gray-600 body-font">
       <div class="container py-24 mx-auto flex flex-wrap">
@@ -263,7 +284,7 @@ export default function Channel({ channel }: PpChannel) {
                 Add an image to showcase your channel.
               </p>
               <div className="mt-6">
-                <AddImage onSave={() => {}} />
+                <AddImage onSave={setChannelImage} />
               </div>
             </div>
           </div>

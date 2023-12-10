@@ -2,7 +2,11 @@ import React, { useRef, useState } from "react";
 import Button from "./Button";
 
 type PpAddImage = {
-  onSave: (file: File) => Promise<void>;
+  onSave: (
+    fileBuffer: ArrayBuffer,
+    fileName: string,
+    fileType: string
+  ) => Promise<void>;
 };
 
 export default function AddImage({ onSave }: PpAddImage) {
@@ -14,11 +18,16 @@ export default function AddImage({ onSave }: PpAddImage) {
     if (image) {
       try {
         setIsSubmitting(true);
-        await onSave(image);
-        setImage(null); // Clear the selected image after saving
-        if (inputRef.current) {
-          inputRef.current.value = ""; // Reset the input element
-        }
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const buffer = reader.result as ArrayBuffer;
+          await onSave(buffer, image.name, image.type);
+          setImage(null); // Clear the selected image after saving
+          if (inputRef.current) {
+            inputRef.current.value = ""; // Reset the input element
+          }
+        };
+        reader.readAsArrayBuffer(image);
       } catch (error) {
         console.error(error);
       } finally {
