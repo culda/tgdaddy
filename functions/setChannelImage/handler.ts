@@ -1,34 +1,29 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
 import { Table } from "sst/node/table";
-import {
-  AttributeValue,
-  DynamoDBClient,
-  QueryCommand,
-  ScanCommand,
-  UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import { S3Client } from "@aws-sdk/client-s3";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel } from "../../app/model/types";
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { marshall } from "@aws-sdk/util-dynamodb";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { ddbGetChannelById } from "../utils";
 import { Bucket } from "sst/node/bucket";
+import { v4 as uuidv4 } from "uuid";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 const s3 = new S3Client({ region: "us-east-1" });
 
 type TpSetChannelImageRequest = {
   channelId: string;
-  image: string;
+  fileBase64: string;
+  fileType: string;
 };
 
-type TpSetChannelImageResponse = {
-  path: string;
+export type TpSetChannelImageResponse = {
+  imagePath: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
+  console.log(event);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {
@@ -44,19 +39,46 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     };
   }
 
-  const { image, channelId } = JSON.parse(
+  const { fileBase64, fileType, channelId } = JSON.parse(
     event.body
   ) as TpSetChannelImageRequest;
 
-  // Assuming the image is a base64 encoded string
-  const buffer = Buffer.from(image, "base64");
+  const buffer = Buffer.from(fileBase64, "base64");
   const imageKey = `${channelId}/${uuidv4()}`;
   const imageBucket = Bucket.ChannelImagesBucket.bucketName;
 
-  let path;
+  try {
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: imageBucket,
+        Key: imageKey,
+        Body: buffer,
+        ContentType: fileType,
+      })
+    );
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ path }),
-  };
+    const imagePath = `https://${imageBucket}.s3.amazonaws.com/${imageKey}`;
+
+    await dynamoDb.send(
+      new UpdateItemCommand({
+        TableName: Table.Channels.tableName,
+        Key: marshall({ id: channelId }),
+        UpdateExpression: "SET imagePath = :imagePath",
+        ExpressionAttributeValues: {
+          ":imagePath": { S: imagePath },
+        },
+      })
+    );
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ imagePath }),
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
+  }
 };

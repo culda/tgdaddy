@@ -164,7 +164,23 @@ export default {
         },
       });
 
-      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {});
+      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {
+        cdk: {
+          bucket: {
+            publicReadAccess: true,
+          },
+        },
+      });
+
+      const setChannelImageHandler = new Function(
+        stack,
+        "SetChannelImageHandler",
+        {
+          handler: "functions/setChannelImage/handler.handler",
+          bind: [channelsTable, channelImagesBucket],
+          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        }
+      );
 
       const api = new Api(stack, "Api", {
         authorizers: {
@@ -208,6 +224,7 @@ export default {
             function: loginHandler,
             authorizer: "none",
           },
+          "POST /setChannelImage": setChannelImageHandler,
 
           // Consumer endpoints
           "POST /joinChannel": joinChannelHandler,

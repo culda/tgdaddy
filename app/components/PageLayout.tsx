@@ -12,7 +12,7 @@ export default function PageLayout({
   return (
     <div className="flex flex-col py-12 max-w-md">
       {title ? (
-        <header className="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
+        <header className="w-full mb-6">
           <h2 class="text-sm title-font text-gray-500 tracking-widest">
             {subtitle}
           </h2>

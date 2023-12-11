@@ -9,14 +9,18 @@ import {
   TpPriceRequest,
   TpPriceResponse,
 } from "../../../api/stripe/price/route";
-import { FaSmile } from "react-icons/fa";
+import { FaMoneyBill, FaAddressBook, FaSmile, FaAtlas } from "react-icons/fa";
 import AddImage from "@/app/components/AddImage";
+import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
+import { useSnackbar } from "@/app/components/SnackbarProvider";
+import ChannelSection from "../ChannelSection";
 
 type PpChannel = {
   channel?: StChannel;
 };
 
 export default function Channel({ channel }: PpChannel) {
+  const snack = useSnackbar();
   const [ch, setCh] = useState(channel);
   const session = useSession();
   const setUsername = useCallback(
@@ -42,6 +46,12 @@ export default function Channel({ channel }: PpChannel) {
         } as TpUpdateUsername),
       });
 
+      snack({
+        key: "username-updated",
+        text: "Username updated",
+        dismissable: false,
+        variant: "success",
+      });
       setCh({ ...ch, username: username } as StChannel);
     },
     [session.data?.accessToken]
@@ -65,6 +75,11 @@ export default function Channel({ channel }: PpChannel) {
         }),
       });
 
+      snack({
+        key: "description-updated",
+        text: "Description updated",
+        variant: "success",
+      });
       setCh({ ...ch, description: description } as StChannel);
     },
     [session.data?.accessToken]
@@ -101,6 +116,12 @@ export default function Channel({ channel }: PpChannel) {
         (await priceRes.json()) as TpPriceResponse;
 
       if (needsStripeConnect) {
+        snack({
+          key: "stripe-connect",
+          text: "You must connect to Stripe before setting a price",
+          dismissable: false,
+          variant: "error",
+        });
         window.location.href = "/app/plan";
         return;
       }
@@ -117,178 +138,114 @@ export default function Channel({ channel }: PpChannel) {
         }),
       });
 
+      snack({
+        key: "pricing-updated",
+        text: "Pricing updated",
+        dismissable: false,
+        variant: "success",
+      });
       setCh({ ...ch, pricing } as StChannel);
     },
     [session.data?.accessToken]
   );
 
-  const setChannelImage = async (
-    fileBuffer: ArrayBuffer,
-    fileName: string,
-    fileType: string
-  ) => {
-    console.log(fileName, fileType);
-    // await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${session.data?.accessToken}`,
-    //   },
-    //   body: JSON.stringify({
-    //     id: ch?.id,
-    //     image,
-    //   }),
-    // });
+  const setChannelImage = async (fileBase64: string, fileType: string) => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/setChannelImage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data?.accessToken}`,
+        },
+        body: JSON.stringify({
+          channelId: ch?.id,
+          fileBase64,
+          fileType,
+        }),
+      }
+    );
 
-    // setCh({ ...ch, image } as StChannel);
+    const { imagePath } = (await res.json()) as TpSetChannelImageResponse;
+
+    setCh({ ...ch, imagePath } as StChannel);
   };
 
   return (
     <div class="text-gray-600 body-font">
-      <div class="container py-24 mx-auto flex flex-wrap">
-        <section class="flex flex-grow relative pb-10 sm:items-center">
-          <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
-            <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
-            <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                class="w-12 h-12"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </div>
+      <div class="container pt-5 mx-auto flex flex-wrap">
+        <ChannelSection isFirstSection>
+          <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
+            Username
+          </h2>
+          <p class="leading-relaxed">
+            This is the public address of your channel.
+          </p>
+          <div class="mt-6">
+            <EditableInput
+              defaultValue={ch?.username}
+              onSave={(v) => setUsername(v)}
+            />
           </div>
-          <div class="flex-grow pl-24 flex sm:items-center items-start flex-col sm:flex-row">
-            <div class="flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
-              <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
-                Username
-              </h2>
-              <p class="leading-relaxed">
-                This is the public address of your channel.
-              </p>
+        </ChannelSection>
+        <ChannelSection>
+          <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
+            Description
+          </h2>
+          <p class="leading-relaxed">Pitch your channel to your audience.</p>
+          <div class="mt-6">
+            <EditableInput
+              textarea
+              defaultValue={ch?.description}
+              onSave={(v) => setDescription(v)}
+            />
+          </div>
+        </ChannelSection>
+
+        <ChannelSection>
+          <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
+            Pricing
+          </h2>
+          <p class="leading-relaxed">
+            You can update prices anytime. Current memberships are not affected
+          </p>
+          <div>
+            {!ch?.pricing && (
               <div class="mt-6">
-                <EditableInput
-                  defaultValue={ch?.username}
-                  onSave={(v) => setUsername(v)}
+                <PriceInput
+                  editMode
+                  defaultFrequency={StPriceFrequency.Monthly}
+                  defaultPrice=""
+                  onSave={(price, frequency) => setPrice(price, frequency)}
                 />
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="flex flex-grow relative pb-10 sm:items-center">
-          <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
-            <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
-            <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                class="w-12 h-12"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </div>
-          </div>
-          <div class="flex-grow pl-24 flex sm:items-center items-start flex-col sm:flex-row">
-            <div class="flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
-              <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
-                Description
-              </h2>
-              <p class="leading-relaxed">
-                Pitch your channel to your audience.
-              </p>
+            )}
+            {ch?.pricing?.map((p) => (
               <div class="mt-6">
-                <EditableInput
-                  textarea
-                  defaultValue={ch?.description}
-                  onSave={(v) => setDescription(v)}
+                <PriceInput
+                  defaultPrice={(p.usd / 100).toFixed(2)}
+                  defaultFrequency={p.frequency}
+                  onSave={(price, frequency) => setPrice(price, frequency)}
                 />
               </div>
-            </div>
+            ))}
           </div>
-        </section>
+        </ChannelSection>
 
-        <section class="flex flex-grow relative pb-10 sm:items-center">
-          <div class="h-full w-20 absolute inset-0 flex items-center justify-center">
-            <div class="h-full w-1 bg-gray-200 pointer-events-none"></div>
-            <div class="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                class="w-12 h-12"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </div>
+        <ChannelSection isLastSection>
+          <h2 className="font-medium title-font text-gray-900 mb-1 text-xl">
+            Profile
+          </h2>
+          <p className="leading-relaxed">
+            Add an image to showcase your channel.
+          </p>
+          <div className="mt-6">
+            <AddImage
+              currentImagePath={ch?.imagePath}
+              onSave={setChannelImage}
+            />
           </div>
-          <div class="flex-grow pl-24 flex sm:items-center items-start flex-col sm:flex-row">
-            <div class="flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
-              <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
-                Pricing
-              </h2>
-              <p class="leading-relaxed">
-                You can update prices anytime. Current memberships are not
-                affected
-              </p>
-              <div>
-                {!ch?.pricing && (
-                  <div class="mt-6">
-                    <PriceInput
-                      editMode
-                      defaultFrequency={StPriceFrequency.Monthly}
-                      defaultPrice=""
-                      onSave={(price, frequency) => setPrice(price, frequency)}
-                    />
-                  </div>
-                )}
-                {ch?.pricing?.map((p) => (
-                  <div class="mt-6">
-                    <PriceInput
-                      defaultPrice={(p.usd / 100).toFixed(2)}
-                      defaultFrequency={p.frequency}
-                      onSave={(price, frequency) => setPrice(price, frequency)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="flex flex-grow relative pb-10 sm:items-center">
-          <div className="h-full w-20 absolute inset-0 flex items-center justify-center">
-            <div className="h-full w-1 bg-gray-200 pointer-events-none"></div>
-            <div className="flex-shrink-0 w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4">
-              <FaSmile className="text-5xl" />
-            </div>
-          </div>
-          <div className="flex-grow pl-24 flex sm:items-center items-start flex-col sm:flex-row">
-            <div className="flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
-              <h2 className="font-medium title-font text-gray-900 mb-1 text-xl">
-                Profile
-              </h2>
-              <p className="leading-relaxed">
-                Add an image to showcase your channel.
-              </p>
-              <div className="mt-6">
-                <AddImage onSave={setChannelImage} />
-              </div>
-            </div>
-          </div>
-        </section>
+        </ChannelSection>
       </div>
     </div>
   );

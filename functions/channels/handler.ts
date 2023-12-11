@@ -46,7 +46,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
         const data = await ddbGetChannelById(id);
-        console.log(data);
         return {
           statusCode: 200,
           body: JSON.stringify({ data }),

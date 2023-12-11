@@ -59,15 +59,15 @@ export default function PriceInput({
 
   const inputWrapperClass = `flex items-center border rounded-md ${
     errorMessage ? "border-red-600" : "border-zinc-300"
-  } bg-neutral-50 grow py-2.5 border-solid max-md:px-5`;
+  } bg-neutral-50 grow py-2.5 border-solid `;
 
-  const inputClass = `focus:outline-none text-black text-center  text-sm whitespace-nowrap justify-center items-center bg-transparent flex-grow`;
+  const inputClass = `focus:outline-none text-black text-center text-sm whitespace-nowrap justify-center items-center bg-transparent flex-grow`;
 
   const selectClass = `border border-zinc-300 text-black text-sm px-4 py-2.5 bg-orange-200 rounded-md shadow-sm focus:outline-none disabled:bg-neutral-100 appearance-none`;
 
   return (
-    <form className="flex flex-col justify-between gap-2 flex-wrap">
-      <div className="flex items-center gap-2">
+    <form className="flex flex-col justify-between gap-2 flex-wrap max-w-sm">
+      <div className="flex flex-wrap gap-2">
         <div className={inputWrapperClass}>
           <span className="pl-3 text-sm text-gray-500">$</span>
           <input

@@ -51,7 +51,7 @@ export default function EditableInput({
 
   const inputClass = `text-black text-center text-sm whitespace-nowrap rounded-md justify-center items-center border ${
     errorMessage ? "border-red-600" : "border-zinc-300"
-  } bg-neutral-50 grow py-2.5 border-solid max-md:px-5`;
+  } bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5`;
 
   return (
     <form className="flex flex-col justify-between gap-2 flex-wrap">

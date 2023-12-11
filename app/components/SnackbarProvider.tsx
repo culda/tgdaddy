@@ -29,6 +29,8 @@ export default function SnackbarProvider({
             text={snack.text}
             variant={snack.variant}
             icon={snack.icon}
+            dismissable={snack.dismissable}
+            autodeleteTime={snack.autodeleteTime}
             handleClose={() =>
               dispatch({ type: "REMOVE_SNACKBAR", payload: { key: snack.key } })
             }

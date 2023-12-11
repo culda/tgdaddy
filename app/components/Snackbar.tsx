@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FaXing } from "react-icons/fa";
+import { FaClosedCaptioning, FaCrosshairs } from "react-icons/fa";
 
 export type SnackbarType = {
   key: string;
@@ -55,10 +55,10 @@ export default function Snackbar({
       <span>{text}</span>
       {dismissable && (
         <button
-          className="bg-transparent !p-0 text-current underline"
+          className="bg-transparent !p-0 text-current font-extrabold"
           onClick={handleClose}
         >
-          <FaXing />
+          X
         </button>
       )}
     </div>

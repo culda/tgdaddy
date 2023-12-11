@@ -11,7 +11,7 @@ export type StLinkChat = {
 export type StChannel = {
   id: string;
   userId: string;
-  imageUrl?: string;
+  imagePath?: string;
   title?: string;
   username?: string;
   description?: string;
