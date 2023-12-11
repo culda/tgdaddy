@@ -16,7 +16,7 @@ export default function PageLayout({
           <h2 class="text-sm title-font text-gray-500 tracking-widest">
             {subtitle}
           </h2>
-          <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">
+          <h1 class="text-gray-900 text-3xl title-font font-bold mb-4">
             {title}
           </h1>
         </header>
