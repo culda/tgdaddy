@@ -212,6 +212,7 @@ export default {
           },
           "POST /channels": channelsHandler,
           "GET /channels": channelsHandler,
+          "PUT /channels": channelsHandler,
           "GET /channels/{username}": {
             function: channelHandler,
             authorizer: "none",

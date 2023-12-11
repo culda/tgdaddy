@@ -5,9 +5,14 @@ import { useSnackbar } from "./SnackbarProvider";
 type PpAddImage = {
   currentImagePath?: string;
   onSave: (fileBase64: string, fileType: string) => Promise<void>;
+  saveOnChange?: boolean;
 };
 
-export default function AddImage({ currentImagePath, onSave }: PpAddImage) {
+export default function AddImage({
+  currentImagePath,
+  onSave,
+  saveOnChange,
+}: PpAddImage) {
   const snack = useSnackbar();
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +58,10 @@ export default function AddImage({ currentImagePath, onSave }: PpAddImage) {
         return;
       }
       setImage(file);
+      if (saveOnChange) {
+        console.log("submitting");
+        submitImage();
+      }
     }
   };
   const selectClass =
@@ -82,9 +91,11 @@ export default function AddImage({ currentImagePath, onSave }: PpAddImage) {
           />
         </div>
       </div>
-      <Button onClick={submitImage} loading={isSubmitting} disabled={!image}>
-        Submit
-      </Button>
+      {!saveOnChange && (
+        <Button onClick={submitImage} loading={isSubmitting} disabled={!image}>
+          Submit
+        </Button>
+      )}
     </form>
   );
 }

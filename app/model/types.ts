@@ -10,8 +10,10 @@ export type StLinkChat = {
 
 export type StChannel = {
   id: string;
+  channelId: string;
   userId: string;
   imagePath?: string;
+  telegramLinkCode?: string;
   title?: string;
   username?: string;
   description?: string;

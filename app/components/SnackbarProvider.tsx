@@ -21,7 +21,7 @@ export default function SnackbarProvider({
       {queue.map((snack, index) => (
         <div
           key={snack.key}
-          className={`fixed z-50 flex w-full m-4 -mt-${index + 1} left-${
+          className={`fixed top-0 z-50 flex w-full m-4 -mt-${index + 1} left-${
             index + 4
           }`}
         >

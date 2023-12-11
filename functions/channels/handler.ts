@@ -3,6 +3,7 @@ import { Table } from "sst/node/table";
 import {
   AttributeValue,
   DynamoDBClient,
+  PutItemCommand,
   QueryCommand,
   ScanCommand,
   UpdateItemCommand,
@@ -26,6 +27,22 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   }
 
   switch (event.requestContext.http.method) {
+    case "PUT": {
+      if (!event.body) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Request body is required" }),
+        };
+      }
+
+      const req = JSON.parse(event.body) as Partial<StChannel>;
+      const res = await ddbPutChannel(req.id as string, req);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ data: res }),
+      };
+    }
     case "POST": {
       if (!event.body) {
         return {
@@ -83,6 +100,26 @@ async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
   }
 
   return Items.map((item) => unmarshall(item)) as StChannel[];
+}
+
+async function ddbPutChannel(
+  id: string,
+  channel: Partial<StChannel>
+): Promise<StChannel | undefined> {
+  const { Attributes } = await dynamoDb.send(
+    new PutItemCommand({
+      TableName: Table.Channels.tableName,
+      Item: marshall(channel),
+      ConditionExpression: "attribute_not_exists(id)",
+      ReturnValues: "ALL_OLD",
+    })
+  );
+
+  if (!Attributes) {
+    return undefined;
+  }
+
+  return unmarshall(Attributes) as StChannel;
 }
 
 async function ddbUpdateChannel(

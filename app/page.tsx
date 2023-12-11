@@ -33,8 +33,10 @@ export default function Home() {
             <span class="ml-3 text-xl">OnlyChannels</span>
           </a>
 
-          <AppButton />
-          <ConnectTelegram platformLogin callbackUrl="/app" />
+          <div class="flex gap-2">
+            <AppButton />
+            <ConnectTelegram platformLogin callbackUrl="/app" />
+          </div>
         </div>
       </header>
       <main>
