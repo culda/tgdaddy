@@ -38,7 +38,7 @@ export default function Button({
 }: ButtonProps) {
   const content = loading ? <LoadingSpinner variant={variant} /> : children;
   const variantClassName = variantStyles[variant];
-  const buttonClassName = `flex mx-auto items-center h-11 py-2 px-4 focus:outline-none rounded text-lg relative ${variantClassName}`;
+  const buttonClassName = `flex items-center justify-center py-2 px-4 disabled:bg-gray-400 focus:outline-none rounded text-lg relative ${variantClassName}`;
 
   if (href) {
     return (

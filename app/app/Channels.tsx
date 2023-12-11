@@ -1,7 +1,6 @@
 "use client";
-import React, { Fragment } from "react";
+import React from "react";
 import { StChannel } from "../model/types";
-import Link from "next/link";
 import Button from "../components/Button";
 import ChannelSection from "./channels/ChannelSection";
 import { FaArrowRight } from "react-icons/fa";
@@ -12,9 +11,11 @@ type PpChannels = {
 
 export default function Channels({ channels }: PpChannels) {
   return (
-    <Fragment>
+    <div class="mt-16">
       <ChannelSection isFirstSection>
-        <div className="justify-center items-stretch flex flex-col gap-2 px-14 py-12 max-md:px-5">
+        <div className="flex flex-col gap-2">
+          {!channels && <h2>You don't have any channels yet. </h2>}
+
           {channels?.map((channel) => (
             <Button
               variant={"secondary"}
@@ -36,6 +37,6 @@ export default function Channels({ channels }: PpChannels) {
           </Button>
         </div>
       </ChannelSection>
-    </Fragment>
+    </div>
   );
 }

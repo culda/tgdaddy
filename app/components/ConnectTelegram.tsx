@@ -29,12 +29,11 @@ export default function ConnectTelegram({
 
   const handleSignOut = async () => {
     setLoggingOut(true);
-    await signOut();
-    window.location.reload();
+    await signOut({
+      callbackUrl: "/",
+    });
     setLoggingOut(false);
   };
-
-  const isPlatformUser = data?.user?.platformLogin;
 
   return (
     <div className="flex items-center">
@@ -49,7 +48,6 @@ export default function ConnectTelegram({
       {/* Conditionally display the user's profile image if authenticated */}
       {status === "authenticated" && data.user.photoUrl && (
         <div class="flex flex-row gap-2">
-          {isPlatformUser && <Button href="/app">App</Button>}
           <Button variant={"text"} loading={loggingOut} onClick={handleSignOut}>
             <FaPowerOff />
           </Button>
