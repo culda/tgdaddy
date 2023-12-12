@@ -2,7 +2,7 @@
 import Button from "@/app/components/Button";
 import PageLayout from "@/app/components/PageLayout";
 import React from "react";
-import ChannelSection from "../../ChannelSection";
+import ChannelSection from "../ChannelSection";
 import { FaCopy } from "react-icons/fa";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import { StChannel } from "@/app/model/types";

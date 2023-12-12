@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { FaClosedCaptioning, FaCrosshairs } from "react-icons/fa";
 
 export type SnackbarType = {
   key: string;
@@ -25,7 +24,7 @@ export default function Snackbar({
   autodeleteTime = 3000,
 }: TSnackbarProps) {
   const variants = {
-    success: "bg-green-500",
+    success: "bg-green-600",
     error: "bg-red-500",
     warning: "bg-yellow-500",
     info: "bg-blue-500",

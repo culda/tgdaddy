@@ -5,23 +5,18 @@ import EditableInput from "../../../components/EditableInput";
 import { TpUpdateUsername } from "@/functions/channelUsername/handler";
 import { Fragment, useCallback, useRef, useState } from "react";
 import PriceInput from "../../../components/PriceInput";
+import { useRouter } from "next/navigation";
 import {
   TpPriceRequest,
   TpPriceResponse,
 } from "../../../api/stripe/price/route";
-import {
-  FaMoneyBill,
-  FaAddressBook,
-  FaSmile,
-  FaAtlas,
-  FaCopy,
-} from "react-icons/fa";
 import AddImage from "@/app/components/AddImage";
 import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
-import ChannelSection from "../ChannelSection";
+import ChannelSection from "./ChannelSection";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Button from "@/app/components/Button";
+import { FaCheckCircle, FaCopy } from "react-icons/fa";
 
 type PpChannel = {
   channel?: StChannel;
@@ -33,21 +28,51 @@ type TpImage = {
   fileType: string;
 };
 
-export default function Channel({ channel, newChannel }: PpChannel) {
+export default function Channel({ channel, newChannel = false }: PpChannel) {
   const snack = useSnackbar();
+  const router = useRouter();
   const [ch, setCh] = useState(channel);
   const session = useSession();
-
-  console.log(ch);
-
+  const [isLoading, setIsLoading] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const priceRef = useRef<HTMLFormElement>(null);
-
   const [image, setImage] = useState<TpImage | null>(null);
+
+  const checkTelegram = async () => {
+    setIsLoading(true);
+    const channelRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels?id=${ch?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data?.accessToken}`,
+        },
+      }
+    );
+
+    const { channelId } = (await channelRes.json()).data as StChannel;
+
+    setCh({ ...ch, channelId } as StChannel);
+    setIsLoading(false);
+  };
+
+  const copyTelegramCode = () => {
+    if (!ch?.telegramLinkCode) {
+      return;
+    }
+    navigator.clipboard.writeText(ch.telegramLinkCode);
+    snack({
+      key: "code-copied",
+      text: "Code copied",
+      variant: "success",
+    });
+  };
 
   const setUsername = useCallback(
     async (username: string) => {
+      setIsLoading(true);
       const pattern = /^[A-Za-z0-9\-\_]+$/;
 
       if (!pattern.test(username)) {
@@ -76,12 +101,14 @@ export default function Channel({ channel, newChannel }: PpChannel) {
         variant: "success",
       });
       setCh({ ...ch, username: username } as StChannel);
+      setIsLoading(false);
     },
     [session.data?.accessToken]
   );
 
   const setDescription = useCallback(
     async (description: string) => {
+      setIsLoading(true);
       if (description.length > 255) {
         throw new Error("Description cannot exceed 255 characters");
       }
@@ -104,12 +131,14 @@ export default function Channel({ channel, newChannel }: PpChannel) {
         variant: "success",
       });
       setCh({ ...ch, description: description } as StChannel);
+      setIsLoading(false);
     },
     [session.data?.accessToken]
   );
 
   const setPrice = useCallback(
     async (price: string, frequency: StPriceFrequency) => {
+      setIsLoading(true);
       const parsedPrice = parseFloat(price);
       const decimalCount = (price.split(".")[1] || "").length;
 
@@ -145,7 +174,7 @@ export default function Channel({ channel, newChannel }: PpChannel) {
           dismissable: false,
           variant: "error",
         });
-        window.location.href = "/app/plan";
+        router.push("/app/plan");
         return;
       }
 
@@ -168,6 +197,7 @@ export default function Channel({ channel, newChannel }: PpChannel) {
         variant: "success",
       });
       setCh({ ...ch, pricing } as StChannel);
+      setIsLoading(false);
     },
     [session.data?.accessToken]
   );
@@ -177,6 +207,8 @@ export default function Channel({ channel, newChannel }: PpChannel) {
       setImage({ fileBase64, fileType });
       return;
     }
+
+    setIsLoading(true);
 
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/setChannelImage`,
@@ -197,17 +229,17 @@ export default function Channel({ channel, newChannel }: PpChannel) {
     const { imagePath } = (await res.json()) as TpSetChannelImageResponse;
 
     setCh({ ...ch, imagePath } as StChannel);
+    setIsLoading(false);
   };
 
   const createChannel = async () => {
+    setIsLoading(true);
     const username = usernameRef.current?.value;
     const description = descriptionRef.current?.value;
     // @ts-expect-error
     const price = priceRef.current.input?.value;
     // @ts-expect-error
     const frequency = priceRef.current.select?.value;
-    // const image = imageRef.current?.files?.[0];
-    console.log(image);
 
     if (!username) {
       snack({
@@ -236,9 +268,7 @@ export default function Channel({ channel, newChannel }: PpChannel) {
       return;
     }
 
-    const pattern = /^[A-Za-z0-9\-\_]+$/;
-
-    if (!pattern.test(username)) {
+    if (!/^[A-Za-z0-9\-\_]+$/.test(username)) {
       snack({
         key: "username-invalid",
         text: "Username can only contain letters, numbers, and the following characters: - _",
@@ -286,48 +316,70 @@ export default function Channel({ channel, newChannel }: PpChannel) {
       return;
     }
 
-    // if (!image) {
-    //   snack({
-    //     key: "image-required",
-    //     text: "Please choose an image",
-    //     variant: "error",
-    //   });
-    //   return;
-    // }
+    if (!image) {
+      snack({
+        key: "image-required",
+        text: "Please choose an image",
+        variant: "error",
+      });
+      return;
+    }
 
-    const newChannelRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          id: ch?.id,
-          userId: session.data?.user?.id,
-          priceUsd: parsedPrice * 100,
-          frequency,
-          description,
-          username,
-        } as StChannel),
+    try {
+      const putRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.data?.accessToken}`,
+          },
+          body: JSON.stringify({
+            id: ch?.id,
+            userId: session.data?.user?.id,
+            pricing: [
+              {
+                frequency,
+                usd: parsedPrice * 100,
+              },
+            ],
+            fileBase64: image?.fileBase64,
+            fileType: image?.fileType,
+            telegramLinkCode: ch?.telegramLinkCode,
+            description,
+            username,
+          } as StChannel),
+        }
+      );
+
+      if (putRes.status === 200) {
+        snack({
+          key: "channel-create-success",
+          text: "Channel created",
+          variant: "success",
+        });
+        router.push(`/app/channels/${ch?.id}`);
+        setIsLoading(false);
+        return;
       }
-    );
 
-    console.log(newChannelRes);
+      if (putRes.status === 409) {
+        snack({
+          key: "channel-create-failure",
+          text: "Username already exists",
+          variant: "error",
+        });
+      } else {
+        snack({
+          key: "channel-create-failure",
+          text: "Something went wrong",
+          variant: "error",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  // const copyCode = () => {
-  //   if (!channel?.telegramLinkCode) {
-  //     return;
-  //   }
-  //   navigator.clipboard.writeText(channel?.telegramLinkCode);
-  //   snack({
-  //     key: "code-copied",
-  //     text: "Code copied",
-  //     variant: "success",
-  //   });
-  // };
 
   return (
     <div class="text-gray-600 body-font">
@@ -345,6 +397,14 @@ export default function Channel({ channel, newChannel }: PpChannel) {
               editMode={newChannel}
               defaultValue={ch?.username}
               onSave={newChannel ? undefined : setUsername}
+              pretext="onlychannels.com/"
+              onCopy={() =>
+                snack({
+                  key: "code-copied",
+                  text: "URL copied",
+                  variant: "success",
+                })
+              }
             />
           </div>
         </ChannelSection>
@@ -404,6 +464,48 @@ export default function Channel({ channel, newChannel }: PpChannel) {
           </div>
         </ChannelSection>
 
+        {!newChannel && (
+          <ChannelSection>
+            <div class="flex flex-col gap-2">
+              {!ch?.channelId && (
+                <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
+                  Connect Telegram
+                </h2>
+              )}
+              {ch?.channelId && (
+                <h2 class="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
+                  Telegram Connected{" "}
+                  <FaCheckCircle className="text-green-500" />
+                </h2>
+              )}
+              {!ch?.channelId && (
+                <Fragment>
+                  {" "}
+                  <p>
+                    Add{" "}
+                    <a href="https://t.me/tgdadybot" target="_blank">
+                      tgdaddybot
+                    </a>{" "}
+                    as an admin to your channel.
+                  </p>
+                  <p> Copy and paste the code below in your channel </p>
+                  <div className="relative text-black text-center text-sm whitespace-nowrap rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
+                    {channel?.telegramLinkCode}
+                    <div className="absolute right-4 inset-y-0 flex items-center">
+                      <button onClick={copyTelegramCode}>
+                        <FaCopy className="text-lg" />
+                      </button>
+                    </div>
+                  </div>
+                  <Button loading={isLoading} onClick={checkTelegram}>
+                    Check
+                  </Button>
+                </Fragment>
+              )}
+            </div>
+          </ChannelSection>
+        )}
+
         <ChannelSection isLastSection>
           <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
             Profile
@@ -422,38 +524,11 @@ export default function Channel({ channel, newChannel }: PpChannel) {
 
         {newChannel && (
           <Fragment>
-            {/* <ChannelSection>
-              <div class="flex flex-col gap-2">
-                <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
-                  Telegram
-                </h2>
-                <p>
-                  Add <b>tgdaddybot</b> as an admin to your channel. Create a
-                  new channel if you don't have one
-                </p>
-                <p className="text-black text-base text-left flex-1">
-                  <b>Note:</b> You only need to enable <i>Add Members</i>
-                </p>
-              </div>
-            </ChannelSection>
-
-            <ChannelSection isLastSection>
-              <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
-                Connection
-              </h2>
-              <p> Copy and paste the below code in your channel </p>
-              <div className="text-black text-base text-left flex-1">
-                <div className="relative text-black text-center text-sm whitespace-nowrap rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
-                  {channel?.telegramLinkCode}
-                  <div className="absolute right-4 inset-y-0 flex items-center">
-                    <button onClick={copyCode}>
-                      <FaCopy className="text-lg" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </ChannelSection> */}
-            <Button onClick={createChannel}>Submit</Button>
+            <div class="h-12 flex justify-center mx-auto">
+              <Button loading={isLoading} onClick={createChannel}>
+                Create channel
+              </Button>
+            </div>
           </Fragment>
         )}
       </div>

@@ -3,13 +3,15 @@ import { ChangeEventHandler, Fragment, useState } from "react";
 import Button from "./components/Button";
 import ConnectTelegram from "./components/ConnectTelegram";
 import AppButton from "./components/AppButton";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [username, setUsername] = useState("");
+  const router = useRouter();
 
-  const getStarted = () => {
-    window.location.href = `/app/channels/add`;
-    return;
+  const getStarted = (username?: string) => {
+    let us = username ?? "myusername";
+    router.push(`/app/channels/${us}/add`);
   };
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -60,11 +62,11 @@ export default function Home() {
                     value={username}
                     onChange={onChange}
                     name="hero-field"
-                    class="w-full  text-base outline-none rounded-md text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                    class="w-full text-base outline-none rounded-md text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                     placeholder="username"
                   />
                 </div>
-                <Button onClick={getStarted}>Get Started</Button>
+                <Button onClick={() => getStarted()}>Get Started</Button>
               </div>
 
               <p class="hidden sm:flex text-sm mt-2 text-gray-500 mb-8 w-full">

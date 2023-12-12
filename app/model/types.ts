@@ -10,8 +10,8 @@ export type StLinkChat = {
 
 export type StChannel = {
   id: string;
-  channelId: string;
-  userId: string;
+  channelId?: string;
+  userId?: string;
   imagePath?: string;
   telegramLinkCode?: string;
   title?: string;
@@ -28,7 +28,7 @@ export type StInviteLink = {
 };
 
 export type StChannelPrice = {
-  id: string;
+  stripePriceId?: string;
   usd: number; // Price in USD cents
   frequency: StPriceFrequency;
 };
@@ -37,11 +37,6 @@ export enum StPriceFrequency {
   Monthly = "monthly",
   Yearly = "yearly",
 }
-
-export type StUserAuth = Pick<
-  StUser,
-  "id" | "username" | "firstName" | "lastName"
->;
 
 export type StUser = {
   id: string;
@@ -74,3 +69,8 @@ export enum StPlan {
   Pro = "Pro",
   Business = "Business",
 }
+
+export type StTelegramLinkCodes = {
+  code: string;
+  channelId: string;
+};

@@ -12,7 +12,7 @@ import Button from "../components/Button";
 import { FaArrowRight, FaCheckCircle } from "react-icons/fa";
 import { useSnackbar } from "../components/SnackbarProvider";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type PpChannel = {
   channel?: StChannel;
@@ -21,7 +21,7 @@ type PpChannel = {
 };
 
 export default function Channel({ channel, sub, link }: PpChannel) {
-  const session = useSession();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const snack = useSnackbar();
 
@@ -56,7 +56,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     const { paymentLink } = (await joinRes.json()) as TpSubscribeResponse;
 
     setIsLoading(false);
-    window.location.href = paymentLink;
+    router.push(paymentLink);
   };
 
   const cancelMembership = async () => {
@@ -87,7 +87,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     }
 
     setIsLoading(false);
-    window.location.reload();
+    router.refresh();
   };
 
   return (
@@ -121,33 +121,35 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         <div class="container px-5 py-8 mx-auto">
           <div class="flex flex-wrap -m-4">
             {!sub &&
-              channel?.pricing?.map((p) => (
-                <div class="p-4 mx-auto max-w-md">
-                  <div class="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
-                    <span class="text-sm tracking-widest title-font mb-1 font-medium">
-                      {p.frequency === StPriceFrequency.Monthly && "Monthly"}
-                      {p.frequency === StPriceFrequency.Yearly && "Yearly"}
-                    </span>
-
-                    <header class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
-                      ${(p.usd / 100).toFixed(2)}
-                    </header>
-                    <p class="flex items-center text-gray-600 mb-2">
-                      <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
-                        <FaCheckCircle />
+              channel?.pricing
+                ?.filter((p) => p.stripePriceId)
+                .map((p) => (
+                  <div class="p-4 mx-auto max-w-md">
+                    <div class="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
+                      <span class="text-sm tracking-widest title-font mb-1 font-medium">
+                        {p.frequency === StPriceFrequency.Monthly && "Monthly"}
+                        {p.frequency === StPriceFrequency.Yearly && "Yearly"}
                       </span>
-                      Cancel anytime.
-                    </p>
 
-                    <Button
-                      loading={isLoading}
-                      onClick={() => joinChannel(p.id)}
-                    >
-                      Join Now
-                    </Button>
+                      <header class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
+                        ${(p.usd / 100).toFixed(2)}
+                      </header>
+                      <p class="flex items-center text-gray-600 mb-2">
+                        <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                          <FaCheckCircle />
+                        </span>
+                        Cancel anytime.
+                      </p>
+
+                      <Button
+                        loading={isLoading}
+                        onClick={() => joinChannel(p.stripePriceId as string)}
+                      >
+                        Join Now
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
           </div>
         </div>
       </section>

@@ -2,7 +2,7 @@
 import React from "react";
 import { StChannel } from "../model/types";
 import Button from "../components/Button";
-import ChannelSection from "./channels/ChannelSection";
+import ChannelSection from "./channels/[id]/ChannelSection";
 import { FaArrowRight } from "react-icons/fa";
 
 type PpChannels = {
@@ -22,7 +22,7 @@ export default function Channels({ channels }: PpChannels) {
               key={channel.id}
               href={`/app/channels/${channel.id.split("/")[0]}`}
             >
-              {channel.title}
+              {channel.username}
             </Button>
           ))}
         </div>

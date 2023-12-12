@@ -2,6 +2,7 @@
 import { StPlan, StUser } from "../../model/types";
 import { useState } from "react";
 import { TpPlanRequest } from "../../api/stripe/plan/route";
+import { useRouter } from "next/navigation";
 
 const plans = [
   {
@@ -32,6 +33,7 @@ type PpPlans = {
 
 export default function Plans({ user }: PpPlans) {
   const [us, setUs] = useState(user);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePlanChange = async (creatorPlan: StPlan) => {
@@ -47,7 +49,7 @@ export default function Plans({ user }: PpPlans) {
 
     const data = await res.json();
     if (data.url) {
-      window.location.href = data.url;
+      router.push(data.url);
       return;
     }
 

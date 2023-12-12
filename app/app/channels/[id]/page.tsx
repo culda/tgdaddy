@@ -32,7 +32,7 @@ export default async function Page({ params }: PpChannel) {
   }
 
   return (
-    <PageLayout title={channel?.title}>
+    <PageLayout title={channel?.username}>
       <Channel channel={channel} />
     </PageLayout>
   );

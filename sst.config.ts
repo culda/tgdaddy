@@ -17,6 +17,8 @@ export default {
         primaryIndex: { partitionKey: "id" },
       });
 
+      // Tables
+
       const channelsTable = new Table(stack, "Channels", {
         fields: {
           id: "string",
@@ -55,6 +57,25 @@ export default {
         }
       );
 
+      const telegramLinkCodesTable = new Table(stack, "TelegramLinkCodes", {
+        fields: {
+          code: "string",
+        },
+        primaryIndex: { partitionKey: "code" },
+      });
+
+      // Buckets
+
+      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {
+        cdk: {
+          bucket: {
+            publicReadAccess: true,
+          },
+        },
+      });
+
+      // Lambdas
+
       const stripeWebhookHandler = new Function(stack, "StripeWebhookHandler", {
         handler: "functions/stripeWebhook/handler.handler",
         bind: [usersTable],
@@ -81,7 +102,12 @@ export default {
 
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
-        bind: [chatsTable, channelsTable, uniqueChannelsTable],
+        bind: [
+          chatsTable,
+          channelsTable,
+          uniqueChannelsTable,
+          telegramLinkCodesTable,
+        ],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
@@ -96,7 +122,12 @@ export default {
 
       const channelsHandler = new Function(stack, "ChannelsHandler", {
         handler: "functions/channels/handler.handler",
-        bind: [channelsTable, uniqueChannelsTable],
+        bind: [
+          channelsTable,
+          uniqueChannelsTable,
+          telegramLinkCodesTable,
+          channelImagesBucket,
+        ],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
@@ -161,14 +192,6 @@ export default {
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
-        },
-      });
-
-      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {
-        cdk: {
-          bucket: {
-            publicReadAccess: true,
-          },
         },
       });
 

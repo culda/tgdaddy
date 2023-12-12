@@ -4,6 +4,7 @@ import {
   DynamoDBClient,
   TransactWriteItem,
   TransactWriteItemsCommand,
+  TransactWriteItemsCommandOutput,
 } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
@@ -47,7 +48,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
 async function ddbUpdateChannelUsername(
   req: TpUpdateUsername
-): Promise<StChannel | undefined> {
+): Promise<TransactWriteItemsCommandOutput> {
   const { id, newUsername, oldUsername } = req;
   const commands: TransactWriteItem[] = [];
 
@@ -74,18 +75,14 @@ async function ddbUpdateChannelUsername(
   commands.push({
     Put: {
       TableName: Table.UniqueChannels.tableName,
-      Item: marshall({ username: newUsername, channelId: id }),
+      Item: marshall({ username: newUsername, id }),
       ConditionExpression: "attribute_not_exists(username)",
     },
   });
 
-  const response = await dynamoDb.send(
+  return await dynamoDb.send(
     new TransactWriteItemsCommand({
       TransactItems: commands,
     })
   );
-
-  if (!response) {
-    return undefined;
-  }
 }

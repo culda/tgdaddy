@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { useSnackbar } from "./SnackbarProvider";
 
@@ -19,30 +19,30 @@ export default function AddImage({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const submitImage = async () => {
-    if (image) {
-      try {
-        setIsSubmitting(true);
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const buffer = reader.result as ArrayBuffer;
-          const base64 = Buffer.from(buffer).toString("base64");
-          await onSave(base64, image.type);
-          setIsSubmitting(false);
-          setImage(null); // Clear the selected image after saving
-
-          if (inputRef.current) {
-            inputRef.current.value = ""; // Reset the input element
-          }
-        };
-        reader.readAsArrayBuffer(image);
-      } catch (error) {
-        console.error(error);
+    if (!image) {
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const buffer = reader.result as ArrayBuffer;
+        const base64 = Buffer.from(buffer).toString("base64");
+        await onSave(base64, image.type);
         setIsSubmitting(false);
-      }
+        // setImage(null); // Clear the selected image after saving
+        // if (inputRef.current) {
+        //   inputRef.current.value = ""; // Reset the input element
+        // }
+      };
+      reader.readAsArrayBuffer(image);
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
     }
   };
 
-  const handleImageUpload: React.ChangeEventHandler<HTMLInputElement> = (
+  const handleImageUpload: React.ChangeEventHandler<HTMLInputElement> = async (
     event
   ) => {
     if (event.target.files && event.target.files[0]) {
@@ -57,13 +57,17 @@ export default function AddImage({
         });
         return;
       }
+
       setImage(file);
-      if (saveOnChange) {
-        console.log("submitting");
-        submitImage();
-      }
     }
   };
+
+  useEffect(() => {
+    if (saveOnChange) {
+      submitImage();
+    }
+  }, [saveOnChange, image]);
+
   const selectClass =
     "border border-zinc-300 text-black text-sm px-2 md:px-4 py-2.5 rounded-md shadow-sm focus:outline-none disabled:bg-neutral-100 appearance-none";
 
