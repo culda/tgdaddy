@@ -1,11 +1,6 @@
 "use client";
 import {
-  TpSubscribeRequest,
-  TpSubscribeResponse,
-} from "../api/stripe/subscribe/route";
-import {
   StChannel,
-  StChannelPrice,
   StConsumerSubscription,
   StPriceFrequency,
 } from "../model/types";
@@ -14,6 +9,12 @@ import { FaArrowRight, FaCheckCircle } from "react-icons/fa";
 import { useSnackbar } from "../components/SnackbarProvider";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import {
+  TpJoinChannelRequest,
+  TpJoinChannelResponse,
+} from "@/functions/joinChannel/handler";
+import { TpUnjoinChannelRequest } from "@/functions/unjoinChannel/handler";
 
 type PpChannel = {
   channel?: StChannel;
@@ -22,6 +23,7 @@ type PpChannel = {
 };
 
 export default function Channel({ channel, sub, link }: PpChannel) {
+  const session = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const snack = useSnackbar();
@@ -36,22 +38,27 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     }
   }, [snack, channel?.pricing]);
 
-  const joinChannel = async (price: StChannelPrice) => {
+  const joinChannel = async (priceId: string) => {
     setIsLoading(true);
+    const joinRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/joinChannel`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data?.accessToken}`,
+        },
+        body: JSON.stringify({
+          channelId: channel?.id,
+          priceId,
+          redirectUrl: window.location.href,
+        } as TpJoinChannelRequest),
+      }
+    );
 
-    const joinRes = await fetch("/api/stripe/subscribe", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        channelId: channel?.id,
-        price,
-        redirectUrl: window.location.href,
-      } as TpSubscribeRequest),
-    });
+    console.log("res", joinRes);
 
-    const { paymentLink } = (await joinRes.json()) as TpSubscribeResponse;
+    const { paymentLink } = (await joinRes.json()) as TpJoinChannelResponse;
 
     setIsLoading(false);
     router.push(paymentLink);
@@ -59,16 +66,19 @@ export default function Channel({ channel, sub, link }: PpChannel) {
 
   const cancelMembership = async () => {
     setIsLoading(true);
-    const res = await fetch("/api/stripe/cancel", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        creatorUserId: channel?.userId,
-        channelId: channel?.id,
-      }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/unjoinChannel`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          channelId: channel?.id,
+        } as TpUnjoinChannelRequest),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.data?.accessToken}`,
+        },
+      }
+    );
 
     if (res.status === 200) {
       snack({
@@ -139,7 +149,10 @@ export default function Channel({ channel, sub, link }: PpChannel) {
                       Cancel anytime.
                     </p>
 
-                    <Button loading={isLoading} onClick={() => joinChannel(p)}>
+                    <Button
+                      loading={isLoading}
+                      onClick={() => joinChannel(p.id)}
+                    >
                       Join Now
                     </Button>
                   </div>
