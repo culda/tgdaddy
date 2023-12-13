@@ -2,7 +2,7 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { Table } from "sst/node/table";
 import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { StPlan, StUser } from "../../app/model/types";
+import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
 import { ddbGetUserById, dynamoDb } from "../utils";
 import crypto from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
@@ -59,6 +59,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       creatorPlan: StPlan.Starter,
       platformLogin: req.platformLogin,
       photoUrl: req.photo_url,
+      creatorStripeAccountStatus: StConnectStatus.NotStarted,
     };
     await dynamoDb.send(
       new PutItemCommand({

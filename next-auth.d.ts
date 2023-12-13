@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
+import { StConnectStatus } from "./app/model/types";
 
 declare module "next-auth" {
   /**
@@ -17,6 +18,7 @@ declare module "next-auth" {
     username?: string;
     photoUrl?: string;
     platformLogin?: string;
+    creatorStripeAccountStatus: StConnectStatus;
   }
 }
 
@@ -28,6 +30,7 @@ declare module "next-auth/jwt" {
       lastName?: string;
       id?: string;
       username?: string;
+      creatorStripeAccountStatus: StConnectStatus;
     };
     sub?: string;
     token: string;

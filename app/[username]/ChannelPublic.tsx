@@ -51,8 +51,6 @@ export default function Channel({ channel, sub, link }: PpChannel) {
       } as TpSubscribeRequest),
     });
 
-    console.log("res", joinRes);
-
     const { paymentLink } = (await joinRes.json()) as TpSubscribeResponse;
 
     setIsLoading(false);

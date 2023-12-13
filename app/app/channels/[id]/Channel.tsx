@@ -14,7 +14,6 @@ import AddImage from "@/app/components/AddImage";
 import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
 import ChannelSection from "./ChannelSection";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import Button from "@/app/components/Button";
 import { FaCheckCircle, FaCopy } from "react-icons/fa";
 
@@ -38,6 +37,11 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const priceRef = useRef<HTMLFormElement>(null);
   const [image, setImage] = useState<TpImage | null>(null);
+
+  const enablePayments = async () => {
+    const currentUrl = window.location.href;
+    router.push(`/app/connect?redirectUrl=${encodeURIComponent(currentUrl)}`);
+  };
 
   const checkTelegram = async () => {
     setIsLoading(true);
@@ -233,7 +237,14 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   };
 
   const createChannel = async () => {
-    setIsLoading(true);
+    if (session.status !== "authenticated") {
+      snack({
+        key: "not-authenticated",
+        text: "You must be logged in to create a channel",
+        variant: "error",
+      });
+      return;
+    }
     const username = usernameRef.current?.value;
     const description = descriptionRef.current?.value;
     // @ts-expect-error
@@ -326,6 +337,8 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
     }
 
     try {
+      setIsLoading(true);
+
       const putRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
         {
@@ -359,11 +372,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           variant: "success",
         });
         router.push(`/app/channels/${ch?.id}`);
-        setIsLoading(false);
-        return;
-      }
-
-      if (putRes.status === 409) {
+      } else if (putRes.status === 409) {
         snack({
           key: "channel-create-failure",
           text: "Username already exists",
@@ -461,6 +470,14 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                 />
               </div>
             ))}
+            {!session?.data?.user.creatorStripeAccountStatus && (
+              <div class="flex gap-2">
+                <p>Connect your Stripe account to enable payments</p>
+                <Button onClick={enablePayments} variant="secondary">
+                  Enable
+                </Button>
+              </div>
+            )}
           </div>
         </ChannelSection>
 

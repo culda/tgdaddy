@@ -1,8 +1,9 @@
 import PageLayout from "@/app/components/PageLayout";
-import { StChannel } from "../../../model/types";
+import { StChannel, StUser } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import Channel from "./Channel";
 import { notFound } from "next/navigation";
+import Button from "@/app/components/Button";
 
 type PpChannel = {
   params: { id: string };
@@ -10,6 +11,17 @@ type PpChannel = {
 
 export default async function Page({ params }: PpChannel) {
   const session = await auth();
+
+  const fetchUser = async () => {
+    const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+        ContentType: "application/json",
+      },
+    });
+    const user = await userRes.json();
+    return user.data as StUser;
+  };
 
   const fetchChannel = async () => {
     const res = await fetch(
@@ -26,6 +38,7 @@ export default async function Page({ params }: PpChannel) {
   };
 
   const channel = await fetchChannel();
+  const user = await fetchUser();
 
   if (!channel) {
     return notFound();
@@ -33,6 +46,20 @@ export default async function Page({ params }: PpChannel) {
 
   return (
     <PageLayout title={channel?.username}>
+      {!user.creatorStripeAccountId && (
+        <div class="flex gap-2">
+          <p>Connect your Stripe account to enable payments</p>
+          <Button
+            href={`/app/connect?redirectUrl=${encodeURIComponent(
+              `/app/channels/${channel.id}`
+            )}`}
+            variant="secondary"
+          >
+            Enable
+          </Button>
+        </div>
+      )}
+
       <Channel channel={channel} />
     </PageLayout>
   );

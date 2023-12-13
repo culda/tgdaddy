@@ -16,7 +16,6 @@ export default function AddImage({
   const snack = useSnackbar();
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const submitImage = async () => {
     if (!image) {
@@ -30,10 +29,6 @@ export default function AddImage({
         const base64 = Buffer.from(buffer).toString("base64");
         await onSave(base64, image.type);
         setIsSubmitting(false);
-        // setImage(null); // Clear the selected image after saving
-        // if (inputRef.current) {
-        //   inputRef.current.value = ""; // Reset the input element
-        // }
       };
       reader.readAsArrayBuffer(image);
     } catch (error) {
@@ -79,7 +74,6 @@ export default function AddImage({
       <div className="flex flex-col gap-2 items-center w-full">
         <div className="relative w-full">
           <input
-            ref={inputRef}
             type="file"
             className={`${selectClass} w-full`}
             accept="image/*"

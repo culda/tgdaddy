@@ -10,13 +10,16 @@ export default function Home() {
   const router = useRouter();
 
   const getStarted = (username?: string) => {
-    let us = username ?? "myusername";
-    router.push(`/app/channels/${us}/add`);
+    let path = "/app/channels/add";
+    if (username) {
+      path += `?username=${username}`;
+    }
+    router.push(path);
   };
 
-  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    const value = e.target.value.trim(); // Remove leading and trailing spaces
-    const sanitizedValue = value.replace(/\s/g, ""); // Remove all remaining spaces
+  const handleUsernameChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    const value = e.target.value.trim();
+    const sanitizedValue = value.replace(/\s/g, "");
 
     setUsername(sanitizedValue);
   };
@@ -32,7 +35,9 @@ export default function Home() {
               alt="logo"
               src="/logo.webp"
             />
-            <span class="ml-3 text-xl">OnlyChannels</span>
+            <span class="ml-3 text-xl">
+              <b>Only</b>Channels
+            </span>
           </a>
 
           <div class="flex gap-2">
@@ -56,15 +61,15 @@ export default function Home() {
                   <span class="flex items-center pl-3 text-gray-700 font-bold rounded-md">
                     onlychannels.com/
                   </span>
-                  <input
-                    type="text"
-                    id="hero-field"
-                    value={username}
-                    onChange={onChange}
-                    name="hero-field"
-                    class="w-full text-base outline-none rounded-md text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                    placeholder="username"
-                  />
+                  <form>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={handleUsernameChange}
+                      class="w-full text-base outline-none rounded-md text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                      placeholder="username"
+                    />
+                  </form>
                 </div>
                 <Button onClick={() => getStarted()}>Get Started</Button>
               </div>

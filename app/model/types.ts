@@ -46,6 +46,7 @@ export type StUser = {
   lastName?: string;
   photoUrl?: string;
   creatorPlan: StPlan;
+  creatorStripeAccountStatus: StConnectStatus;
   creatorStripeSubscriptionId?: string;
   creatorStripeAccountId?: string;
   creatorStripeCustomerId?: string;
@@ -61,6 +62,7 @@ export type StConsumerSubscription = {
 export enum StConnectStatus {
   Connected = "connected",
   Pending = "pending",
+  NotStarted = "notStarted",
 }
 
 export enum StPlan {

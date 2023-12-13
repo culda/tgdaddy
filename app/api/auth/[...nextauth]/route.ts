@@ -41,7 +41,6 @@ export const config = {
       },
       authorize: async (credentials) => {
         if (!credentials) return Promise.reject("no credentials");
-        console.log("credentials", credentials);
         const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
           method: "POST",
           body: JSON.stringify({
@@ -66,6 +65,7 @@ export const config = {
           firstName: user.firstName,
           lastName: user.lastName,
           photoUrl: user.photoUrl,
+          creatorStripeAccountStatus: user.creatorStripeAccountStatus,
         };
       },
     }),

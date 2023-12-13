@@ -17,6 +17,14 @@ export default async function Page() {
     return user.data as StUser;
   };
 
+  if (!session?.accessToken) {
+    return (
+      <PageLayout title="Sign in">
+        <h2>Please login before accessing this page</h2>
+      </PageLayout>
+    );
+  }
+
   const user = await fetchUser();
 
   return (

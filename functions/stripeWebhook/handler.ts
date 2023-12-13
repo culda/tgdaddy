@@ -10,7 +10,11 @@ import { StPlan } from "@/app/model/types";
 
 export type CheckoutCompletedMetadata = {
   userId: string;
-  plan: StPlan;
+  creatorPlan: StPlan;
+};
+
+export type SubscriptionUpdatedMetadata = {
+  userId: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -65,7 +69,11 @@ async function handleSubscriptionDeleted(data: Stripe.Subscription) {
 }
 
 async function handleSubscriptionUpdated(data: Stripe.Subscription) {
-  const { userId } = data.metadata as CheckoutCompletedMetadata;
+  const { userId } = data.metadata as SubscriptionUpdatedMetadata;
+  if (!userId) {
+    console.log("No userId in metadata");
+    return;
+  }
   const input: UpdateItemCommandInput = {
     TableName: Table.Users.tableName,
     Key: {
@@ -79,6 +87,7 @@ async function handleSubscriptionUpdated(data: Stripe.Subscription) {
     ExpressionAttributeNames: {
       "#plan": "plan",
     },
+    ConditionExpression: "attribute_exists(creatorStripeSubscriptionId)",
     ReturnValues: "ALL_NEW",
   };
 
@@ -90,20 +99,17 @@ async function handleSubscriptionUpdated(data: Stripe.Subscription) {
 }
 
 async function handleCheckoutCompleted(data: Stripe.Checkout.Session) {
-  const { plan, userId } = data.metadata as CheckoutCompletedMetadata;
+  const { creatorPlan, userId } = data.metadata as CheckoutCompletedMetadata;
   const input: UpdateItemCommandInput = {
     TableName: Table.Users.tableName,
     Key: {
       id: { S: userId },
     },
-    UpdateExpression: `SET #plan = :plan, creatorStripeSubscriptionId = :creatorStripeSubscriptionId, creatorStripeCustomerId = :creatorStripeCustomerId`,
+    UpdateExpression: `SET creatorPlan = :creatorPlan, creatorStripeSubscriptionId = :creatorStripeSubscriptionId, creatorStripeCustomerId = :creatorStripeCustomerId`,
     ExpressionAttributeValues: {
-      ":plan": { S: plan as string },
+      ":creatorPlan": { S: creatorPlan as string },
       ":creatorStripeSubscriptionId": { S: data.subscription as string },
       ":creatorStripeCustomerId": { S: data.customer as string },
-    },
-    ExpressionAttributeNames: {
-      "#plan": "plan",
     },
     ReturnValues: "ALL_NEW",
   };

@@ -169,85 +169,85 @@ async function handleUpdate(u: TelegramUpdate) {
   // }
 }
 
-async function dbDeleteChat(id: number) {
-  await dynamoDb.send(
-    new DeleteItemCommand({
-      TableName: Table.Chats.tableName,
-      Key: marshall({ id }),
-    })
-  );
-}
+// async function dbDeleteChat(id: number) {
+//   await dynamoDb.send(
+//     new DeleteItemCommand({
+//       TableName: Table.Chats.tableName,
+//       Key: marshall({ id }),
+//     })
+//   );
+// }
 
-async function dbStartLinkChat(id: number) {
-  const chat: StLinkChat = {
-    id,
-    type: "link",
-  };
-  await dynamoDb.send(
-    new PutItemCommand({
-      TableName: Table.Chats.tableName,
-      Item: marshall(chat),
-    })
-  );
-}
+// async function dbStartLinkChat(id: number) {
+//   const chat: StLinkChat = {
+//     id,
+//     type: "link",
+//   };
+//   await dynamoDb.send(
+//     new PutItemCommand({
+//       TableName: Table.Chats.tableName,
+//       Item: marshall(chat),
+//     })
+//   );
+// }
 
-async function dbSetChannelInfo(
-  id: string,
-  channelId: string,
-  title: string | undefined
-) {
-  const username = title
-    ? encodeURIComponent(
-        title
-          .replace(/\s/g, "")
-          .replace(/[^\w-]/g, "")
-          .concat(channelId)
-      )
-    : channelId;
+// async function dbSetChannelInfo(
+//   id: string,
+//   channelId: string,
+//   title: string | undefined
+// ) {
+//   const username = title
+//     ? encodeURIComponent(
+//         title
+//           .replace(/\s/g, "")
+//           .replace(/[^\w-]/g, "")
+//           .concat(channelId)
+//       )
+//     : channelId;
 
-  const channel: StChannel = {
-    id: channelId,
-    userId: id,
-    title,
-    username,
-  };
+//   const channel: StChannel = {
+//     id: channelId,
+//     userId: id,
+//     title,
+//     username,
+//   };
 
-  await dynamoDb.send(
-    new TransactWriteItemsCommand({
-      TransactItems: [
-        {
-          Put: {
-            TableName: Table.UniqueChannels.tableName,
-            Item: marshall({ username, channelId }),
-            ConditionExpression: "attribute_not_exists(username)",
-          },
-        },
-        {
-          Put: {
-            TableName: Table.Channels.tableName,
-            Item: marshall(channel),
-          },
-        },
-      ],
-    })
-  );
-}
+//   await dynamoDb.send(
+//     new TransactWriteItemsCommand({
+//       TransactItems: [
+//         {
+//           Put: {
+//             TableName: Table.UniqueChannels.tableName,
+//             Item: marshall({ username, channelId }),
+//             ConditionExpression: "attribute_not_exists(username)",
+//           },
+//         },
+//         {
+//           Put: {
+//             TableName: Table.Channels.tableName,
+//             Item: marshall(channel),
+//           },
+//         },
+//       ],
+//     })
+//   );
+// }
 
-async function dbGetActiveChat(id: number): Promise<StChat | undefined> {
-  const { Item } = await dynamoDb.send(
-    new GetItemCommand({
-      TableName: Table.Chats.tableName,
-      Key: {
-        id: {
-          N: `${id}`,
-        },
-      },
-    })
-  );
+// async function dbGetActiveChat(id: number): Promise<StChat | undefined> {
+//   const { Item } = await dynamoDb.send(
+//     new GetItemCommand({
+//       TableName: Table.Chats.tableName,
+//       Key: {
+//         id: {
+//           N: `${id}`,
+//         },
+//       },
+//     })
+//   );
 
-  if (!Item) {
-    return undefined;
-  }
+//   if (!Item) {
+//     return undefined;
+//   }
 
-  return unmarshall(Item) as StChat;
-}
+//   return unmarshall(Item) as StChat;
+// }
