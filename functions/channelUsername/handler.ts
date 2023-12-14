@@ -9,6 +9,7 @@ import {
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
+import { ApiResponse } from "@/app/model/errors";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
@@ -24,26 +25,25 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   console.log(event);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
-    };
+    return ApiResponse({
+      status: 403,
+    });
   }
 
   if (!event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Request body is required" }),
-    };
+    return ApiResponse({
+      message: "Request body is required",
+      status: 400,
+    });
   }
 
   const req = JSON.parse(event.body) as TpUpdateUsername;
   const res = await ddbUpdateChannelUsername(req);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ data: res }),
-  };
+  return ApiResponse({
+    status: 200,
+    body: res,
+  });
 };
 
 async function ddbUpdateChannelUsername(

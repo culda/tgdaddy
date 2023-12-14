@@ -23,8 +23,7 @@ export default async function Page({ params }: PpChannel) {
         cache: "no-cache",
       }
     );
-    const channel = await res.json();
-    return channel.data as StChannel;
+    return (await res.json()) as StChannel;
   };
 
   const fetchSubscription = async (channelId: string) => {
@@ -39,12 +38,20 @@ export default async function Page({ params }: PpChannel) {
         channelId,
       } as TpGetSubscriptionRequest),
     });
-    const subscription = await res.json();
-    return subscription.data as StConsumerSubscription | undefined;
+
+    const data = await res.json();
+
+    if (
+      !res.ok ||
+      (Object.keys(data).length === 0 && data.constructor === Object)
+    ) {
+      return undefined;
+    }
+
+    return data as StConsumerSubscription;
   };
 
   const channel = await fetchChannel();
-  console.log(channel);
   const sub = await fetchSubscription(channel.id);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
   const link =

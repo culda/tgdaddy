@@ -6,6 +6,7 @@ import { ddbGetChannelById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { StChannelPrice, frequencyToInterval } from "@/app/model/types";
+import { ApiResponse } from "@/app/model/errors";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -24,17 +25,15 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 > = async (event) => {
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
-    };
+    return ApiResponse({
+      status: 403,
+    });
   }
 
   if (!event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Request body is required" }),
-    };
+    return ApiResponse({
+      status: 400,
+    });
   }
 
   const { priceId, channelId, redirectUrl } = JSON.parse(
@@ -50,17 +49,17 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   );
 
   if (!pricing) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Invalid price id" }),
-    };
+    return ApiResponse({
+      status: 400,
+      message: "Invalid price ID",
+    });
   }
 
   if (!creatorStripeAccountId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No Stripe account found" }),
-    };
+    return ApiResponse({
+      status: 400,
+      message: "Payments are not enabled",
+    });
   }
 
   // Create custoer ID for the user if first time  customer

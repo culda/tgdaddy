@@ -20,8 +20,7 @@ export default async function Page() {
       ContentType: "application/json",
     },
   });
-  const data = await res.json();
-  const channels: StChannel[] = data.data;
+  const channels: StChannel[] = await res.json();
 
   return (
     <PageLayout title="Channels">

@@ -19,8 +19,7 @@ export default async function Page({ params }: PpChannel) {
         ContentType: "application/json",
       },
     });
-    const user = await userRes.json();
-    return user.data as StUser;
+    return (await userRes.json()) as StUser;
   };
 
   const fetchChannel = async () => {
@@ -33,8 +32,7 @@ export default async function Page({ params }: PpChannel) {
         },
       }
     );
-    const channel = await res.json();
-    return channel.data as StChannel;
+    return (await res.json()) as StChannel;
   };
 
   const channel = await fetchChannel();

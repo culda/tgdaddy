@@ -13,8 +13,7 @@ export default async function Page() {
         ContentType: "application/json",
       },
     });
-    const user = await userRes.json();
-    return user.data as StUser;
+    return (await userRes.json()) as StUser;
   };
 
   if (!session?.accessToken) {

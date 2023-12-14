@@ -18,6 +18,8 @@ import { ddbGetChannelById } from "../utils";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { Bucket } from "sst/node/bucket";
+import { ApiResponse } from "@/app/model/errors";
+import { Api } from "sst/node/api";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 const s3 = new S3Client({ region: "us-east-1" });
@@ -64,10 +66,10 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       try {
         const res = await ddbPutChannel(req);
 
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ data: res }),
-        };
+        return ApiResponse({
+          status: 200,
+          body: res,
+        });
       } catch (error) {
         console.log(error);
         if (
@@ -79,67 +81,59 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
             if (reason.Code === "ConditionalCheckFailed") {
               // Here you can determine which condition failed based on the reason
               // The `reason.Message` property may contain more details
-              return {
-                statusCode: 409,
-                body: JSON.stringify({
-                  message: "Username already exists",
-                }),
-              };
+              return ApiResponse({
+                status: 409,
+                message: "Username already exists",
+              });
             }
           }
         }
-        return {
-          statusCode: 500,
-          body: JSON.stringify({
-            message: "Failed to execute TransactGetItemsCommandOutput",
-          }),
-        };
+        return ApiResponse({
+          status: 500,
+        });
       }
     }
     case "POST": {
       if (!event.body) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Request body is required" }),
-        };
+        return ApiResponse({
+          status: 400,
+        });
       }
 
       const req = JSON.parse(event.body) as Partial<StChannel>;
       const res = await ddbUpdateChannel(req.id as string, req);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data: res }),
-      };
+      return ApiResponse({
+        status: 200,
+        body: res,
+      });
     }
     case "GET": {
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
-        const data = await ddbGetChannelById(id);
-        if (userId !== data?.userId) {
-          return {
-            statusCode: 401,
-            body: JSON.stringify({ message: "Unauthorized" }),
-          };
+        const channel = await ddbGetChannelById(id);
+        if (userId !== channel?.userId) {
+          return ApiResponse({
+            status: 403,
+          });
         }
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ data }),
-        };
+        return ApiResponse({
+          status: 200,
+          body: channel,
+        });
       }
 
-      const data = await dbGetUserChannels(userId);
+      const channels = await dbGetUserChannels(userId);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data }),
-      };
+      return ApiResponse({
+        status: 200,
+        body: channels,
+      });
     }
     default:
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ message: "Method not allowed" }),
-      };
+      return ApiResponse({
+        status: 405,
+      });
   }
 };
 
@@ -246,7 +240,7 @@ async function ddbUpdateChannel(
         if (key === "pricing") {
           const pricingArray = value.map((item) => ({
             M: {
-              stripePriceId: { S: item.stripePriceId! },
+              id: { S: item.id! },
               usd: { N: item.usd.toString() },
               frequency: { S: item.frequency },
             },

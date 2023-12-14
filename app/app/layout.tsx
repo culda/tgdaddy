@@ -4,13 +4,11 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import SnackbarProvider from "../components/SnackbarProvider";
 import ConnectTelegram from "../components/ConnectTelegram";
-import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,9 +16,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <Fragment>
-      <header class="fixed z-50 top-0 right-0 text-gray-900 bg-white body-font">
-        <div class="container mx-auto justify-between flex flex-wrap p-5 flex-col md:flex-row items-center">
-          <ConnectTelegram platformLogin callbackUrl={pathname} />
+      <header class="fixed z-20 top-0 right-0 text-gray-900 bg-white body-font">
+        <div class="container mx-auto justify-between flex flex-wrap p-2 flex-col md:flex-row items-center">
+          <ConnectTelegram platformLogin />
         </div>
       </header>
       <body className={inter.className}>

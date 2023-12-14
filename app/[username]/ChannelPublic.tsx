@@ -56,9 +56,21 @@ export default function Channel({ channel, sub, link }: PpChannel) {
       }
     );
 
+    const data = await joinRes.json();
+
+    if (!joinRes.ok) {
+      snack({
+        key: "channel-join",
+        text: data.message,
+        variant: "error",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     console.log("res", joinRes);
 
-    const { paymentLink } = (await joinRes.json()) as TpJoinChannelResponse;
+    const { paymentLink } = data as TpJoinChannelResponse;
 
     setIsLoading(false);
     router.push(paymentLink);

@@ -4,6 +4,7 @@ import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StConsumerSubscription } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
+import { ApiResponse } from "@/app/model/errors";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
@@ -17,28 +18,26 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   console.log(event);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
-    };
+    return ApiResponse({
+      status: 403,
+    });
   }
 
   switch (event.requestContext.http.method) {
     case "POST": {
       if (!event.body) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Request body is required" }),
-        };
+        return ApiResponse({
+          status: 400,
+        });
       }
 
       const { channelId } = JSON.parse(event.body) as TpGetSubscriptionRequest;
       const data = await dbGetSubscription(userId, channelId);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data }),
-      };
+      return ApiResponse({
+        status: 200,
+        body: data,
+      });
     }
     default:
       return {

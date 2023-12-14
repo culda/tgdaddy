@@ -10,7 +10,7 @@ export default function PageLayout({
   children,
 }: PpPageLayout) {
   return (
-    <div className="flex flex-col py-12 max-w-md">
+    <div className="flex flex-col py-6 max-w-md">
       {title ? (
         <header className="w-full mb-6">
           <h2 class="text-sm title-font text-gray-500 tracking-widest">

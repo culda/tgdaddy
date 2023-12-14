@@ -6,23 +6,21 @@ import { TelegramAuthData } from "./telegramLogin/types";
 import Button from "./Button";
 import { useState } from "react";
 import { FaPowerOff } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 
 type PpConnectTelegram = {
-  callbackUrl?: string;
   platformLogin?: boolean;
 };
 
-export default function ConnectTelegram({
-  callbackUrl,
-  platformLogin,
-}: PpConnectTelegram) {
+export default function ConnectTelegram({ platformLogin }: PpConnectTelegram) {
   const { data, status } = useSession();
+  const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleAuthCallback = async (user: TelegramAuthData) => {
     signIn("credentials", {
       ...user,
-      callbackUrl,
+      callbackUrl: pathname,
       platformLogin,
     });
   };
@@ -30,7 +28,7 @@ export default function ConnectTelegram({
   const handleSignOut = async () => {
     setLoggingOut(true);
     await signOut({
-      callbackUrl: "/",
+      callbackUrl: pathname,
     });
     setLoggingOut(false);
   };

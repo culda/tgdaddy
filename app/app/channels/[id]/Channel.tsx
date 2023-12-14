@@ -6,19 +6,16 @@ import { TpUpdateUsername } from "@/functions/channelUsername/handler";
 import { Fragment, useCallback, useRef, useState } from "react";
 import PriceInput from "../../../components/PriceInput";
 import { useRouter } from "next/navigation";
-import {
-  TpPriceRequest,
-  TpPriceResponse,
-} from "../../../api/stripe/price/route";
 import AddImage from "@/app/components/AddImage";
 import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
 import ChannelSection from "./ChannelSection";
 import Button from "@/app/components/Button";
 import { FaCheckCircle, FaCopy } from "react-icons/fa";
+import { nanoid } from "nanoid";
 
 type PpChannel = {
-  channel?: StChannel;
+  channel?: Partial<StChannel>;
   newChannel?: boolean;
 };
 
@@ -359,6 +356,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             userId: session.data?.user?.id,
             pricing: [
               {
+                id: nanoid(),
                 frequency,
                 usd: parsedPrice * 100,
               },
@@ -477,14 +475,14 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                 />
               </div>
             ))}
-            {!session?.data?.user.creatorStripeAccountStatus && (
+            {/* {!session?.data?.user.creatorStripeAccountStatus && (
               <div class="flex gap-2">
                 <p>Connect your Stripe account to enable payments</p>
                 <Button onClick={enablePayments} variant="secondary">
                   Enable
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
         </ChannelSection>
 

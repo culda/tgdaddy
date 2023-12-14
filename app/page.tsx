@@ -42,7 +42,7 @@ export default function Home() {
 
           <div class="flex gap-2">
             <AppButton />
-            <ConnectTelegram platformLogin callbackUrl="/app" />
+            <ConnectTelegram platformLogin />
           </div>
         </div>
       </header>
