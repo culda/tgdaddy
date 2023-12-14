@@ -217,6 +217,8 @@ export default {
             identitySource: ["$request.header.admintoken"],
           },
         },
+        customDomain:
+          stack.stage === "production" ? "api.members.page" : undefined,
         defaults: {
           authorizer: "telegramAuth",
         },
