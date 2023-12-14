@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { ddbGetUserById } from "../utils";
+import { ddbGetChannelById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import {
@@ -18,7 +18,6 @@ const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
 export type TpUnjoinChannelRequest = {
   channelId: string;
-  creatorUserId: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
@@ -39,10 +38,16 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     };
   }
 
-  const { channelId, creatorUserId } = JSON.parse(
-    event.body
-  ) as TpUnjoinChannelRequest;
+  const { channelId } = JSON.parse(event.body) as TpUnjoinChannelRequest;
 
+  const channel = await ddbGetChannelById(channelId);
+  if (!channel) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Channel not found" }),
+    };
+  }
+  const creatorUserId = channel.userId;
   const creatorUser = await ddbGetUserById(creatorUserId);
   const subId = `${userId}/${channelId}`;
   const sub = await ddbGetSub(subId);
@@ -56,7 +61,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
   // kick user from channel
   try {
-    await telegram.api.kickChatMember(channelId, userId);
+    await telegram.api.kickChatMember(channel.channelId, userId);
   } catch (err) {
     console.log(err);
   }

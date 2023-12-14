@@ -1,3 +1,5 @@
+import Stripe from "stripe";
+
 export type StChat = {
   id: number;
   type: "link";
@@ -11,7 +13,7 @@ export type StLinkChat = {
 export type StChannel = {
   id: string;
   channelId?: string;
-  userId?: string;
+  userId: string;
   imagePath?: string;
   telegramLinkCode?: string;
   title?: string;
@@ -28,7 +30,7 @@ export type StInviteLink = {
 };
 
 export type StChannelPrice = {
-  stripePriceId?: string;
+  id: string;
   usd: number; // Price in USD cents
   frequency: StPriceFrequency;
 };
@@ -75,4 +77,15 @@ export enum StPlan {
 export type StTelegramLinkCodes = {
   code: string;
   channelId: string;
+};
+
+export const frequencyToInterval = (
+  frequency: StPriceFrequency
+): Stripe.PriceCreateParams.Recurring.Interval => {
+  switch (frequency) {
+    case StPriceFrequency.Monthly:
+      return "month";
+    case StPriceFrequency.Yearly:
+      return "year";
+  }
 };
