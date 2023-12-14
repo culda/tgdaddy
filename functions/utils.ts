@@ -51,7 +51,7 @@ export async function ddbGetChannelIdByUsername(
     return undefined;
   }
 
-  const data = unmarshall(Item) as { username: string; channelId: string };
+  const data = unmarshall(Item) as { username: string; id: string };
 
-  return data.channelId;
+  return data.id;
 }

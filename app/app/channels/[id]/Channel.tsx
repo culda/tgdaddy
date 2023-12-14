@@ -154,33 +154,40 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
         throw new Error("Price can only have up to 2 decimal places");
       }
 
-      const priceRes = await fetch("/api/stripe/price", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          channelUserId: ch?.userId,
-          channelId: ch?.id,
-          priceUsd: parsedPrice * 100,
+      const pricing = [
+        {
           frequency,
-          username: ch?.username,
-        } as TpPriceRequest),
-      });
+          usd: parsedPrice * 100,
+        },
+      ];
 
-      const { pricing, needsStripeConnect } =
-        (await priceRes.json()) as TpPriceResponse;
+      // const priceRes = await fetch("/api/stripe/price", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     channelUserId: ch?.userId,
+      //     channelId: ch?.id,
+      //     priceUsd: parsedPrice * 100,
+      //     frequency,
+      //     username: ch?.username,
+      //   } as TpPriceRequest),
+      // });
 
-      if (needsStripeConnect) {
-        snack({
-          key: "stripe-connect",
-          text: "You must connect to Stripe before setting a price",
-          dismissable: false,
-          variant: "error",
-        });
-        router.push("/app/plan");
-        return;
-      }
+      // const { pricing, needsStripeConnect } =
+      //   (await priceRes.json()) as TpPriceResponse;
+
+      // if (needsStripeConnect) {
+      //   snack({
+      //     key: "stripe-connect",
+      //     text: "You must connect to Stripe before setting a price",
+      //     dismissable: false,
+      //     variant: "error",
+      //   });
+      //   router.push("/app/plan");
+      //   return;
+      // }
 
       await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
         method: "POST",

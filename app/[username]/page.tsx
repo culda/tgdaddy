@@ -44,6 +44,7 @@ export default async function Page({ params }: PpChannel) {
   };
 
   const channel = await fetchChannel();
+  console.log(channel);
   const sub = await fetchSubscription(channel.id);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
   const link =

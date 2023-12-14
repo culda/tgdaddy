@@ -111,9 +111,8 @@ const PriceInput = forwardRef<HTMLFormElement, PpPriceInput>(
               value={membershipType}
               className={selectClass}
             >
-              <option value="Monthly">Monthly</option>
-              <option value="Daily">Daily</option>
-              <option value="Lifetime">Lifetime</option>
+              <option value={StPriceFrequency.Monthly}>Monthly</option>
+              <option value={StPriceFrequency.Yearly}>Yearly</option>
             </select>
           </div>
         </div>

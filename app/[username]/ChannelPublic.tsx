@@ -5,6 +5,7 @@ import {
 } from "../api/stripe/subscribe/route";
 import {
   StChannel,
+  StChannelPrice,
   StConsumerSubscription,
   StPriceFrequency,
 } from "../model/types";
@@ -35,7 +36,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     }
   }, [snack, channel?.pricing]);
 
-  const joinChannel = async (priceId: string) => {
+  const joinChannel = async (price: StChannelPrice) => {
     setIsLoading(true);
 
     const joinRes = await fetch("/api/stripe/subscribe", {
@@ -44,9 +45,8 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        creatorUserId: channel?.userId,
         channelId: channel?.id,
-        priceId,
+        price,
         redirectUrl: window.location.href,
       } as TpSubscribeRequest),
     });
@@ -88,6 +88,8 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     router.refresh();
   };
 
+  console.log(channel);
+
   return (
     <div>
       <section class="text-gray-600 body-font">
@@ -95,7 +97,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
           <img
             class="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded"
             alt="hero"
-            src="https://dummyimage.com/720x600"
+            src={channel?.imagePath}
           />
           <div class="text-center lg:w-2/3 w-full">
             <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
@@ -119,35 +121,30 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         <div class="container px-5 py-8 mx-auto">
           <div class="flex flex-wrap -m-4">
             {!sub &&
-              channel?.pricing
-                ?.filter((p) => p.stripePriceId)
-                .map((p) => (
-                  <div class="p-4 mx-auto max-w-md">
-                    <div class="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
-                      <span class="text-sm tracking-widest title-font mb-1 font-medium">
-                        {p.frequency === StPriceFrequency.Monthly && "Monthly"}
-                        {p.frequency === StPriceFrequency.Yearly && "Yearly"}
+              channel?.pricing?.map((p) => (
+                <div class="p-4 mx-auto max-w-md">
+                  <div class="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
+                    <span class="text-sm tracking-widest title-font mb-1 font-medium">
+                      {p.frequency === StPriceFrequency.Monthly && "Monthly"}
+                      {p.frequency === StPriceFrequency.Yearly && "Yearly"}
+                    </span>
+
+                    <header class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
+                      ${(p.usd / 100).toFixed(2)}
+                    </header>
+                    <p class="flex items-center text-gray-600 mb-2">
+                      <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                        <FaCheckCircle />
                       </span>
+                      Cancel anytime.
+                    </p>
 
-                      <header class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
-                        ${(p.usd / 100).toFixed(2)}
-                      </header>
-                      <p class="flex items-center text-gray-600 mb-2">
-                        <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
-                          <FaCheckCircle />
-                        </span>
-                        Cancel anytime.
-                      </p>
-
-                      <Button
-                        loading={isLoading}
-                        onClick={() => joinChannel(p.stripePriceId as string)}
-                      >
-                        Join Now
-                      </Button>
-                    </div>
+                    <Button loading={isLoading} onClick={() => joinChannel(p)}>
+                      Join Now
+                    </Button>
                   </div>
-                ))}
+                </div>
+              ))}
           </div>
         </div>
       </section>

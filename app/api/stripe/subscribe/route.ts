@@ -4,11 +4,11 @@ import {
   TpJoinChannelRequest,
   TpJoinChannelResponse,
 } from "@/functions/joinChannel/handler";
+import { StChannelPrice } from "@/app/model/types";
 
 export type TpSubscribeRequest = {
   redirectUrl: string;
-  creatorUserId: string;
-  priceId: string;
+  price: StChannelPrice;
   channelId: string;
 };
 
@@ -18,13 +18,12 @@ export type TpSubscribeResponse = {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const { channelId, creatorUserId, priceId, redirectUrl } =
+  const { channelId, price, redirectUrl } =
     (await req.json()) as TpSubscribeRequest;
   const joinRes = await fetch(`${process.env.API_ENDPOINT}/joinChannel`, {
     method: "POST",
     body: JSON.stringify({
-      creatorUserId,
-      priceId,
+      price,
       redirectUrl,
       channelId,
     } as TpJoinChannelRequest),
