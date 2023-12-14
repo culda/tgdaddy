@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "../stripe";
 import { StConnectStatus, StUser } from "@/app/model/types";
-import { auth } from "../../auth/[...nextauth]/route";
+import { auth } from "../../auth/[...nextauth]/auth";
 
 export type TpConnectStripeRequest = {
   redirectUrl: string;

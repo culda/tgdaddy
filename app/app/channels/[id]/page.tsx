@@ -1,6 +1,6 @@
 import PageLayout from "@/app/components/PageLayout";
 import { StChannel, StConnectStatus, StUser } from "../../../model/types";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/app/api/auth/[...nextauth]/auth";
 import Channel from "./Channel";
 import { notFound } from "next/navigation";
 import Button from "@/app/components/Button";

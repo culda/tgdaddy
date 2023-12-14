@@ -3,7 +3,6 @@ import React from "react";
 import { StChannel } from "@/app/model/types";
 import Channel from "../[id]/Channel";
 import { nanoid } from "nanoid";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
 
 type PpParams = {
   searchParams: { username: string };

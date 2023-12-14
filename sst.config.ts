@@ -4,7 +4,7 @@ import { NextjsSite, Function, Api, Table, Bucket } from "sst/constructs";
 export default {
   config(_input) {
     return {
-      name: "tgdaddy",
+      name: "memberspage",
       region: "us-east-1",
     };
   },

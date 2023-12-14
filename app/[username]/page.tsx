@@ -2,7 +2,7 @@ import { StChannel, StConsumerSubscription } from "../model/types";
 import ChannelPublic from "./ChannelPublic";
 import ConnectTelegram from "../components/ConnectTelegram";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
-import { auth } from "../api/auth/[...nextauth]/route";
+import { auth } from "../api/auth/[...nextauth]/auth";
 import { Telegram } from "puregram";
 import Button from "../components/Button";
 

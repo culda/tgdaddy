@@ -24,7 +24,7 @@ function initTelegramAuthLogin(options: TTelegramAuthLogin) {
  * @returns A React component that renders the Telegram login button.
  */
 export default function LoginButton(props: LoginButtonProps) {
-  const { data, status } = useSession();
+  const { status } = useSession();
   const hiddenDivRef = useRef<HTMLDivElement>(null);
   const scriptRef = useRef<HTMLScriptElement>();
 

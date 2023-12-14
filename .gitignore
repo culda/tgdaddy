@@ -2,6 +2,7 @@ node_modules
 .next
 .sst
 .env.local
-.env
+.env.*
 tsconfig.tsbuildinfo
 .yarn/cache
+.open-next/

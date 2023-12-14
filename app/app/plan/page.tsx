@@ -1,7 +1,7 @@
 import { StUser } from "../../model/types";
 import PageLayout from "../../components/PageLayout";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
 import Plans from "@/app/app/plan/Plans";
+import { auth } from "@/app/api/auth/[...nextauth]/auth";
 
 export default async function Page() {
   const session = await auth();
@@ -15,14 +15,6 @@ export default async function Page() {
     });
     return (await userRes.json()) as StUser;
   };
-
-  if (!session?.accessToken) {
-    return (
-      <PageLayout title="Sign in">
-        <h2>Please login before accessing this page</h2>
-      </PageLayout>
-    );
-  }
 
   const user = await fetchUser();
 
