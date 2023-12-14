@@ -13,10 +13,10 @@ export default function PageLayout({
     <div className="flex flex-col py-6 max-w-md">
       {title ? (
         <header className="w-full mb-6">
-          <h2 class="text-sm title-font text-gray-500 tracking-widest">
+          <h2 className="text-sm title-font text-gray-500 tracking-widest">
             {subtitle}
           </h2>
-          <h1 class="text-gray-900 text-3xl title-font font-bold mb-4">
+          <h1 className="text-gray-900 text-3xl title-font font-bold mb-4">
             {title}
           </h1>
         </header>

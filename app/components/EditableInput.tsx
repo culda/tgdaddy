@@ -119,9 +119,9 @@ const EditableInput = forwardRef<
               </div>
             )}
           </div>
-          // <div class="flex relative">
+          // <div className="flex relative">
           //   {pretext && (
-          //     <span class="flex items-center pl-3 text-gray-700 font-bold rounded-md">
+          //     <span className="flex items-center pl-3 text-gray-700 font-bold rounded-md">
           //       {pretext}
           //     </span>
           //   )}

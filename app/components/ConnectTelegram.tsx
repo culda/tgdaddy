@@ -45,7 +45,7 @@ export default function ConnectTelegram({ platformLogin }: PpConnectTelegram) {
       />
       {/* Conditionally display the user's profile image if authenticated */}
       {status === "authenticated" && data.user.photoUrl && (
-        <div class="flex flex-row gap-2">
+        <div className="flex flex-row gap-2">
           <Button variant={"text"} loading={loggingOut} onClick={handleSignOut}>
             <FaPowerOff />
           </Button>

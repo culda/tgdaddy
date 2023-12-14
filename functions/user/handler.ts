@@ -9,50 +9,47 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StUser } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { ddbGetUserById, dynamoDb } from "../utils";
+import { ApiResponse } from "@/app/model/errors";
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
   console.log(event);
-
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
-    };
+    return ApiResponse({
+      status: 403,
+    });
   }
 
   switch (event.requestContext.http.method) {
     case "POST": {
       if (!event.body) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Request body is required" }),
-        };
+        return ApiResponse({
+          status: 400,
+        });
       }
 
       const req = JSON.parse(event.body) as Partial<StUser>;
-      const res = await ddbUpdateUser(userId, req);
+      const user = await ddbUpdateUser(userId, req);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data: res }),
-      };
+      return ApiResponse({
+        status: 200,
+        body: user,
+      });
     }
     case "GET": {
-      const data = await ddbGetUserById(userId);
+      const user = await ddbGetUserById(userId);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ data }),
-      };
+      return ApiResponse({
+        status: 200,
+        body: user,
+      });
     }
     default:
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ message: "Method not allowed" }),
-      };
+      return ApiResponse({
+        status: 405,
+      });
   }
 };
 

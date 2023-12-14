@@ -1,11 +1,12 @@
-import {
-  APIGatewayProxyHandlerV2,
-  APIGatewayProxyHandlerV2WithLambdaAuthorizer,
-} from "aws-lambda";
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
 import { ddbGetChannelById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { StChannelPrice, frequencyToInterval } from "@/app/model/types";
+import {
+  StChannelPrice,
+  StConnectStatus,
+  frequencyToInterval,
+} from "@/app/model/types";
 import { ApiResponse } from "@/app/model/errors";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
@@ -23,6 +24,7 @@ export type TpJoinChannelResponse = {
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
+  console.log(event);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return ApiResponse({
@@ -42,7 +44,13 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
   const user = await ddbGetUserById(userId);
   const channel = await ddbGetChannelById(channelId);
-  const creatorUser = await ddbGetUserById(channel?.id as string);
+  if (!channel) {
+    return ApiResponse({
+      status: 400,
+      message: "Channel not found",
+    });
+  }
+  const creatorUser = await ddbGetUserById(channel.userId);
   const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
   const pricing: StChannelPrice | undefined = channel?.pricing?.find(
     (p) => p.id === priceId
@@ -55,7 +63,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     });
   }
 
-  if (!creatorStripeAccountId) {
+  if (creatorUser?.creatorStripeAccountStatus !== StConnectStatus.Connected) {
     return ApiResponse({
       status: 400,
       message: "Payments are not enabled",
@@ -78,13 +86,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
    * Find or create an appropriate Stripe price ID for the requested subscription
    */
   const products = await client.products.list(
-    {
-      ids: [channelId],
-    },
+    {},
     {
       stripeAccount: creatorStripeAccountId,
     }
   );
+  console.log(products);
   const product = products.data[0];
   const existingPrices = await client.prices.list(
     {
@@ -100,6 +107,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       p.recurring?.interval === frequencyToInterval(pricing.frequency)
   );
 
+  console.log("found price", price);
+
   if (!price) {
     // Create a new price if no matching price is found
     price = await client.prices.create(
@@ -113,15 +122,17 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         stripeAccount: creatorStripeAccountId,
       }
     );
+    console.log("new price", price);
   }
 
+  console.log("price id", price.id);
   /**
    * Create a Stripe Checkout session
    */
   const session = await client.checkout.sessions.create(
     {
       payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: price.id, quantity: 1 }],
       mode: "subscription",
       success_url: redirectUrl,
       cancel_url: redirectUrl,

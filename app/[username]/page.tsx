@@ -54,12 +54,20 @@ export default async function Page({ params }: PpChannel) {
   const channel = await fetchChannel();
   const sub = await fetchSubscription(channel.id);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
-  const link =
-    sub &&
-    (await telegram.api.createChatInviteLink({
-      chat_id: channel.id,
-      member_limit: 1,
-    }));
+
+  let link: string | undefined;
+
+  if (sub && channel.channelId) {
+    try {
+      const inviteLink = await telegram.api.createChatInviteLink({
+        chat_id: channel.channelId,
+        member_limit: 1,
+      });
+      link = inviteLink.invite_link;
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   const myChannel = channel.userId === session?.user?.id;
 
@@ -74,7 +82,7 @@ export default async function Page({ params }: PpChannel) {
         )}
         <ConnectTelegram />
       </div>
-      <ChannelPublic channel={channel} sub={sub} link={link?.invite_link} />
+      <ChannelPublic channel={channel} sub={sub} link={link} />
     </div>
   );
 }

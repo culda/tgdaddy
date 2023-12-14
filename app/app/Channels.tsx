@@ -11,7 +11,7 @@ type PpChannels = {
 
 export default function Channels({ channels }: PpChannels) {
   return (
-    <div class="mt-16">
+    <div className="mt-16">
       <ChannelSection isFirstSection>
         <div className="flex flex-col gap-2">
           {!channels && <h2>You don't have any channels yet. </h2>}
@@ -28,9 +28,9 @@ export default function Channels({ channels }: PpChannels) {
         </div>
       </ChannelSection>
       <ChannelSection isLastSection>
-        <div class="flex">
+        <div className="flex">
           <Button href={`/app/channels/add`}>
-            <div class="flex flex-row gap-2 items-center">
+            <div className="flex flex-row gap-2 items-center">
               New Channel
               <FaArrowRight />
             </div>

@@ -16,8 +16,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <Fragment>
-      <header class="fixed z-20 top-0 right-0 text-gray-900 bg-white body-font">
-        <div class="container mx-auto justify-between flex flex-wrap p-2 flex-col md:flex-row items-center">
+      <header className="fixed z-20 top-0 right-0 text-gray-900 bg-white body-font">
+        <div className="container mx-auto justify-between flex flex-wrap p-2 flex-col md:flex-row items-center">
           <ConnectTelegram platformLogin />
         </div>
       </header>

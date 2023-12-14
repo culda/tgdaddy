@@ -1,5 +1,9 @@
 import { StChannel, StUser } from "@/app/model/types";
-import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  QueryCommand,
+} from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 
@@ -37,21 +41,23 @@ export async function ddbGetChannelById(
   return unmarshall(Item) as StChannel;
 }
 
-export async function ddbGetChannelIdByUsername(
+export async function ddbGetChannelByUsername(
   username: string
-): Promise<string | undefined> {
-  const { Item } = await dynamoDb.send(
-    new GetItemCommand({
-      TableName: Table.UniqueChannels.tableName,
-      Key: marshall({ username }),
+): Promise<StChannel | undefined> {
+  const { Items } = await dynamoDb.send(
+    new QueryCommand({
+      TableName: Table.Channels.tableName,
+      IndexName: "UsernameIndex",
+      KeyConditionExpression: "username = :username",
+      ExpressionAttributeValues: marshall({ ":username": username }),
     })
   );
 
-  if (!Item) {
+  if (!Items) {
     return undefined;
   }
 
-  const data = unmarshall(Item) as { username: string; id: string };
+  const data = unmarshall(Items[0]) as StChannel;
 
-  return data.id;
+  return data;
 }

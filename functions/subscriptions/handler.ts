@@ -40,10 +40,9 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       });
     }
     default:
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ message: "Method not allowed" }),
-      };
+      return ApiResponse({
+        status: 405,
+      });
   }
 };
 

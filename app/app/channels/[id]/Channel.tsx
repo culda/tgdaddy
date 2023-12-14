@@ -396,16 +396,16 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   };
 
   return (
-    <div class="text-gray-600 body-font">
-      <div class="container pt-5 mx-auto flex flex-wrap">
+    <div className="text-gray-600 body-font">
+      <div className="container pt-5 mx-auto flex flex-wrap">
         <ChannelSection isFirstSection>
-          <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
+          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
             Username
           </h2>
-          <p class="leading-relaxed">
+          <p className="leading-relaxed">
             This is the public address of your channel.
           </p>
-          <div class="mt-6">
+          <div className="mt-6">
             <EditableInput
               ref={usernameRef}
               editMode={newChannel}
@@ -423,11 +423,13 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           </div>
         </ChannelSection>
         <ChannelSection>
-          <h2 class="font-medium title-font text-gray-900 mb-1 text-xl">
+          <h2 className="font-medium title-font text-gray-900 mb-1 text-xl">
             Description
           </h2>
-          <p class="leading-relaxed">Pitch your channel to your audience.</p>
-          <div class="mt-6">
+          <p className="leading-relaxed">
+            Pitch your channel to your audience.
+          </p>
+          <div className="mt-6">
             <EditableInput
               ref={descriptionRef}
               editMode={newChannel}
@@ -439,15 +441,15 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
         </ChannelSection>
 
         <ChannelSection>
-          <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
+          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
             Pricing
           </h2>
-          <p class="leading-relaxed">
+          <p className="leading-relaxed">
             You can update prices anytime. Current memberships are not affected
           </p>
           <div>
             {!ch?.pricing && (
-              <div class="mt-6">
+              <div className="mt-6">
                 <PriceInput
                   ref={priceRef}
                   editMode={newChannel}
@@ -462,7 +464,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               </div>
             )}
             {ch?.pricing?.map((p) => (
-              <div class="mt-6">
+              <div key={p.id} className="mt-6">
                 <PriceInput
                   ref={priceRef}
                   defaultPrice={(p.usd / 100).toFixed(2)}
@@ -475,27 +477,19 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                 />
               </div>
             ))}
-            {/* {!session?.data?.user.creatorStripeAccountStatus && (
-              <div class="flex gap-2">
-                <p>Connect your Stripe account to enable payments</p>
-                <Button onClick={enablePayments} variant="secondary">
-                  Enable
-                </Button>
-              </div>
-            )} */}
           </div>
         </ChannelSection>
 
         {!newChannel && (
           <ChannelSection>
-            <div class="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               {!ch?.channelId && (
-                <h2 class="font-bold title-font text-gray-900 mb-1 text-xl">
+                <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
                   Connect Telegram
                 </h2>
               )}
               {ch?.channelId && (
-                <h2 class="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
+                <h2 className="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
                   Telegram Connected{" "}
                   <FaCheckCircle className="text-green-500" />
                 </h2>
@@ -546,7 +540,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
         {newChannel && (
           <Fragment>
-            <div class="h-12 flex justify-center mx-auto">
+            <div className="h-12 flex justify-center mx-auto">
               <Button loading={isLoading} onClick={createChannel}>
                 Create channel
               </Button>

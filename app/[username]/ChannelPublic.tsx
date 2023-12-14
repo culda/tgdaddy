@@ -68,8 +68,6 @@ export default function Channel({ channel, sub, link }: PpChannel) {
       return;
     }
 
-    console.log("res", joinRes);
-
     const { paymentLink } = data as TpJoinChannelResponse;
 
     setIsLoading(false);
@@ -110,26 +108,24 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     router.refresh();
   };
 
-  console.log(channel);
-
   return (
     <div>
-      <section class="text-gray-600 body-font">
-        <div class="container mx-auto flex px-5 py-8 items-center justify-center flex-col">
+      <section className="text-gray-600 body-font">
+        <div className="container mx-auto flex px-5 py-8 items-center justify-center flex-col">
           <img
-            class="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded"
+            className="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded"
             alt="hero"
             src={channel?.imagePath}
           />
-          <div class="text-center lg:w-2/3 w-full">
-            <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
+          <div className="text-center lg:w-2/3 w-full">
+            <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
               {channel?.title}
             </h1>
-            <p class="mb-8 leading-relaxed">{channel?.description}</p>
+            <p className="mb-8 leading-relaxed">{channel?.description}</p>
             {sub && link && (
-              <div class="flex justify-center">
+              <div className="flex justify-center">
                 <Button href={link} target="_blank">
-                  <div class="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     Access {channel?.username}
                     <FaArrowRight />
                   </div>
@@ -139,23 +135,23 @@ export default function Channel({ channel, sub, link }: PpChannel) {
           </div>
         </div>
       </section>
-      <section class="text-gray-600 body-font overflow-hidden">
-        <div class="container px-5 py-8 mx-auto">
-          <div class="flex flex-wrap -m-4">
+      <section className="text-gray-600 body-font overflow-hidden">
+        <div className="container px-5 py-8 mx-auto">
+          <div className="flex flex-wrap -m-4">
             {!sub &&
               channel?.pricing?.map((p) => (
-                <div class="p-4 mx-auto max-w-md">
-                  <div class="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
-                    <span class="text-sm tracking-widest title-font mb-1 font-medium">
+                <div key={p.id} className="p-4 mx-auto max-w-md">
+                  <div className="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
+                    <span className="text-sm tracking-widest title-font mb-1 font-medium">
                       {p.frequency === StPriceFrequency.Monthly && "Monthly"}
                       {p.frequency === StPriceFrequency.Yearly && "Yearly"}
                     </span>
 
-                    <header class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
+                    <header className="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
                       ${(p.usd / 100).toFixed(2)}
                     </header>
-                    <p class="flex items-center text-gray-600 mb-2">
-                      <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                    <p className="flex items-center text-gray-600 mb-2">
+                      <span className="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
                         <FaCheckCircle />
                       </span>
                       Cancel anytime.
@@ -174,14 +170,20 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         </div>
       </section>
       {sub && (
-        <section class="text-gray-600 body-font">
-          <Button
-            loading={isLoading}
-            variant="text"
+        <section className="text-gray-400 text-sm px-16">
+          <p>
+            If you want to cancel your subscription, please reach out to us at{" "}
+            <a href="mailto:support@onlychannels.com" target="_blank">
+              support@onlychannels.com
+            </a>
+            . Please quote your membership ID {sub.consumerStripeSubscriptionId}
+            .
+          </p>
+          {/* <a
             onClick={() => cancelMembership()}
           >
             Cancel membership
-          </Button>
+          </a> */}
         </section>
       )}
     </div>
