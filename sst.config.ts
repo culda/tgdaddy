@@ -262,6 +262,7 @@ export default {
           NEXT_PUBLIC_API_ENDPOINT: api.url, // available on the client
           API_ENDPOINT: api.url, // available on the server
         },
+        customDomain: stack.stage === "production" ? "members.page" : undefined,
       });
 
       stack.addOutputs({
