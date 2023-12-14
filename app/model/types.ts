@@ -17,7 +17,7 @@ export type StChannel = {
   imagePath?: string;
   telegramLinkCode?: string;
   title?: string;
-  username?: string;
+  username: string;
   description?: string;
   pricing?: StChannelPrice[];
 };

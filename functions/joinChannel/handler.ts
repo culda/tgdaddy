@@ -5,6 +5,7 @@ import { AuthorizerContext } from "../telegramAuth/handler";
 import {
   StChannelPrice,
   StConnectStatus,
+  StPlan,
   frequencyToInterval,
 } from "@/app/model/types";
 import { ApiResponse } from "@/app/model/errors";
@@ -107,8 +108,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       p.recurring?.interval === frequencyToInterval(pricing.frequency)
   );
 
-  console.log("found price", price);
-
   if (!price) {
     // Create a new price if no matching price is found
     price = await client.prices.create(
@@ -122,10 +121,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         stripeAccount: creatorStripeAccountId,
       }
     );
-    console.log("new price", price);
   }
 
-  console.log("price id", price.id);
   /**
    * Create a Stripe Checkout session
    */
@@ -138,6 +135,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       cancel_url: redirectUrl,
       customer: customerId,
       subscription_data: {
+        application_fee_percent: getFeePercentage(creatorUser.creatorPlan),
         metadata: {
           userId,
           channelId,
@@ -160,3 +158,16 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     } as TpJoinChannelResponse),
   };
 };
+
+function getFeePercentage(plan: StPlan): number {
+  switch (plan) {
+    case StPlan.Starter:
+      return 18;
+    case StPlan.Growth:
+      return 8;
+    case StPlan.Pro:
+      return 5;
+    case StPlan.Business:
+      return 1;
+  }
+}

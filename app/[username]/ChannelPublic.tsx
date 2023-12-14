@@ -170,20 +170,15 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         </div>
       </section>
       {sub && (
-        <section className="text-gray-400 text-sm px-16">
+        <section className="text-gray-400 text-sm px-8">
           <p>
             If you want to cancel your subscription, please reach out to us at{" "}
             <a href="mailto:support@onlychannels.com" target="_blank">
               support@onlychannels.com
             </a>
-            . Please quote your membership ID {sub.consumerStripeSubscriptionId}
-            .
+            . Please quote your membership ID{" "}
+            <u>{sub.consumerStripeSubscriptionId}</u>.
           </p>
-          {/* <a
-            onClick={() => cancelMembership()}
-          >
-            Cancel membership
-          </a> */}
         </section>
       )}
     </div>

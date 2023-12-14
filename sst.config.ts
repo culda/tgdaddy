@@ -175,7 +175,7 @@ export default {
 
       const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
         handler: "functions/subscriptions/handler.handler",
-        bind: [consumerSubscriptionsTable],
+        bind: [consumerSubscriptionsTable, channelsTable],
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 

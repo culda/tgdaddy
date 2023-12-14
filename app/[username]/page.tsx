@@ -26,7 +26,7 @@ export default async function Page({ params }: PpChannel) {
     return (await res.json()) as StChannel;
   };
 
-  const fetchSubscription = async (channelId: string) => {
+  const fetchSubscription = async (username: string) => {
     const res = await fetch(`${process.env.API_ENDPOINT}/subscriptions`, {
       method: "POST",
       headers: {
@@ -35,7 +35,7 @@ export default async function Page({ params }: PpChannel) {
       },
       cache: "no-cache",
       body: JSON.stringify({
-        channelId,
+        username,
       } as TpGetSubscriptionRequest),
     });
 
@@ -52,7 +52,7 @@ export default async function Page({ params }: PpChannel) {
   };
 
   const channel = await fetchChannel();
-  const sub = await fetchSubscription(channel.id);
+  const sub = await fetchSubscription(channel.username as string);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
   let link: string | undefined;

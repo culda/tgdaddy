@@ -5,11 +5,12 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StConsumerSubscription } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { ApiResponse } from "@/app/model/errors";
+import { ddbGetChannelByUsername } from "../utils";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
 export type TpGetSubscriptionRequest = {
-  channelId: string;
+  username: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
@@ -31,12 +32,22 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         });
       }
 
-      const { channelId } = JSON.parse(event.body) as TpGetSubscriptionRequest;
-      const data = await dbGetSubscription(userId, channelId);
+      const { username } = JSON.parse(event.body) as TpGetSubscriptionRequest;
+      console.log(username);
+      const channel = await ddbGetChannelByUsername(username);
+      if (!channel) {
+        return ApiResponse({
+          status: 400,
+          message: "Channel not found",
+        });
+      }
+      console.log(channel);
+      const sub = await dbGetSubscription(userId, channel?.id as string);
+      console.log(sub);
 
       return ApiResponse({
         status: 200,
-        body: data,
+        body: sub,
       });
     }
     default:
