@@ -36,7 +36,7 @@ export default function ConnectTelegram({ platformLogin }: PpConnectTelegram) {
   return (
     <div className="flex items-center bg-gray-200 animate-pulse">
       <LoginButton
-        botUsername="tgdaddybot"
+        botUsername={process.env.NEXT_PUBLIC_BOT_USERNAME as string}
         onAuthCallback={handleAuthCallback}
         buttonSize="large"
         cornerRadius={5}

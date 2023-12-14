@@ -500,7 +500,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                   <p>
                     Add{" "}
                     <a href="https://t.me/tgdadybot" target="_blank">
-                      tgdaddybot
+                      process.env.NEXT_PUBLIC_BOT_USERNAME
                     </a>{" "}
                     as an admin to your channel.
                   </p>
