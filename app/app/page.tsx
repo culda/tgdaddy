@@ -12,6 +12,7 @@ export default async function Page() {
       ContentType: "application/json",
     },
   });
+
   const channels: StChannel[] = await res.json();
 
   return (

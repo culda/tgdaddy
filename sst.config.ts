@@ -210,7 +210,6 @@ export default {
           telegramAuth: {
             type: "lambda",
             function: telegramAuthHandler,
-            identitySource: ["$request.header.Cookie"],
           },
           admin: {
             type: "lambda",
@@ -219,7 +218,9 @@ export default {
           },
         },
         customDomain:
-          stack.stage === "production" ? "api.members.page" : undefined,
+          stack.stage === "production"
+            ? "api.members.page"
+            : "api-dev.members.page",
         defaults: {
           authorizer: "telegramAuth",
         },
