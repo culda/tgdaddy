@@ -4,6 +4,7 @@ import Button from "./components/Button";
 import ConnectTelegram from "./components/ConnectTelegram";
 import AppButton from "./components/AppButton";
 import { useRouter } from "next/navigation";
+import AccountWidget from "./components/AccountWidget";
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -27,23 +28,20 @@ export default function Home() {
   return (
     <Fragment>
       <header className="text-gray-900 bg-white body-font">
-        <div className="container mx-auto justify-between flex flex-wrap p-5 flex-col md:flex-row items-center">
-          <a className="flex title-font font-medium items-center mb-4 md:mb-0">
+        <div className="mx-auto justify-between flex flex-wrap p-5 items-center">
+          <a className="flex title-font font-medium items-center md:mb-0">
             <img
               loading="lazy"
-              className="aspect-[2.22] object-contain object-center w-[102px] overflow-hidden"
+              className="aspect-[1.22] object-contain object-center w-[64px] overflow-hidden"
               alt="logo"
               src="/logo.webp"
             />
             <span className="ml-3 text-xl">
-              <b>Only</b>Channels
+              <b>Members</b>Page
             </span>
           </a>
 
-          <div className="flex gap-2">
-            <AppButton />
-            <ConnectTelegram platformLogin />
-          </div>
+          <AccountWidget />
         </div>
       </header>
       <main>
@@ -59,14 +57,14 @@ export default function Home() {
               <div className="flex w-full md:justify-start justify-center items-end">
                 <div className="hidden sm:flex relative mr-4 rounded-md border border-indigo-500 ">
                   <span className="flex items-center pl-3 text-gray-700 font-bold rounded-md">
-                    onlychannels.com/
+                    members.page/
                   </span>
                   <form>
                     <input
                       type="text"
                       value={username}
                       onChange={handleUsernameChange}
-                      className="w-full text-base outline-none rounded-md text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                      className="w-full text-base outline-none rounded-md text-gray-700 py-1 pl-1 pr-2 leading-8 transition-colors duration-200 ease-in-out"
                       placeholder="username"
                     />
                   </form>

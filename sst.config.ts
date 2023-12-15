@@ -210,6 +210,7 @@ export default {
           telegramAuth: {
             type: "lambda",
             function: telegramAuthHandler,
+            identitySource: ["$request.header.Cookie"],
           },
           admin: {
             type: "lambda",
@@ -264,7 +265,8 @@ export default {
           NEXT_PUBLIC_API_ENDPOINT: api.url, // available on the client
           API_ENDPOINT: api.url, // available on the server
         },
-        customDomain: stack.stage === "production" ? "members.page" : undefined,
+        customDomain:
+          stack.stage === "production" ? "members.page" : "dev.members.page",
       });
 
       stack.addOutputs({

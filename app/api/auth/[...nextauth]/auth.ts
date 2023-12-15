@@ -4,7 +4,7 @@ import {
   NextApiResponse,
 } from "next";
 import { CookiesOptions, NextAuthOptions, getServerSession } from "next-auth";
-import { encode } from "next-auth/jwt";
+import { decode, encode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 
 const cookies: Partial<CookiesOptions> = {
@@ -17,6 +17,14 @@ const cookies: Partial<CookiesOptions> = {
       domain: process.env.NEXT_PUBLIC_DOMAIN,
       secure: true,
     },
+  },
+  callbackUrl: {
+    name: `next-auth.callback-url`,
+    options: {},
+  },
+  csrfToken: {
+    name: "next-auth.csrf-token",
+    options: {},
   },
 };
 
@@ -39,6 +47,7 @@ export const config = {
         hash: { label: "Hash", type: "text" },
       },
       authorize: async (credentials) => {
+        console.log("got credentials", credentials);
         if (!credentials) return Promise.reject("no credentials");
         const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
           method: "POST",
@@ -54,7 +63,7 @@ export const config = {
           }),
         });
 
-        const user = (await res.json()).data;
+        const user = await res.json();
         console.log("user", user);
 
         return {
@@ -64,7 +73,6 @@ export const config = {
           firstName: user.firstName,
           lastName: user.lastName,
           photoUrl: user.photoUrl,
-          creatorStripeAccountStatus: user.creatorStripeAccountStatus,
         };
       },
     }),
@@ -91,6 +99,24 @@ export const config = {
         token.user = user; // Attach user details to the JWT token
       }
       return token;
+    },
+  },
+  jwt: {
+    encode: async ({ token, secret }) => {
+      const encodedToken = await encode({
+        token,
+        secret: Buffer.from(secret),
+      });
+      return encodedToken;
+    },
+    decode: async ({ token, secret }) => {
+      console.log("decoding", token, secret);
+      const decodedToken = await decode({
+        token,
+        secret: Buffer.from(secret),
+      });
+      console.log("decoded", decodedToken);
+      return decodedToken;
     },
   },
 } satisfies NextAuthOptions;

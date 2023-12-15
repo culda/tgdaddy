@@ -5,6 +5,7 @@ import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
 import { auth } from "../api/auth/[...nextauth]/auth";
 import { Telegram } from "puregram";
 import Button from "../components/Button";
+import AccountWidget from "../components/AccountWidget";
 
 type PpChannel = {
   params: { username: string };
@@ -80,7 +81,7 @@ export default async function Page({ params }: PpChannel) {
             Manage{" "}
           </Button>
         )}
-        <ConnectTelegram />
+        <AccountWidget />
       </div>
       <ChannelPublic channel={channel} sub={sub} link={link} />
     </div>

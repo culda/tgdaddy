@@ -18,7 +18,6 @@ declare module "next-auth" {
     username?: string;
     photoUrl?: string;
     platformLogin?: string;
-    creatorStripeAccountStatus: StConnectStatus;
   }
 }
 
@@ -30,7 +29,6 @@ declare module "next-auth/jwt" {
       lastName?: string;
       id?: string;
       username?: string;
-      creatorStripeAccountStatus: StConnectStatus;
     };
     sub?: string;
     token: string;

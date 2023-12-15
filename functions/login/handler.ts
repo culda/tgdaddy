@@ -6,6 +6,7 @@ import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
 import { ddbGetUserById, dynamoDb } from "../utils";
 import crypto from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
+import { ApiResponse } from "@/app/model/errors";
 
 export type LoginRequest = TelegramAuthData & {
   platformLogin?: boolean;
@@ -13,10 +14,9 @@ export type LoginRequest = TelegramAuthData & {
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (!event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Request body is required" }),
-    };
+    return ApiResponse({
+      status: 400,
+    });
   }
 
   let user: StUser | undefined;
@@ -40,10 +40,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     .digest("hex");
 
   if (hmac !== req.hash) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Invalid hash" }),
-    };
+    return ApiResponse({
+      status: 401,
+    });
   }
 
   /**
@@ -69,8 +68,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     );
   }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ data: user }),
-  };
+  return ApiResponse({
+    status: 200,
+    body: user,
+  });
 };

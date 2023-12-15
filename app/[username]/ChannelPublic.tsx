@@ -173,8 +173,8 @@ export default function Channel({ channel, sub, link }: PpChannel) {
         <section className="text-gray-400 text-sm px-8">
           <p>
             If you want to cancel your subscription, please reach out to us at{" "}
-            <a href="mailto:support@onlychannels.com" target="_blank">
-              support@onlychannels.com
+            <a href="mailto:support@memberspage.com" target="_blank">
+              support@memberspage.com
             </a>
             . Please quote your membership ID{" "}
             <u>{sub.consumerStripeSubscriptionId}</u>.

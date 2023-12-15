@@ -3,12 +3,14 @@ import React, { Fragment, useState } from "react";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import SnackbarProvider from "../components/SnackbarProvider";
-import ConnectTelegram from "../components/ConnectTelegram";
+import { usePathname } from "next/navigation";
+import AccountWidget from "../components/AccountWidget";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,7 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <Fragment>
       <header className="fixed z-20 top-0 right-0 text-gray-900 bg-white body-font">
         <div className="container mx-auto justify-between flex flex-wrap p-2 flex-col md:flex-row items-center">
-          <ConnectTelegram platformLogin />
+          <AccountWidget platformLogin />
         </div>
       </header>
       <body className={inter.className}>

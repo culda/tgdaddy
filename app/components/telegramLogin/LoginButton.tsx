@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LoginButtonProps, TTelegramAuthLogin } from "./types";
 import { createScript } from "./createScript";
 import { useSession } from "next-auth/react";
@@ -25,6 +25,7 @@ function initTelegramAuthLogin(options: TTelegramAuthLogin) {
  */
 export default function LoginButton(props: LoginButtonProps) {
   const { status } = useSession();
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   const hiddenDivRef = useRef<HTMLDivElement>(null);
   const scriptRef = useRef<HTMLScriptElement>();
 
@@ -41,11 +42,30 @@ export default function LoginButton(props: LoginButtonProps) {
 
       // add the script element to the DOM
       hiddenDivRef.current?.after(scriptRef.current);
+
+      const handleIframeLoad = () => {
+        console.log("message");
+        setIframeLoaded(true);
+      };
+
+      window.addEventListener("message", handleIframeLoad);
+      return () => {
+        window.removeEventListener("message", handleIframeLoad);
+      };
     } else {
       // If the condition is false, remove the script element from the DOM
       scriptRef.current?.remove();
     }
   }, [props, status]);
 
-  return <div ref={hiddenDivRef} hidden />;
+  return (
+    <div className="relative">
+      {!iframeLoaded && status !== "authenticated" && (
+        <div className="absolute inset-0 bg-gray-300 animate-pulse" />
+      )}
+      <div ref={hiddenDivRef} className={`${iframeLoaded ? "hidden" : "w-48"}`}>
+        &nbsp;
+      </div>
+    </div>
+  );
 }

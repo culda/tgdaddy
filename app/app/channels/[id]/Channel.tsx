@@ -411,7 +411,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               editMode={newChannel}
               defaultValue={ch?.username}
               onSave={newChannel ? undefined : setUsername}
-              pretext="onlychannels.com/"
+              pretext="members.page/"
               onCopy={() =>
                 snack({
                   key: "code-copied",

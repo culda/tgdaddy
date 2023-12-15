@@ -1,15 +1,9 @@
 "use client";
 import Loader from "@/app/components/Loader";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-type PpParams = {
-  searchParams: { redirectUrl: string };
-};
-
-export default function Page({ searchParams }: PpParams) {
-  const session = useSession();
+export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
@@ -18,10 +12,6 @@ export default function Page({ searchParams }: PpParams) {
       headers: {
         ContentType: "application/json",
       },
-      // body: JSON.stringify({
-      //   userId: session?.data?.user.id,
-      //   redirectUrl: `${process.env.NEXT_PUBLIC_HOST}${searchParams.redirectUrl}`,
-      // }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -31,5 +21,9 @@ export default function Page({ searchParams }: PpParams) {
       });
   }, []);
 
-  return <Loader />;
+  return (
+    <div className="relative left-1/2 -translate-x-1/2 p-5 text-center">
+      <Loader />;
+    </div>
+  );
 }
