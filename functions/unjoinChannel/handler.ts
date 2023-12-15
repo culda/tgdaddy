@@ -60,11 +60,11 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   );
 
   // kick user from channel
-  try {
-    await telegram.api.kickChatMember(channel.channelId, userId);
-  } catch (err) {
-    console.log(err);
-  }
+  // try {
+  //   await telegram.api.kickChatMember(channel.channelId, userId);
+  // } catch (err) {
+  //   console.log(err);
+  // }
 
   return {
     statusCode: 200,
