@@ -6,8 +6,6 @@ export default withAuth({
     authorized: async ({ token, req }) => {
       const t = req.cookies.get("next-auth.session-token")?.value;
       // TODO: check if token is valid
-      console.log(t);
-      console.log("token", token);
       return !!t;
     },
   },

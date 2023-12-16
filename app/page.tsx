@@ -41,12 +41,17 @@ export default function Home() {
             </span>
           </a>
 
-          <AccountWidget />
+          <Button
+            href={`/login?platformLogin=true&callbackUrl=${encodeURIComponent(
+              "/app"
+            )}`}
+          >
+            Login
+          </Button>
         </div>
       </header>
       <main>
         {/* Enter channel name */}
-
         <section className="text-gray-600 body-font flex items-center justify-center">
           <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
             <div className=" lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">

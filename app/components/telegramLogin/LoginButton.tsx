@@ -30,32 +30,24 @@ export default function LoginButton(props: LoginButtonProps) {
   const scriptRef = useRef<HTMLScriptElement>();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      // destry the existing script element
-      scriptRef.current?.remove();
+    // init the global variable
+    initTelegramAuthLogin({ onAuthCallback: props.onAuthCallback });
 
-      // init the global variable
-      initTelegramAuthLogin({ onAuthCallback: props.onAuthCallback });
+    // create a new script element and save it
+    scriptRef.current = createScript(props);
 
-      // create a new script element and save it
-      scriptRef.current = createScript(props);
+    // add the script element to the DOM
+    hiddenDivRef.current?.after(scriptRef.current);
 
-      // add the script element to the DOM
-      hiddenDivRef.current?.after(scriptRef.current);
+    const handleIframeLoad = () => {
+      console.log("message");
+      setIframeLoaded(true);
+    };
 
-      const handleIframeLoad = () => {
-        console.log("message");
-        setIframeLoaded(true);
-      };
-
-      window.addEventListener("message", handleIframeLoad);
-      return () => {
-        window.removeEventListener("message", handleIframeLoad);
-      };
-    } else {
-      // If the condition is false, remove the script element from the DOM
-      scriptRef.current?.remove();
-    }
+    window.addEventListener("message", handleIframeLoad);
+    return () => {
+      window.removeEventListener("message", handleIframeLoad);
+    };
   }, [props, status]);
 
   return (

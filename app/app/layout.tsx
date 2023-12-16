@@ -3,14 +3,12 @@ import React, { Fragment, useState } from "react";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import SnackbarProvider from "../components/SnackbarProvider";
-import { usePathname } from "next/navigation";
 import AccountWidget from "../components/AccountWidget";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

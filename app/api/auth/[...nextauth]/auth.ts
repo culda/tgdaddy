@@ -110,12 +110,10 @@ export const config = {
       return encodedToken;
     },
     decode: async ({ token, secret }) => {
-      console.log("decoding", token, secret);
       const decodedToken = await decode({
         token,
         secret: Buffer.from(secret),
       });
-      console.log("decoded", decodedToken);
       return decodedToken;
     },
   },

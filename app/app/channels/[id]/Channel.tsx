@@ -35,11 +35,6 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   const priceRef = useRef<HTMLFormElement>(null);
   const [image, setImage] = useState<TpImage | null>(null);
 
-  const enablePayments = async () => {
-    const currentUrl = window.location.href;
-    router.push(`/app/connect?redirectUrl=${encodeURIComponent(currentUrl)}`);
-  };
-
   const checkTelegram = async () => {
     setIsLoading(true);
     const channelRes = await fetch(
@@ -53,7 +48,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
       }
     );
 
-    const { channelId } = (await channelRes.json()).data as StChannel;
+    const { channelId } = (await channelRes.json()) as StChannel;
 
     setCh({ ...ch, channelId } as StChannel);
     setIsLoading(false);
@@ -157,34 +152,6 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           usd: parsedPrice * 100,
         },
       ];
-
-      // const priceRes = await fetch("/api/stripe/price", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     channelUserId: ch?.userId,
-      //     channelId: ch?.id,
-      //     priceUsd: parsedPrice * 100,
-      //     frequency,
-      //     username: ch?.username,
-      //   } as TpPriceRequest),
-      // });
-
-      // const { pricing, needsStripeConnect } =
-      //   (await priceRes.json()) as TpPriceResponse;
-
-      // if (needsStripeConnect) {
-      //   snack({
-      //     key: "stripe-connect",
-      //     text: "You must connect to Stripe before setting a price",
-      //     dismissable: false,
-      //     variant: "error",
-      //   });
-      //   router.push("/app/plan");
-      //   return;
-      // }
 
       await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
         method: "POST",
@@ -500,12 +467,12 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                   <p>
                     Add{" "}
                     <a href="https://t.me/tgdadybot" target="_blank">
-                      process.env.NEXT_PUBLIC_BOT_USERNAME
+                      {process.env.NEXT_PUBLIC_BOT_USERNAME}
                     </a>{" "}
                     as an admin to your channel.
                   </p>
                   <p> Copy and paste the code below in your channel </p>
-                  <div className="relative text-black text-center text-sm whitespace-nowrap rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
+                  <div className="relative text-black text-center text-sm rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
                     {channel?.telegramLinkCode}
                     <div className="absolute right-4 inset-y-0 flex items-center">
                       <button onClick={copyTelegramCode}>
