@@ -1,4 +1,4 @@
-import Link, { LinkProps as NextLinkProps } from "next/link";
+import Link from "next/link";
 import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 
 const variantStyles = {

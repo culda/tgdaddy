@@ -99,8 +99,6 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      console.log(update);
-
       return NextResponse.json({
         success: true,
         message: "Subscription updated successfully",

@@ -1,6 +1,5 @@
 import { StChannel, StConsumerSubscription } from "../model/types";
 import ChannelPublic from "./ChannelPublic";
-import ConnectTelegram from "../components/ConnectTelegram";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
 import { auth } from "../api/auth/[...nextauth]/auth";
 import { Telegram } from "puregram";
@@ -74,7 +73,7 @@ export default async function Page({ params }: PpChannel) {
 
   return (
     <div className="relative">
-      <div className="absolute top-0 right-0 pt-4 pr-4 flex flex-row gap-2">
+      <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
         {myChannel && (
           <Button variant="secondary" href={`/app/channels/${channel.id}`}>
             {" "}

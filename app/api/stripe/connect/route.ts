@@ -26,8 +26,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const user = await fetchUser();
-    console.log("user", user);
-    // const {redirectUrl} = (await req.json()) as TpConnectStripeRequest;
 
     let accountId;
     if (!user.creatorStripeAccountId) {
@@ -47,9 +45,6 @@ export async function POST(req: NextRequest) {
       accountId = user.creatorStripeAccountId;
     }
 
-    console.log(accountId);
-
-    // const redirectUrl = `${process.env.NEXT_PUBLIC_HOST}/app/channels`;
     const accountLink = await client.accountLinks.create({
       account: accountId,
       refresh_url: `${process.env.NEXT_PUBLIC_HOST}/api/stripe/connect`,

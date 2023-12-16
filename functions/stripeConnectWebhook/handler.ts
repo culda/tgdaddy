@@ -1,6 +1,5 @@
 import {
   DeleteItemCommand,
-  PutItemCommand,
   ScanCommand,
   ScanCommandInput,
   TransactWriteItemsCommand,
@@ -10,9 +9,10 @@ import {
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { Stripe } from "stripe";
 import { Table } from "sst/node/table";
-import { dynamoDb } from "../utils";
 import { StConnectStatus, StConsumerSubscription } from "@/app/model/types";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { ApiResponse } from "@/app/model/errors";
+import { dynamoDb } from "../utils";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -27,24 +27,24 @@ export type SubscriptionDeletedMetadata = {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
   const sig = event.headers?.["stripe-signature"];
   const verify = Stripe.webhooks.constructEvent(
     Buffer.from(event.body ?? ""),
     Buffer.from(sig ?? ""),
     process.env.STRIPE_CONNECT_WEBHOOK_SECRET as string
   );
+  console.log(verify);
   switch (verify.type) {
     case "account.external_account.created": {
-      handleAccountCreated(verify);
+      await handleAccountCreated(verify);
       break;
     }
     case "checkout.session.completed": {
-      handleCheckoutCompleted(verify);
+      await handleCheckoutCompleted(verify);
       break;
     }
     case "customer.subscription.deleted": {
-      handleSubscriptionDeleted(verify.data.object);
+      await handleSubscriptionDeleted(verify.data.object);
       break;
     }
   }

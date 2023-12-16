@@ -23,7 +23,7 @@ export default function Page() {
 
   return (
     <div className="relative left-1/2 -translate-x-1/2 p-5 text-center">
-      <Loader />;
+      <Loader />
     </div>
   );
 }
