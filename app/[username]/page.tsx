@@ -72,7 +72,7 @@ export default async function Page({ params }: PpChannel) {
   const myChannel = channel.userId === session?.user?.id;
 
   return (
-    <div className="relative">
+    <div className="relative max-w-md">
       <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
         {myChannel && (
           <Button variant="secondary" href={`/app/channels/${channel.id}`}>

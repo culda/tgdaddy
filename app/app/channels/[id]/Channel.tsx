@@ -31,6 +31,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const priceRef = useRef<HTMLFormElement>(null);
   const [image, setImage] = useState<TpImage | null>(null);
@@ -97,6 +98,36 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
         variant: "success",
       });
       setCh({ ...ch, username: username } as StChannel);
+      setIsLoading(false);
+    },
+    [session.data?.accessToken]
+  );
+
+  const setTitle = useCallback(
+    async (title: string) => {
+      setIsLoading(true);
+      if (title.length > 255) {
+        throw new Error("Title cannot exceed 255 characters");
+      }
+
+      await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.data?.accessToken}`,
+        },
+        body: JSON.stringify({
+          id: ch?.id,
+          title,
+        }),
+      });
+
+      snack({
+        key: "description-updated",
+        text: "Description updated",
+        variant: "success",
+      });
+      setCh({ ...ch, title } as StChannel);
       setIsLoading(false);
     },
     [session.data?.accessToken]
@@ -217,6 +248,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
       return;
     }
     const username = usernameRef.current?.value;
+    const title = titleRef.current?.value;
     const description = descriptionRef.current?.value;
     // @ts-expect-error
     const price = priceRef.current.input?.value;
@@ -332,6 +364,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             fileType: image?.fileType,
             telegramLinkCode: ch?.telegramLinkCode,
             description,
+            title,
             username,
           } as StChannel),
         }
@@ -378,6 +411,27 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               editMode={newChannel}
               defaultValue={ch?.username}
               onSave={newChannel ? undefined : setUsername}
+              pretext="members.page/"
+              onCopy={() =>
+                snack({
+                  key: "code-copied",
+                  text: "URL copied",
+                  variant: "success",
+                })
+              }
+            />
+          </div>
+        </ChannelSection>
+        <ChannelSection>
+          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
+            Title
+          </h2>
+          <div className="mt-6">
+            <EditableInput
+              ref={titleRef}
+              editMode={newChannel}
+              defaultValue={ch?.title}
+              onSave={newChannel ? undefined : setTitle}
               pretext="members.page/"
               onCopy={() =>
                 snack({
@@ -467,7 +521,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
                   <p>
                     Add{" "}
                     <a href="https://t.me/tgdadybot" target="_blank">
-                      {process.env.NEXT_PUBLIC_BOT_USERNAME}
+                      <b>{process.env.NEXT_PUBLIC_BOT_USERNAME}</b>
                     </a>{" "}
                     as an admin to your channel.
                   </p>

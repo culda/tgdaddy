@@ -73,41 +73,6 @@ export default function Channel({ channel, sub, link }: PpChannel) {
     setIsLoading(false);
     router.push(paymentLink);
   };
-
-  const cancelMembership = async () => {
-    setIsLoading(true);
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/unjoinChannel`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          channelId: channel?.id,
-        } as TpUnjoinChannelRequest),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.data?.accessToken}`,
-        },
-      }
-    );
-
-    if (res.status === 200) {
-      snack({
-        key: "channel-cancel",
-        text: "Canceled",
-        variant: "success",
-      });
-    } else {
-      snack({
-        key: "channel-cancel",
-        text: "Failed",
-        variant: "error",
-      });
-    }
-
-    setIsLoading(false);
-    router.refresh();
-  };
-
   return (
     <div>
       <section className="text-gray-600 body-font">
