@@ -11,7 +11,6 @@ import { Stripe } from "stripe";
 import { Table } from "sst/node/table";
 import { StConnectStatus, StConsumerSubscription } from "@/app/model/types";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { ApiResponse } from "@/app/model/errors";
 import { dynamoDb } from "../utils";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
@@ -108,18 +107,6 @@ async function handleAccountCreated(
   data: Stripe.AccountExternalAccountCreatedEvent
 ) {
   await ddbConnectAccount(data.account as string);
-  await createProduct(data.account as string);
-}
-
-async function createProduct(accountId: string) {
-  await client.products.create(
-    {
-      name: "Channel Subscription",
-    },
-    {
-      stripeAccount: accountId,
-    }
-  );
 }
 
 async function ddbConnectAccount(accountId: string) {

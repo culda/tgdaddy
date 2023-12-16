@@ -84,16 +84,32 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   }
 
   /**
-   * Find or create an appropriate Stripe price ID for the requested subscription
+   * Find or create an appropriate product
    */
+  let product;
   const products = await client.products.list(
     {},
     {
       stripeAccount: creatorStripeAccountId,
     }
   );
-  console.log(products);
-  const product = products.data[0];
+
+  if (products.data.length === 0) {
+    product = await client.products.create(
+      {
+        name: channel.username,
+      },
+      {
+        stripeAccount: creatorStripeAccountId,
+      }
+    );
+  } else {
+    product = products.data[0];
+  }
+
+  /**
+   * Find or create an appropriate price
+   */
   const existingPrices = await client.prices.list(
     {
       product: product.id,
