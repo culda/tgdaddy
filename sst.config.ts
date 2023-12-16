@@ -10,13 +10,6 @@ export default {
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
-      const chatsTable = new Table(stack, "Chats", {
-        fields: {
-          id: "number",
-        },
-        primaryIndex: { partitionKey: "id" },
-      });
-
       // Tables
 
       const channelsTable = new Table(stack, "Channels", {
@@ -79,7 +72,6 @@ export default {
       const stripeWebhookHandler = new Function(stack, "StripeWebhookHandler", {
         handler: "functions/stripeWebhook/handler.handler",
         bind: [usersTable],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         environment: {
           STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
         },
@@ -91,7 +83,6 @@ export default {
         {
           handler: "functions/stripeConnectWebhook/handler.handler",
           bind: [usersTable, consumerSubscriptionsTable],
-          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
           environment: {
             STRIPE_CONNECT_WEBHOOK_SECRET: process.env
               .STRIPE_CONNECT_WEBHOOK_SECRET as string,
@@ -102,13 +93,7 @@ export default {
 
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
-        bind: [
-          chatsTable,
-          channelsTable,
-          uniqueChannelsTable,
-          telegramLinkCodesTable,
-        ],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        bind: [channelsTable, uniqueChannelsTable, telegramLinkCodesTable],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
@@ -117,7 +102,6 @@ export default {
       const channelHandler = new Function(stack, "ChannelHandler", {
         handler: "functions/channel/handler.handler",
         bind: [channelsTable, uniqueChannelsTable],
-        permissions: ["dynamodb:GetItem"],
       });
 
       const channelsHandler = new Function(stack, "ChannelsHandler", {
@@ -128,7 +112,6 @@ export default {
           telegramLinkCodesTable,
           channelImagesBucket,
         ],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
       const channelUsernameHandler = new Function(
@@ -137,14 +120,12 @@ export default {
         {
           handler: "functions/channelUsername/handler.handler",
           bind: [channelsTable, uniqueChannelsTable],
-          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         }
       );
 
       const joinChannelHandler = new Function(stack, "JoinChannelHandler", {
         handler: "functions/joinChannel/handler.handler",
         bind: [channelsTable, usersTable],
-        permissions: ["dynamodb:GetItem"],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
@@ -153,7 +134,6 @@ export default {
       const unjoinChannelHandler = new Function(stack, "UnjoinChannelHandler", {
         handler: "functions/unjoinChannel/handler.handler",
         bind: [consumerSubscriptionsTable, usersTable],
-        permissions: ["dynamodb:GetItem", "dynamodb:PutItem"],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
@@ -176,7 +156,6 @@ export default {
       const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
         handler: "functions/subscriptions/handler.handler",
         bind: [consumerSubscriptionsTable, channelsTable],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
       const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
@@ -189,7 +168,6 @@ export default {
       const loginHandler = new Function(stack, "LoginHandler", {
         handler: "functions/login/handler.handler",
         bind: [usersTable],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
@@ -201,7 +179,6 @@ export default {
         {
           handler: "functions/setChannelImage/handler.handler",
           bind: [channelsTable, channelImagesBucket],
-          permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
         }
       );
 

@@ -40,7 +40,6 @@ export default function LoginButton(props: LoginButtonProps) {
     hiddenDivRef.current?.after(scriptRef.current);
 
     const handleIframeLoad = () => {
-      console.log("message");
       setIframeLoaded(true);
     };
 

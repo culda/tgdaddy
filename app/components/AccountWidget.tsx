@@ -23,7 +23,7 @@ export default function AccountWidget({
   const handleSignOut = async () => {
     setLoggingOut(true);
     await signOut({
-      callbackUrl: redirect,
+      callbackUrl: "/",
     });
     setLoggingOut(false);
   };
