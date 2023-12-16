@@ -5,6 +5,7 @@ import { auth } from "../api/auth/[...nextauth]/auth";
 import { Telegram } from "puregram";
 import Button from "../components/Button";
 import AccountWidget from "../components/AccountWidget";
+import { notFound } from "next/navigation";
 
 type PpChannel = {
   params: { username: string };
@@ -52,6 +53,11 @@ export default async function Page({ params }: PpChannel) {
   };
 
   const channel = await fetchChannel();
+
+  if (!channel) {
+    return notFound();
+  }
+
   const sub = await fetchSubscription(channel.username as string);
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
@@ -72,7 +78,7 @@ export default async function Page({ params }: PpChannel) {
   const myChannel = channel.userId === session?.user?.id;
 
   return (
-    <div className="relative max-w-md">
+    <div className="relative max-w-md flex mx-auto">
       <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
         {myChannel && (
           <Button variant="secondary" href={`/app/channels/${channel.id}`}>

@@ -93,7 +93,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
       snack({
         key: "username-updated",
-        text: "Username updated",
+        text: "Updated",
         dismissable: false,
         variant: "success",
       });
@@ -124,7 +124,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
       snack({
         key: "description-updated",
-        text: "Description updated",
+        text: "Updated",
         variant: "success",
       });
       setCh({ ...ch, title } as StChannel);
@@ -154,7 +154,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
       snack({
         key: "description-updated",
-        text: "Description updated",
+        text: "Updated",
         variant: "success",
       });
       setCh({ ...ch, description: description } as StChannel);
@@ -198,7 +198,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
       snack({
         key: "pricing-updated",
-        text: "Pricing updated",
+        text: "Updated",
         dismissable: false,
         variant: "success",
       });
@@ -234,6 +234,11 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
     const { imagePath } = (await res.json()) as TpSetChannelImageResponse;
 
+    snack({
+      key: "image-updated",
+      text: "Updated",
+      variant: "success",
+    });
     setCh({ ...ch, imagePath } as StChannel);
     setIsLoading(false);
   };
@@ -432,14 +437,6 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               editMode={newChannel}
               defaultValue={ch?.title}
               onSave={newChannel ? undefined : setTitle}
-              pretext="members.page/"
-              onCopy={() =>
-                snack({
-                  key: "code-copied",
-                  text: "URL copied",
-                  variant: "success",
-                })
-              }
             />
           </div>
         </ChannelSection>
