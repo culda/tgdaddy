@@ -11,6 +11,7 @@ type PpEditableForm = {
   textarea?: boolean;
   onCopy?: () => void;
   pretext?: string;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 
 const EditableInput = forwardRef<
@@ -25,7 +26,7 @@ const EditableInput = forwardRef<
       textarea,
       onCopy,
       pretext,
-      ...rest
+      inputProps,
     },
     ref
   ) => {
@@ -92,7 +93,6 @@ const EditableInput = forwardRef<
               onChange={handleInputChange}
               disabled={!isEditing}
               className={inputClass}
-              {...rest}
             />
           </div>
         ) : (
@@ -104,12 +104,12 @@ const EditableInput = forwardRef<
             {pretext && <span className="font-bold pl-3 pr-1 ">{pretext}</span>}
             <input
               type="text"
-              size={1}
               className={inputClass}
               ref={ref as React.RefObject<HTMLInputElement>}
               value={inputValue}
               onChange={handleInputChange}
               disabled={!isEditing}
+              {...inputProps}
             />
             {onCopy && !isEditing && (
               <div className="absolute right-4 inset-y-0 flex items-center">
@@ -119,29 +119,6 @@ const EditableInput = forwardRef<
               </div>
             )}
           </div>
-          // <div className="flex relative">
-          //   {pretext && (
-          //     <span className="flex items-center pl-3 text-gray-700 font-bold rounded-md">
-          //       {pretext}
-          //     </span>
-          //   )}
-          //   <input
-          // type="text"
-          // ref={ref as React.RefObject<HTMLInputElement>}
-          // value={inputValue}
-          // onChange={handleInputChange}
-          // disabled={!isEditing}
-          // className={inputClass}
-          // {...rest}
-          //   />
-          // {onCopy && !isEditing && (
-          //   <div className="absolute right-4 inset-y-0 flex items-center">
-          //     <button type="button" onClick={() => copyValue()}>
-          //       <FaCopy className="text-lg" />
-          //     </button>
-          //   </div>
-          // )}
-          // </div>
         )}
         {onSave && (
           <Button

@@ -413,6 +413,9 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           <div className="mt-6">
             <EditableInput
               ref={usernameRef}
+              inputProps={{
+                size: 1,
+              }}
               editMode={newChannel}
               defaultValue={ch?.username}
               onSave={newChannel ? undefined : setUsername}
