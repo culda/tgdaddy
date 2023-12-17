@@ -1,9 +1,11 @@
 export default function ChannelSection({
+  title,
   children,
   isLastSection = false,
   isFirstSection = false,
 }: {
   children: React.ReactNode;
+  title?: React.ReactNode;
   isFirstSection?: boolean;
   isLastSection?: boolean;
 }) {
@@ -19,6 +21,11 @@ export default function ChannelSection({
       </div>
       <div className="flex-grow pl-20 flex sm:items-center items-start flex-col sm:flex-row">
         <div className=" flex flex-col flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
+          {title && (
+            <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
+              {title}
+            </h2>
+          )}
           {children}
         </div>
       </div>

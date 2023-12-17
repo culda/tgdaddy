@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
       <body className={inter.className}>
         <SnackbarProvider>
-          <div className="relative mt-16 flex flex-col md:flex-row md:items-stretch max-md:px-5 min-h-screen">
+          <div className="relative flex flex-col md:flex-row md:items-stretch max-md:px-5 ">
             {/* Hamburger Icon */}
             <button
               className="md:hidden fixed bottom-5 right-5 z-50 text-4xl"
@@ -69,8 +69,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </nav>
 
             {/* Main Content */}
-            <div className="flex flex-col items-stretch w-full md:ml-[35%] lg:ml-[35%]">
-              <div className="flex grow flex-col overflow-auto">{children}</div>
+            <div className="flex flex-col items-stretch mt-16 w-full md:ml-[35%] lg:ml-[35%]">
+              <div className="flex grow flex-col overflow-auto relative min-h-[500px]">
+                {children}
+              </div>
             </div>
           </div>
         </SnackbarProvider>

@@ -15,14 +15,13 @@ export default function Page() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         const { connectUrl } = data;
         router.push(connectUrl);
       });
   }, []);
 
   return (
-    <div className="relative left-1/2 -translate-x-1/2 p-5 text-center">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 p-5 text-center">
       <Loader />
     </div>
   );

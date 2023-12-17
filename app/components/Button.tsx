@@ -7,6 +7,8 @@ const variantStyles = {
   text: "bg-transparent hover:bg-gray-100 border border-transparent hover:border-gray-300",
 };
 
+type Size = "sm" | "md" | "lg";
+
 const LoadingSpinner = ({ variant }: { variant: Variant }) => (
   <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
     <div
@@ -23,6 +25,8 @@ type ButtonProps = {
   children: React.ReactNode;
   href?: string;
   loading?: boolean;
+  size?: Size;
+  active?: boolean;
   variant?: Variant;
   onClick?: () => void;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick"> &
@@ -33,12 +37,17 @@ export default function Button({
   href,
   loading,
   onClick,
+  active,
+  size = "md",
   variant = "primary",
   ...props
 }: ButtonProps) {
   const content = loading ? <LoadingSpinner variant={variant} /> : children;
   const variantClassName = variantStyles[variant];
-  const buttonClassName = `flex items-center justify-center h-11 py-2 px-4 disabled:bg-gray-400 focus:outline-none rounded text-lg relative ${variantClassName}`;
+  const padding = size === "sm" ? "p-2" : size === "md" ? "p-2" : "p-2";
+  const buttonClassName = `flex items-center justify-center h-10 ${padding} disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
+    active ? "border-2 border-indigo-800 " : ""
+  }`;
 
   if (href) {
     return (

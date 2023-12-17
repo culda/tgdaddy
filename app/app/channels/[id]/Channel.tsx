@@ -458,10 +458,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           </div>
         </ChannelSection>
 
-        <ChannelSection>
-          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-            Pricing
-          </h2>
+        <ChannelSection title="Pricing">
           <p className="leading-relaxed">
             You can update prices anytime. Current memberships are not affected
           </p>
@@ -499,19 +496,19 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
         </ChannelSection>
 
         {!newChannel && (
-          <ChannelSection>
-            <div className="flex flex-col gap-2">
-              {!ch?.channelId && (
-                <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-                  Connect Telegram
-                </h2>
-              )}
-              {ch?.channelId && (
+          <ChannelSection
+            title={
+              !ch?.channelId ? (
+                "Connect Telegram"
+              ) : (
                 <h2 className="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
                   Telegram Connected{" "}
                   <FaCheckCircle className="text-green-500" />
                 </h2>
-              )}
+              )
+            }
+          >
+            <div className="flex flex-col gap-2">
               {!ch?.channelId && (
                 <Fragment>
                   {" "}
@@ -540,12 +537,9 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           </ChannelSection>
         )}
 
-        <ChannelSection isLastSection>
-          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-            Profile
-          </h2>
+        <ChannelSection title="Photo" isLastSection>
           <p className="leading-relaxed">
-            Add an image to showcase your channel.
+            Add a photo to showcase your channel.
           </p>
           <div className="mt-6">
             <AddImage
