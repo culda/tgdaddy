@@ -1,17 +1,15 @@
 "use client";
 import { ChangeEventHandler, Fragment, useState } from "react";
 import Button from "./components/Button";
-import ConnectTelegram from "./components/ConnectTelegram";
-import AppButton from "./components/AppButton";
 import { useRouter } from "next/navigation";
-import AccountWidget from "./components/AccountWidget";
 
 export default function Home() {
   const [username, setUsername] = useState("");
   const router = useRouter();
 
-  const getStarted = (username?: string) => {
+  const getStarted = () => {
     let path = "/app/channels/add";
+
     if (username) {
       path += `?username=${username}`;
     }
@@ -21,6 +19,8 @@ export default function Home() {
   const handleUsernameChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value = e.target.value.trim();
     const sanitizedValue = value.replace(/\s/g, "");
+
+    console.log("setting", sanitizedValue);
 
     setUsername(sanitizedValue);
   };
