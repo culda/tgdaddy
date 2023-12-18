@@ -65,7 +65,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     await dynamoDb.send(
       new PutItemCommand({
         TableName: Table.Users.tableName,
-        Item: marshall(user),
+        Item: marshall(user, { removeUndefinedValues: true }),
       })
     );
   }
