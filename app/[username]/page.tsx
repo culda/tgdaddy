@@ -58,7 +58,12 @@ export default async function Page({ params }: PpChannel) {
     return notFound();
   }
 
-  const sub = await fetchSubscription(channel.username as string);
+  let sub;
+
+  if (session?.user?.id) {
+    sub = await fetchSubscription(channel.username as string);
+  }
+
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
   let link: string | undefined;
