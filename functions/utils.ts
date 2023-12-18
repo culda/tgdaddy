@@ -1,4 +1,4 @@
-import { StChannel, StUser } from "@/app/model/types";
+import { StChannel, StUser, StUserCredentials } from "@/app/model/types";
 import {
   DynamoDBClient,
   GetItemCommand,
@@ -22,6 +22,23 @@ export async function ddbGetUserById(id: string): Promise<StUser | undefined> {
   }
 
   return unmarshall(Item) as StUser;
+}
+
+export async function ddbGetUserCredsByEmail(
+  email: string
+): Promise<StUserCredentials | undefined> {
+  const { Item } = await dynamoDb.send(
+    new GetItemCommand({
+      TableName: Table.UsersCreds.tableName,
+      Key: marshall({ email }),
+    })
+  );
+
+  if (!Item) {
+    return undefined;
+  }
+
+  return unmarshall(Item) as StUserCredentials;
 }
 
 export async function ddbGetChannelById(

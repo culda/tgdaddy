@@ -42,6 +42,8 @@ export enum StPriceFrequency {
 
 export type StUser = {
   id: string;
+  telegramId?: string;
+  email?: string;
   platformLogin?: boolean;
   username?: string;
   firstName?: string;
@@ -53,6 +55,14 @@ export type StUser = {
   creatorStripeAccountId?: string;
   creatorStripeCustomerId?: string;
   consumerStripeCustomerId?: string;
+};
+
+export type StUserCredentials = {
+  email: string;
+  password: string;
+  resetCode?: string;
+  resetCodeExpiry?: number;
+  id: string;
 };
 
 export type StConsumerSubscription = {

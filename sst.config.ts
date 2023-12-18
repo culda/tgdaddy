@@ -39,6 +39,13 @@ export default {
         primaryIndex: { partitionKey: "id" },
       });
 
+      const usersCredsTable = new Table(stack, "UsersCreds", {
+        fields: {
+          email: "string",
+        },
+        primaryIndex: { partitionKey: "email" },
+      });
+
       const consumerSubscriptionsTable = new Table(
         stack,
         "ConsumerSubscriptions",
@@ -165,13 +172,30 @@ export default {
         },
       });
 
-      const loginHandler = new Function(stack, "LoginHandler", {
-        handler: "functions/login/handler.handler",
+      const loginTelegramHandler = new Function(stack, "LoginTelegramHandler", {
+        handler: "functions/loginTelegram/handler.handler",
         bind: [usersTable],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
       });
+
+      const loginHandler = new Function(stack, "LoginHandler", {
+        handler: "functions/login/handler.handler",
+        bind: [usersTable, usersCredsTable],
+      });
+
+      const forgotPasswordHandler = new Function(
+        stack,
+        "ForgotPasswordHandler",
+        {
+          handler: "functions/forgotPassword/handler.handler",
+          bind: [usersCredsTable],
+          environment: {
+            MAILGUN_API_KEY: process.env.MAILGUN_API_KEY as string,
+          },
+        }
+      );
 
       const setChannelImageHandler = new Function(
         stack,
@@ -225,8 +249,16 @@ export default {
           "POST /user": userHandler,
           "GET /user": userHandler,
           "POST /subscriptions": subscriptionsHandler,
+          "POST /forgotPassword": {
+            function: forgotPasswordHandler,
+            authorizer: "none",
+          },
           "POST /login": {
             function: loginHandler,
+            authorizer: "none",
+          },
+          "POST /loginTelegram": {
+            function: loginTelegramHandler,
             authorizer: "none",
           },
           "POST /setChannelImage": setChannelImageHandler,

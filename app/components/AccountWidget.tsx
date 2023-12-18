@@ -4,7 +4,7 @@ import AppButton from "./AppButton";
 import Button from "./Button";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { FaPowerOff } from "react-icons/fa";
+import { FaPowerOff, FaUser } from "react-icons/fa";
 
 type PpAccountWidget = {
   platformLogin?: boolean;
@@ -40,17 +40,23 @@ export default function AccountWidget({
           Login
         </Button>
       )}
-      {status === "authenticated" && data.user.photoUrl && (
+      {status === "authenticated" && (
         <div className="flex flex-row gap-2">
           <Button variant={"text"} loading={loggingOut} onClick={handleSignOut}>
             <FaPowerOff />
           </Button>
           <div className="ml-2 w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
-            <img
-              src={data.user.photoUrl}
-              alt="User Profile"
-              className="w-full h-full object-cover"
-            />
+            {data.user.photoUrl ? (
+              <img
+                src={data.user.photoUrl}
+                alt="User Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex justify-center items-center text-2xl w-full h-full bg-gray-300">
+                <FaUser />
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -35,6 +35,42 @@ export const config = {
   },
   providers: [
     Credentials({
+      id: "email",
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+        platformLogin: { label: "Platform Login", type: "text" },
+        resetCode: { label: "Reset Code", type: "text" },
+      },
+      authorize: async (credentials) => {
+        if (!credentials) return Promise.reject("no credentials");
+        console.log("got credentials", credentials);
+        const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+            resetCode: credentials.resetCode,
+            platformLogin: credentials.platformLogin === "true" ? true : false,
+          }),
+        });
+
+        const user = await res.json();
+
+        // Check if the response is successful and has a user
+        if (res.ok && user) {
+          console.log("ok", res, user);
+          return user;
+        }
+
+        // Return null if user data could not be retrieved
+        throw new Error(user.message);
+      },
+    }),
+    Credentials({
+      id: "telegram",
       name: "Telegram",
       credentials: {
         id: { label: "User ID", type: "text" },
@@ -49,11 +85,11 @@ export const config = {
       authorize: async (credentials) => {
         console.log("got credentials", credentials);
         if (!credentials) return Promise.reject("no credentials");
-        const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
+        const res = await fetch(`${process.env.API_ENDPOINT}/loginTelegram`, {
           method: "POST",
           body: JSON.stringify({
             id: credentials.id,
-            platformLogin: credentials.platformLogin,
+            platformLogin: Boolean(credentials.platformLogin),
             username: credentials.username,
             first_name: credentials.first_name,
             last_name: credentials.last_name,

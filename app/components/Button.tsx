@@ -39,13 +39,14 @@ export default function Button({
   onClick,
   active,
   size = "md",
+  className,
   variant = "primary",
   ...props
 }: ButtonProps) {
   const content = loading ? <LoadingSpinner variant={variant} /> : children;
   const variantClassName = variantStyles[variant];
   const padding = size === "sm" ? "p-2" : size === "md" ? "p-2" : "p-2";
-  const buttonClassName = `flex items-center justify-center h-10 ${padding} disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
+  const buttonClassName = `flex flex-grow items-center justify-center h-10 min-w-10 ${padding} disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
     active ? "border-2 border-indigo-800 " : ""
   }`;
 
@@ -59,7 +60,7 @@ export default function Button({
   return (
     <button
       type="button"
-      className={buttonClassName}
+      className={[buttonClassName, className || ""].join(" ")}
       onClick={onClick}
       {...props}
     >

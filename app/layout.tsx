@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Script from "next/script";
+import SnackbarProvider from "./components/SnackbarProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,7 +34,9 @@ export default function RootLayout({
         ></Script>
       </head>
       <body className={inter.className}>
-        <SessionProvider>{children}</SessionProvider>
+        <SnackbarProvider>
+          <SessionProvider>{children}</SessionProvider>
+        </SnackbarProvider>
       </body>
     </html>
   );

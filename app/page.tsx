@@ -41,13 +41,15 @@ export default function Home() {
             </span>
           </a>
 
-          <Button
-            href={`/login?platformLogin=true&callbackUrl=${encodeURIComponent(
-              "/app"
-            )}`}
-          >
-            Login
-          </Button>
+          <div>
+            <Button
+              href={`/login?platformLogin=true&callbackUrl=${encodeURIComponent(
+                "/app"
+              )}`}
+            >
+              Login
+            </Button>
+          </div>
         </div>
       </header>
       <main>
