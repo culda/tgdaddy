@@ -30,10 +30,10 @@ export default function Channels({
       </div>
       <div className="flex flex-col gap-2 mt-8">
         <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-          Channels
+          Pages
         </h2>
         {isFalseyOrEmptyArray(channels) && (
-          <h2>You don't have any channels yet. </h2>
+          <h2>You don't have any pages yet. </h2>
         )}
 
         {!isEmptyArray(channels) &&
@@ -48,7 +48,7 @@ export default function Channels({
           ))}
         <Button href={`/app/channels/add`}>
           <div className="flex flex-row gap-2 items-center">
-            New Channel
+            New Page
             <FaArrowRight />
           </div>
         </Button>

@@ -403,14 +403,9 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   return (
     <div className="text-gray-600 body-font">
       <div className="container pt-5 mx-auto flex flex-wrap">
-        <ChannelSection isFirstSection>
-          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-            Username
-          </h2>
-          <p className="leading-relaxed">
-            This is the public address of your channel.
-          </p>
-          <div className="mt-6">
+        <ChannelSection title="Username" isFirstSection>
+          <p>This is the public URL of your page.</p>
+          <div className="mt-4">
             <EditableInput
               ref={usernameRef}
               inputProps={{
@@ -430,11 +425,9 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             />
           </div>
         </ChannelSection>
-        <ChannelSection>
-          <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
-            Title
-          </h2>
-          <div className="mt-6">
+        <ChannelSection title="Title">
+          <p>Sell your page with a catchy title</p>
+          <div className="mt-4">
             <EditableInput
               ref={titleRef}
               editMode={newChannel}
@@ -443,14 +436,11 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             />
           </div>
         </ChannelSection>
-        <ChannelSection>
-          <h2 className="font-medium title-font text-gray-900 mb-1 text-xl">
-            Description
-          </h2>
+        <ChannelSection title="Description">
           <p className="leading-relaxed">
-            Pitch your channel to your audience.
+            Describe your page and what your audience can expect
           </p>
-          <div className="mt-6">
+          <div className="mt-4">
             <EditableInput
               ref={descriptionRef}
               editMode={newChannel}
@@ -467,7 +457,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           </p>
           <div>
             {!ch?.pricing && (
-              <div className="mt-6">
+              <div className="mt-4">
                 <PriceInput
                   ref={priceRef}
                   editMode={newChannel}
@@ -482,7 +472,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               </div>
             )}
             {ch?.pricing?.map((p) => (
-              <div key={p.id} className="mt-6">
+              <div key={p.id} className="mt-4">
                 <PriceInput
                   ref={priceRef}
                   defaultPrice={(p.usd / 100).toFixed(2)}
@@ -544,7 +534,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
           <p className="leading-relaxed">
             Add a photo to showcase your channel.
           </p>
-          <div className="mt-6">
+          <div className="mt-4">
             <AddImage
               currentImagePath={ch?.imagePath}
               onSave={setChannelImage}

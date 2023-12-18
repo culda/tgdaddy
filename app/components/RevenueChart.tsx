@@ -29,8 +29,6 @@ const RevenueChart = ({ data, total }: PpRevenueChart) => {
   const [chartData, setChartData] = useState<ChartData<"bar">>(data.day);
   const [timeframe, setTimeframe] = useState<"day" | "week" | "month">("day");
 
-  console.log(chartData);
-
   const updateChartData = (timeframe: "day" | "day2") => {
     switch (timeframe) {
       case "day":
@@ -50,7 +48,17 @@ const RevenueChart = ({ data, total }: PpRevenueChart) => {
       </div>
       <Bar
         data={chartData}
-        options={{ scales: { y: { beginAtZero: true } } }}
+        options={{
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: "$",
+              },
+              beginAtZero: true,
+            },
+          },
+        }}
       />
       <div className="flex flex-row gap-2">
         <Button

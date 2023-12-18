@@ -14,6 +14,7 @@ export default async function Page() {
       Authorization: `Bearer ${session?.accessToken}`,
       ContentType: "application/json",
     },
+    cache: "no-cache",
   });
   const channels: StChannel[] = await channelsRes.json();
 

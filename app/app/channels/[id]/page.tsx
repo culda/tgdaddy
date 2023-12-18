@@ -45,10 +45,13 @@ export default async function Page({ params }: PpChannel) {
   return (
     <PageLayout title={channel?.username}>
       {user.creatorStripeAccountStatus !== StConnectStatus.Connected && (
-        <div className="flex gap-2 text-gray-800">
-          <p>Connect your Stripe account to enable payments</p>
+        <div className="flex gap-2 text-gray-800 mb-4">
+          <p>
+            Connect your Stripe account to receive instant payments from
+            subscribers
+          </p>
           <Button href={`/app/connect`} variant="secondary">
-            Enable
+            Connect
           </Button>
         </div>
       )}

@@ -16,7 +16,7 @@ export default async function Page({ searchParams }: PpParams) {
   };
 
   return (
-    <PageLayout title="Add Channel">
+    <PageLayout title="Add Page">
       <Channel newChannel channel={channel} />
     </PageLayout>
   );

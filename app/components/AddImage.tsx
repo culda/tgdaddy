@@ -42,11 +42,11 @@ export default function AddImage({
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      if (file.size > 2097152) {
-        // 2MB limit
+      if (file.size > 5242880) {
+        // 5MB limit
         snack({
           key: "image-too-large",
-          text: "Image must be less than 2MB",
+          text: "Image must be less than 5MB",
           dismissable: false,
           variant: "error",
         });

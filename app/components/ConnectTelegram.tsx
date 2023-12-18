@@ -17,7 +17,7 @@ export default function ConnectTelegram({
   const pathname = usePathname();
 
   const handleAuthCallback = async (user: TelegramAuthData) => {
-    signIn("credentials", {
+    signIn("telegram", {
       ...user,
       callbackUrl: callbackUrl ?? pathname,
       platformLogin,
