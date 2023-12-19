@@ -36,6 +36,7 @@ export type StChannelPrice = {
 };
 
 export enum StPriceFrequency {
+  OneOff = "oneoff",
   Monthly = "monthly",
   Yearly = "yearly",
 }
@@ -97,5 +98,7 @@ export const frequencyToInterval = (
       return "month";
     case StPriceFrequency.Yearly:
       return "year";
+    default:
+      throw new Error("Invalid frequency");
   }
 };

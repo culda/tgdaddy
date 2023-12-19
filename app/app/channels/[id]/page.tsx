@@ -1,7 +1,7 @@
 import PageLayout from "@/app/components/PageLayout";
-import { StChannel, StConnectStatus, StUser } from "../../../model/types";
+import { StChannel } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
-import Channel from "./Channel";
+import Channel from "../Channel";
 import { notFound } from "next/navigation";
 import Button from "@/app/components/Button";
 
@@ -12,16 +12,6 @@ type PpChannel = {
 export default async function Page({ params }: PpChannel) {
   const session = await auth();
 
-  const fetchUser = async () => {
-    const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
-      headers: {
-        Authorization: `Bearer ${session?.accessToken}`,
-        ContentType: "application/json",
-      },
-    });
-    return (await userRes.json()) as StUser;
-  };
-
   const fetchChannel = async () => {
     const res = await fetch(
       `${process.env.API_ENDPOINT}/channels?id=${params.id}`,
@@ -30,13 +20,13 @@ export default async function Page({ params }: PpChannel) {
           Authorization: `Bearer ${session?.accessToken}`,
           ContentType: "application/json",
         },
+        cache: "no-cache",
       }
     );
     return (await res.json()) as StChannel;
   };
 
   const channel = await fetchChannel();
-  const user = await fetchUser();
 
   if (!channel) {
     return notFound();
@@ -44,17 +34,14 @@ export default async function Page({ params }: PpChannel) {
 
   return (
     <PageLayout title={channel?.username}>
-      {user.creatorStripeAccountStatus !== StConnectStatus.Connected && (
-        <div className="flex gap-2 text-gray-800 mb-4">
-          <p>
-            Connect your Stripe account to receive instant payments from
-            subscribers
-          </p>
-          <Button href={`/app/connect`} variant="secondary">
-            Connect
-          </Button>
-        </div>
-      )}
+      <div className="flex flex-row gap-2">
+        <Button href={`/app/channels/${channel.id}/edit`} variant="secondary">
+          Edit Details
+        </Button>
+        {/* <Button href={`/app/channels/${channel.id}/edit`} variant="secondary">
+          Edit Details
+        </Button> */}
+      </div>
 
       <Channel channel={channel} />
     </PageLayout>

@@ -42,6 +42,13 @@ body {
   }
 }
 
+input:focus,
+textarea:focus,
+.default-focus-within:focus-within {
+  outline: -webkit-focus-ring-color auto 1px;
+  outline-color: #f8aa1b;
+}
+
 .radio-button {
   appearance: none;
   -webkit-appearance: none;

@@ -2,9 +2,10 @@ import dayjs from "dayjs";
 import { auth } from "../api/auth/[...nextauth]/auth";
 import { client } from "../api/stripe/stripe";
 import PageLayout from "../components/PageLayout";
-import { StChannel, StUser } from "../model/types";
+import { StChannel, StConnectStatus, StUser } from "../model/types";
 import Channels from "./Channels";
 import { TpRevenueChartData, TpTotalRevenue } from "../components/RevenueChart";
+import Button from "../components/Button";
 
 export default async function Page() {
   const session = await auth();
@@ -34,6 +35,17 @@ export default async function Page() {
 
   return (
     <PageLayout title="Dashboard">
+      {user.creatorStripeAccountStatus !== StConnectStatus.Connected && (
+        <div className="flex gap-2 text-gray-800 mb-4">
+          <p>
+            Connect your Stripe account to receive instant payments from
+            subscribers
+          </p>
+          <Button href={`/app/connect`} variant="secondary">
+            Connect
+          </Button>
+        </div>
+      )}
       <Channels
         chartData={revenueData?.chart}
         channels={channels}

@@ -1,10 +1,9 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { StChannel, StPriceFrequency } from "../../../model/types";
-import EditableInput from "../../../components/EditableInput";
-import { TpUpdateUsername } from "@/functions/channelUsername/handler";
+import { StChannel, StPriceFrequency } from "../../model/types";
+import TextField from "../../components/TextField";
 import { Fragment, useCallback, useRef, useState } from "react";
-import PriceInput from "../../../components/PriceInput";
+import PriceInput from "../../components/PriceInput";
 import { useRouter } from "next/navigation";
 import AddImage from "@/app/components/AddImage";
 import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
@@ -12,11 +11,15 @@ import { useSnackbar } from "@/app/components/SnackbarProvider";
 import ChannelSection from "./ChannelSection";
 import Button from "@/app/components/Button";
 import { FaCheckCircle, FaCopy } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { nanoid } from "nanoid";
 
 type PpChannel = {
-  channel?: Partial<StChannel>;
-  newChannel?: boolean;
+  channel: Partial<StChannel>;
+  isNew?: boolean;
+  edit?: boolean;
 };
 
 type TpImage = {
@@ -24,17 +27,63 @@ type TpImage = {
   fileType: string;
 };
 
-export default function Channel({ channel, newChannel = false }: PpChannel) {
+type TpValues = {
+  username: string;
+  title: string;
+  description: string;
+  price: number;
+  frequency: string;
+};
+
+const schema = yup.object().shape({
+  username: yup
+    .string()
+    .lowercase()
+    .required("Username is required")
+    .matches(
+      /^[A-Za-z0-9\-\_]+$/,
+      "Username can only contain letters, numbers, and the following characters: - _"
+    ),
+  title: yup.string().required("Title is required"),
+  description: yup.string().required("Description is required"),
+  price: yup
+    .number()
+    .required("Price is required")
+    .test(
+      "maxDecimals",
+      "Price can have a maximum of 2 decimal places",
+      (value) => {
+        if (value) {
+          const decimalCount = value.toString().split(".")[1]?.length || 0;
+          return decimalCount <= 2;
+        }
+        return true;
+      }
+    ),
+  frequency: yup.string().required("Frequency is required"),
+});
+
+export default function Channel({
+  channel,
+  isNew = false,
+  edit = false,
+}: PpChannel) {
   const snack = useSnackbar();
   const router = useRouter();
   const [ch, setCh] = useState(channel);
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const usernameRef = useRef<HTMLInputElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const priceRef = useRef<HTMLFormElement>(null);
   const [image, setImage] = useState<TpImage | null>(null);
+  const { register, handleSubmit } = useForm<TpValues>({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      username: ch?.username,
+      title: ch?.title,
+      description: ch?.description,
+      price: ch?.pricing?.[0] && ch.pricing[0].usd / 100,
+      frequency: ch?.pricing?.[0] && ch.pricing[0].frequency,
+    },
+  });
 
   const checkTelegram = async () => {
     setIsLoading(true);
@@ -66,102 +115,6 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
       variant: "success",
     });
   };
-
-  const setUsername = useCallback(
-    async (username: string) => {
-      setIsLoading(true);
-      const pattern = /^[A-Za-z0-9\-\_]+$/;
-
-      if (!pattern.test(username)) {
-        throw new Error(
-          "Username can only contain letters, numbers, and the following characters: - _"
-        );
-      }
-
-      await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channelUsername`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          id: ch?.id,
-          oldUsername: ch?.username,
-          newUsername: username,
-        } as TpUpdateUsername),
-      });
-
-      snack({
-        key: "username-updated",
-        text: "Updated",
-        dismissable: false,
-        variant: "success",
-      });
-      setCh({ ...ch, username: username } as StChannel);
-      setIsLoading(false);
-    },
-    [session.data?.accessToken]
-  );
-
-  const setTitle = useCallback(
-    async (title: string) => {
-      setIsLoading(true);
-      if (title.length > 255) {
-        throw new Error("Title cannot exceed 255 characters");
-      }
-
-      await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          id: ch?.id,
-          title,
-        }),
-      });
-
-      snack({
-        key: "description-updated",
-        text: "Updated",
-        variant: "success",
-      });
-      setCh({ ...ch, title } as StChannel);
-      setIsLoading(false);
-    },
-    [session.data?.accessToken]
-  );
-
-  const setDescription = useCallback(
-    async (description: string) => {
-      setIsLoading(true);
-      if (description.length > 255) {
-        throw new Error("Description cannot exceed 255 characters");
-      }
-
-      await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          id: ch?.id,
-          description: description,
-        }),
-      });
-
-      snack({
-        key: "description-updated",
-        text: "Updated",
-        variant: "success",
-      });
-      setCh({ ...ch, description: description } as StChannel);
-      setIsLoading(false);
-    },
-    [session.data?.accessToken]
-  );
 
   const setPrice = useCallback(
     async (price: string, frequency: StPriceFrequency) => {
@@ -209,7 +162,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
   );
 
   const setChannelImage = async (fileBase64: string, fileType: string) => {
-    if (newChannel) {
+    if (edit) {
       setImage({ fileBase64, fileType });
       return;
     }
@@ -243,7 +196,13 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
     setIsLoading(false);
   };
 
-  const createChannel = async () => {
+  const onSubmit = async ({
+    description,
+    title,
+    username,
+    price,
+    frequency,
+  }: TpValues) => {
     if (session.status !== "authenticated") {
       snack({
         key: "not-authenticated",
@@ -252,97 +211,54 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
       });
       return;
     }
-    const username = usernameRef.current?.value;
-    const title = titleRef.current?.value;
-    const description = descriptionRef.current?.value;
-    // @ts-expect-error
-    const price = priceRef.current.input?.value;
-    // @ts-expect-error
-    const frequency = priceRef.current.select?.value;
 
-    if (!username) {
-      snack({
-        key: "username-required",
-        text: "Username is required",
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!description) {
-      snack({
-        key: "description-required",
-        text: "Description is required",
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!price) {
-      snack({
-        key: "price-required",
-        text: "Price is required",
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!/^[A-Za-z0-9\-\_]+$/.test(username)) {
-      snack({
-        key: "username-invalid",
-        text: "Username can only contain letters, numbers, and the following characters: - _",
-        variant: "error",
-      });
-      return;
-    }
-
-    if (description.length > 255) {
+    if (description.length > 500) {
       snack({
         key: "description-invalid",
-        text: "Description cannot exceed 255 characters",
+        text: "Description cannot exceed 500 characters",
         variant: "error",
       });
       return;
     }
 
-    const parsedPrice = parseFloat(price);
-    const decimalCount = (price.split(".")[1] || "").length;
+    // const parsedPrice = parseFloat(price);
+    // const decimalCount = (price.split(".")[1] || "").length;
 
-    if (isNaN(parsedPrice)) {
-      snack({
-        key: "price-invalid",
-        text: "Price must be a valid number for the price",
-        variant: "error",
-      });
-      return;
-    }
+    // if (isNaN(parsedPrice)) {
+    //   snack({
+    //     key: "price-invalid",
+    //     text: "Price must be a valid number",
+    //     variant: "error",
+    //   });
+    //   return;
+    // }
 
-    if (decimalCount > 2) {
-      snack({
-        key: "price-invalid",
-        text: "Price can only have up to 2 decimal places",
-        variant: "error",
-      });
-      return;
-    }
+    // if (decimalCount > 2) {
+    //   snack({
+    //     key: "price-invalid",
+    //     text: "Price can only have up to 2 decimal places",
+    //     variant: "error",
+    //   });
+    //   return;
+    // }
 
-    if (!frequency) {
-      snack({
-        key: "frequency-required",
-        text: "Frequency is required",
-        variant: "error",
-      });
-      return;
-    }
+    // if (!frequency) {
+    //   snack({
+    //     key: "frequency-required",
+    //     text: "Frequency is required",
+    //     variant: "error",
+    //   });
+    //   return;
+    // }
 
-    if (!image) {
-      snack({
-        key: "image-required",
-        text: "Please choose an image",
-        variant: "error",
-      });
-      return;
-    }
+    // if (!image) {
+    //   snack({
+    //     key: "image-required",
+    //     text: "Please choose an image",
+    //     variant: "error",
+    //   });
+    //   return;
+    // }
 
     try {
       setIsLoading(true);
@@ -350,7 +266,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
       const putRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
         {
-          method: "PUT",
+          method: isNew ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.data?.accessToken}`,
@@ -362,7 +278,7 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
               {
                 id: nanoid(),
                 frequency,
-                usd: parsedPrice * 100,
+                usd: price * 100,
               },
             ],
             fileBase64: image?.fileBase64,
@@ -377,8 +293,8 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
       if (putRes.status === 200) {
         snack({
-          key: "channel-create-success",
-          text: "Channel created",
+          key: "channel-success",
+          text: "Success",
           variant: "success",
         });
         router.push(`/app/channels/${ch?.id}`);
@@ -402,18 +318,20 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
 
   return (
     <div className="text-gray-600 body-font">
-      <div className="container pt-5 mx-auto flex flex-wrap">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="container pt-5 mx-auto flex flex-wrap"
+      >
         <ChannelSection title="Username" isFirstSection>
           <p>This is the public URL of your page.</p>
           <div className="mt-4">
-            <EditableInput
-              ref={usernameRef}
+            <TextField
+              registerProps={register("username")}
               inputProps={{
                 size: 1,
               }}
-              editMode={newChannel}
+              editMode={edit}
               defaultValue={ch?.username}
-              onSave={newChannel ? undefined : setUsername}
               pretext="members.page/"
               onCopy={() =>
                 snack({
@@ -428,11 +346,10 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
         <ChannelSection title="Title">
           <p>Sell your page with a catchy title</p>
           <div className="mt-4">
-            <EditableInput
-              ref={titleRef}
-              editMode={newChannel}
+            <TextField
+              registerProps={register("title")}
+              editMode={edit}
               defaultValue={ch?.title}
-              onSave={newChannel ? undefined : setTitle}
             />
           </div>
         </ChannelSection>
@@ -441,12 +358,11 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             Describe your page and what your audience can expect
           </p>
           <div className="mt-4">
-            <EditableInput
-              ref={descriptionRef}
-              editMode={newChannel}
+            <TextField
+              registerProps={register("description")}
+              editMode={edit}
               textarea
               defaultValue={ch?.description}
-              onSave={newChannel ? undefined : setDescription}
             />
           </div>
         </ChannelSection>
@@ -456,39 +372,35 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             You can update prices anytime. Current memberships are not affected
           </p>
           <div>
-            {!ch?.pricing && (
-              <div className="mt-4">
-                <PriceInput
-                  ref={priceRef}
-                  editMode={newChannel}
-                  defaultFrequency={StPriceFrequency.Monthly}
-                  defaultPrice=""
-                  onSave={
-                    newChannel
-                      ? undefined
-                      : (price, frequency) => setPrice(price, frequency)
-                  }
-                />
-              </div>
-            )}
-            {ch?.pricing?.map((p) => (
+            <div className="mt-4">
+              <PriceInput
+                priceRegisterProps={register("price")}
+                frequencyRegisterProps={register("frequency")}
+                editMode={edit}
+                // onSave={
+                //   edit
+                //     ? undefined
+                //     : (price, frequency) => setPrice(price, frequency)
+                // }
+              />
+            </div>
+            {/* {ch?.pricing?.map((p) => (
               <div key={p.id} className="mt-4">
                 <PriceInput
-                  ref={priceRef}
                   defaultPrice={(p.usd / 100).toFixed(2)}
                   defaultFrequency={p.frequency}
                   onSave={
-                    newChannel
+                    edit
                       ? undefined
                       : (price, frequency) => setPrice(price, frequency)
                   }
                 />
               </div>
-            ))}
+            ))} */}
           </div>
         </ChannelSection>
 
-        {!newChannel && (
+        {!edit && (
           <ChannelSection
             title={
               !ch?.channelId ? (
@@ -538,21 +450,19 @@ export default function Channel({ channel, newChannel = false }: PpChannel) {
             <AddImage
               currentImagePath={ch?.imagePath}
               onSave={setChannelImage}
-              saveOnChange={newChannel}
+              saveOnChange={edit}
             />
           </div>
         </ChannelSection>
 
-        {newChannel && (
-          <Fragment>
-            <div className="h-12 flex justify-center mx-auto">
-              <Button loading={isLoading} onClick={createChannel}>
-                Create channel
-              </Button>
-            </div>
-          </Fragment>
+        {edit && (
+          <div className="h-12 flex w-1/2 justify-center mx-auto">
+            <Button type="submit" loading={isLoading}>
+              {isNew ? "Create" : "Save"}
+            </Button>
+          </div>
         )}
-      </div>
+      </form>
     </div>
   );
 }

@@ -7,7 +7,6 @@ import {
   TransactWriteItemsCommandOutput,
 } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { StChannel } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { ApiResponse } from "@/app/model/errors";
 

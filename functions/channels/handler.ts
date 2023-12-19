@@ -24,10 +24,12 @@ import { Api } from "sst/node/api";
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 const s3 = new S3Client({ region: "us-east-1" });
 
-export type WithImage = {
+export type TpImage = {
   fileBase64: string;
   fileType: string;
 };
+
+type Request = Partial<StChannel & TpImage>;
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
@@ -49,22 +51,18 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         };
       }
 
-      const req = JSON.parse(event.body) as Partial<StChannel & WithImage>;
+      const req = JSON.parse(event.body) as Request;
+      let obj: Partial<StChannel> = req;
 
       if (req.fileBase64 && req.fileType) {
-        const buffer = Buffer.from(req.fileBase64, "base64");
-        const imageKey = `${req.id}/${uuidv4()}`;
-        const imageBucket = Bucket.ChannelImagesBucket.bucketName;
-
-        await s3PutImage(buffer, imageKey, imageBucket, req.fileType);
-
-        req.imagePath = `https://${imageBucket}.s3.amazonaws.com/${imageKey}`;
-        delete req.fileBase64;
-        delete req.fileType;
+        obj = await addImagePathToObj(
+          { fileBase64: req.fileBase64, fileType: req.fileType },
+          obj
+        );
       }
 
       try {
-        const res = await ddbPutChannel(req);
+        const res = await ddbPutChannel(obj);
 
         return ApiResponse({
           status: 200,
@@ -100,8 +98,55 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         });
       }
 
-      const req = JSON.parse(event.body) as Partial<StChannel>;
-      const res = await ddbUpdateChannel(req.id as string, req);
+      const req = JSON.parse(event.body) as Request;
+      let obj: Partial<StChannel> = req;
+
+      const commands = [];
+
+      /**
+       * If the username was updated, we attempt to need to verify that the new username is unique
+       */
+      if (req.username) {
+        const ch = await ddbGetChannelById(req.id as string);
+        // If the username wasn't changed, nothing to do
+        if (ch?.username !== req.username) {
+          // Delete old username from UniqueChannels table
+          commands.push({
+            Delete: {
+              TableName: Table.UniqueChannels.tableName,
+              Key: marshall({ username: ch?.username }),
+            },
+          });
+
+          // Add new username to UniqueChannels table
+          commands.push({
+            Put: {
+              TableName: Table.UniqueChannels.tableName,
+              Item: marshall({ username: req.username, id: req.id }),
+              ConditionExpression: "attribute_not_exists(username)",
+            },
+          });
+        }
+      }
+
+      /**
+       * If a new image was uploaded, we need to upload it to S3
+       */
+      if (req.fileBase64 && req.fileType) {
+        obj = await addImagePathToObj(
+          { fileBase64: req.fileBase64, fileType: req.fileType },
+          obj
+        );
+      }
+
+      const updateChannel = await ddbUpdateChannelTransactItem(obj);
+      commands.push(updateChannel);
+
+      const res = await dynamoDb.send(
+        new TransactWriteItemsCommand({
+          TransactItems: commands,
+        })
+      );
 
       return ApiResponse({
         status: 200,
@@ -180,7 +225,7 @@ async function ddbPutChannel(
     Put: {
       TableName: Table.UniqueChannels.tableName,
       Item: marshall(
-        { username: channel.username, id: channel.id },
+        { username: channel.username?.toLowerCase(), id: channel.id },
         { removeUndefinedValues: true }
       ),
       ConditionExpression: "attribute_not_exists(username)",
@@ -217,56 +262,65 @@ async function ddbPutChannel(
   return response;
 }
 
-async function ddbUpdateChannel(
-  id: string,
+async function ddbUpdateChannelTransactItem(
   channel: Partial<StChannel>
-): Promise<StChannel | undefined> {
+): Promise<TransactWriteItem> {
   const updateExpressionParts = [];
   const expressionAttributeValues: Record<string, AttributeValue> = {};
   const expressionAttributeNames: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(channel)) {
-    if (key !== "id") {
-      const attributeName = `#${key}`;
-      const attributeValue = `:${key}`;
+    if (key === "id") {
+      continue;
+    }
+    const attributeName = `#${key}`;
+    const attributeValue = `:${key}`;
 
-      updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
-      expressionAttributeNames[attributeName] = key;
+    updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
+    expressionAttributeNames[attributeName] = key;
 
-      if (typeof value === "string") {
-        expressionAttributeValues[attributeValue] = { S: value };
-      } else if (Array.isArray(value)) {
-        // Handle pricing array separately
-        if (key === "pricing") {
-          const pricingArray = value.map((item) => ({
-            M: {
-              id: { S: item.id! },
-              usd: { N: item.usd.toString() },
-              frequency: { S: item.frequency },
-            },
-          }));
-          expressionAttributeValues[attributeValue] = { L: pricingArray };
-        }
+    if (typeof value === "string") {
+      expressionAttributeValues[attributeValue] = { S: value };
+    } else if (Array.isArray(value)) {
+      // Handle pricing array separately
+      if (key === "pricing") {
+        const pricingArray = value.map((item) => ({
+          M: {
+            id: { S: item.id! },
+            usd: { N: item.usd.toString() },
+            frequency: { S: item.frequency },
+          },
+        }));
+        expressionAttributeValues[attributeValue] = { L: pricingArray };
       }
     }
   }
 
-  const { Attributes } = await dynamoDb.send(
-    new UpdateItemCommand({
+  return {
+    Update: {
       TableName: Table.Channels.tableName,
       Key: {
-        id: { S: id },
+        id: { S: channel.id! },
       },
       UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
-      ReturnValues: "ALL_NEW",
-    })
-  );
+    },
+  };
+}
 
-  if (!Attributes) {
-    return undefined;
-  }
+async function addImagePathToObj(
+  img: TpImage,
+  channel: Partial<StChannel>
+): Promise<Partial<StChannel>> {
+  const buffer = Buffer.from(img.fileBase64!, "base64");
+  const imageKey = `${channel.id}/${uuidv4()}`;
+  const imageBucket = Bucket.ChannelImagesBucket.bucketName;
 
-  return unmarshall(Attributes) as StChannel;
+  await s3PutImage(buffer, imageKey, imageBucket, img.fileType!);
+
+  return {
+    ...channel,
+    imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
+  };
 }

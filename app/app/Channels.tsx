@@ -2,7 +2,7 @@
 import React from "react";
 import { StChannel } from "../model/types";
 import Button from "../components/Button";
-import ChannelSection from "./channels/[id]/ChannelSection";
+import ChannelSection from "./channels/ChannelSection";
 import { FaArrowRight } from "react-icons/fa";
 import { isEmptyArray, isFalseyOrEmptyArray } from "./utils";
 import RevenueChart, {
