@@ -1,12 +1,11 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { StChannel, StPriceFrequency } from "../../model/types";
+import { StChannel } from "../../model/types";
 import TextField from "../../components/TextField";
-import { Fragment, useCallback, useRef, useState } from "react";
+import { Fragment, useState } from "react";
 import PriceInput from "../../components/PriceInput";
 import { useRouter } from "next/navigation";
 import AddImage from "@/app/components/AddImage";
-import { TpSetChannelImageResponse } from "@/functions/setChannelImage/handler";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
 import ChannelSection from "./ChannelSection";
 import Button from "@/app/components/Button";
@@ -74,7 +73,7 @@ export default function Channel({
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState<TpImage | null>(null);
-  const { register, handleSubmit } = useForm<TpValues>({
+  const { getValues, formState, register, handleSubmit } = useForm<TpValues>({
     resolver: yupResolver(schema),
     defaultValues: {
       username: ch?.username,
@@ -116,86 +115,6 @@ export default function Channel({
     });
   };
 
-  const setPrice = useCallback(
-    async (price: string, frequency: StPriceFrequency) => {
-      setIsLoading(true);
-      const parsedPrice = parseFloat(price);
-      const decimalCount = (price.split(".")[1] || "").length;
-
-      if (isNaN(parsedPrice)) {
-        throw new Error("Price must be a valid number");
-      }
-
-      if (decimalCount > 2) {
-        throw new Error("Price can only have up to 2 decimal places");
-      }
-
-      const pricing = [
-        {
-          frequency,
-          usd: parsedPrice * 100,
-        },
-      ];
-
-      await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          id: ch?.id,
-          pricing,
-        }),
-      });
-
-      snack({
-        key: "pricing-updated",
-        text: "Updated",
-        dismissable: false,
-        variant: "success",
-      });
-      setCh({ ...ch, pricing } as StChannel);
-      setIsLoading(false);
-    },
-    [session.data?.accessToken]
-  );
-
-  const setChannelImage = async (fileBase64: string, fileType: string) => {
-    if (edit) {
-      setImage({ fileBase64, fileType });
-      return;
-    }
-
-    setIsLoading(true);
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/setChannelImage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.data?.accessToken}`,
-        },
-        body: JSON.stringify({
-          channelId: ch?.id,
-          fileBase64,
-          fileType,
-        }),
-      }
-    );
-
-    const { imagePath } = (await res.json()) as TpSetChannelImageResponse;
-
-    snack({
-      key: "image-updated",
-      text: "Updated",
-      variant: "success",
-    });
-    setCh({ ...ch, imagePath } as StChannel);
-    setIsLoading(false);
-  };
-
   const onSubmit = async ({
     description,
     title,
@@ -220,45 +139,6 @@ export default function Channel({
       });
       return;
     }
-
-    // const parsedPrice = parseFloat(price);
-    // const decimalCount = (price.split(".")[1] || "").length;
-
-    // if (isNaN(parsedPrice)) {
-    //   snack({
-    //     key: "price-invalid",
-    //     text: "Price must be a valid number",
-    //     variant: "error",
-    //   });
-    //   return;
-    // }
-
-    // if (decimalCount > 2) {
-    //   snack({
-    //     key: "price-invalid",
-    //     text: "Price can only have up to 2 decimal places",
-    //     variant: "error",
-    //   });
-    //   return;
-    // }
-
-    // if (!frequency) {
-    //   snack({
-    //     key: "frequency-required",
-    //     text: "Frequency is required",
-    //     variant: "error",
-    //   });
-    //   return;
-    // }
-
-    // if (!image) {
-    //   snack({
-    //     key: "image-required",
-    //     text: "Please choose an image",
-    //     variant: "error",
-    //   });
-    //   return;
-    // }
 
     try {
       setIsLoading(true);
@@ -327,19 +207,23 @@ export default function Channel({
           <div className="mt-4">
             <TextField
               registerProps={register("username")}
+              errorMessage={formState.errors.username?.message}
               inputProps={{
                 size: 1,
               }}
               editMode={edit}
               defaultValue={ch?.username}
               pretext="members.page/"
-              onCopy={() =>
+              onCopy={() => {
+                navigator.clipboard.writeText(
+                  `members.page/${getValues("username")}`
+                );
                 snack({
                   key: "code-copied",
                   text: "URL copied",
                   variant: "success",
-                })
-              }
+                });
+              }}
             />
           </div>
         </ChannelSection>
@@ -347,6 +231,7 @@ export default function Channel({
           <p>Sell your page with a catchy title</p>
           <div className="mt-4">
             <TextField
+              errorMessage={formState.errors.title?.message}
               registerProps={register("title")}
               editMode={edit}
               defaultValue={ch?.title}
@@ -377,26 +262,8 @@ export default function Channel({
                 priceRegisterProps={register("price")}
                 frequencyRegisterProps={register("frequency")}
                 editMode={edit}
-                // onSave={
-                //   edit
-                //     ? undefined
-                //     : (price, frequency) => setPrice(price, frequency)
-                // }
               />
             </div>
-            {/* {ch?.pricing?.map((p) => (
-              <div key={p.id} className="mt-4">
-                <PriceInput
-                  defaultPrice={(p.usd / 100).toFixed(2)}
-                  defaultFrequency={p.frequency}
-                  onSave={
-                    edit
-                      ? undefined
-                      : (price, frequency) => setPrice(price, frequency)
-                  }
-                />
-              </div>
-            ))} */}
           </div>
         </ChannelSection>
 
@@ -449,7 +316,7 @@ export default function Channel({
           <div className="mt-4">
             <AddImage
               currentImagePath={ch?.imagePath}
-              onSave={setChannelImage}
+              onSave={setImage}
               saveOnChange={edit}
             />
           </div>

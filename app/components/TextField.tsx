@@ -13,6 +13,7 @@ type PpTextField = {
   pretext?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   registerProps: UseFormRegisterReturn;
+  errorMessage?: string;
 };
 
 const TextField = forwardRef<
@@ -22,64 +23,15 @@ const TextField = forwardRef<
   (
     {
       editMode = false,
-      // onSave,
       textarea,
       onCopy,
+      errorMessage,
       pretext,
       inputProps,
       registerProps,
     },
     ref
   ) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isEditing, setIsEditing] = useState(editMode);
-    // const [inputValue, setInputValue] = useState<string>(defaultValue ?? "");
-    const [errorMessage, setErrorMessage] = useState("");
-
-    const copyValue = () => {
-      // if (!inputValue) {
-      //   return;
-      // }
-      // navigator.clipboard.writeText(
-      //   pretext ? `${pretext}${inputValue}` : inputValue
-      // );
-      onCopy?.();
-    };
-
-    // const toggleEdit = async () => {
-    //   if (!onSave) {
-    //     return;
-    //   }
-    //   if (!isEditing) {
-    //     setIsEditing(true);
-    //     setTimeout(
-    //       () => (ref as React.RefObject<HTMLTextAreaElement>)?.current?.focus(),
-    //       0
-    //     );
-    //   } else {
-    //     try {
-    //       setIsSubmitting(true);
-    //       // await onSave(inputValue);
-    //       setIsSubmitting(false);
-    //       setIsEditing(false);
-    //       setErrorMessage("");
-    //     } catch (error) {
-    //       setIsSubmitting(false);
-    //       if (error instanceof Error) {
-    //         setErrorMessage(error.message || "An error occurred while saving");
-    //       }
-    //     } finally {
-    //       setIsEditing(false);
-    //     }
-    //   }
-    // };
-
-    // const handleInputChange: React.ChangeEventHandler<
-    //   HTMLInputElement | HTMLTextAreaElement
-    // > = (event) => {
-    //   setInputValue(event.target.value);
-    // };
-
     const inputClass = `flex flex-grow min-w-0 text-black bg-neutral-50 text-sm text-gray-600 focus:outline-none rounded-md py-2.5 px-1 ${
       pretext ? "" : "text-center"
     }`;
@@ -90,9 +42,7 @@ const TextField = forwardRef<
           <div className="flex border-zinc-300 border default-focus-within rounded-md bg-neutral-50">
             <textarea
               {...registerProps}
-              // value={inputValue}
-              // onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!editMode}
               className={inputClass}
             />
           </div>
@@ -105,32 +55,20 @@ const TextField = forwardRef<
             {pretext && <span className="font-bold pl-3 pr-1 ">{pretext}</span>}
             <input
               type="text"
-              // name="username"
               className={inputClass}
-              // ref={ref as React.RefObject<HTMLInputElement>}
-              // value={inputValue}
-              // onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!editMode}
               {...inputProps}
               {...registerProps}
             />
-            {onCopy && !isEditing && (
+            {onCopy && !editMode && (
               <div className="absolute right-4 inset-y-0 flex items-center">
-                <button type="button" onClick={() => copyValue()}>
+                <button type="button" onClick={onCopy}>
                   <FaCopy className="text-lg" />
                 </button>
               </div>
             )}
           </div>
         )}
-        {/* {onSave && (
-          <Button
-            onClick={async () => await toggleEdit()}
-            loading={isSubmitting}
-          >
-            {isEditing ? "Save" : "Edit"}
-          </Button>
-        )} */}
 
         <div
           className={`mt-2 h-8 text-sm ${errorMessage ? "text-red-600" : ""} ${

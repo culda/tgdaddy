@@ -34,7 +34,7 @@ export default async function Page({ params }: PpChannel) {
 
   return (
     <PageLayout title={channel?.username}>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 mb-4">
         <Button href={`/app/channels/${channel.id}/edit`} variant="secondary">
           Edit Details
         </Button>

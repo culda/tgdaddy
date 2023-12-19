@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { useSnackbar } from "./SnackbarProvider";
+import { TpImage } from "@/functions/channels/handler";
 
 type PpAddImage = {
   currentImagePath?: string;
-  onSave: (fileBase64: string, fileType: string) => Promise<void>;
+  onSave: ({ fileBase64, fileType }: TpImage) => void;
   saveOnChange?: boolean;
 };
 
@@ -27,7 +28,10 @@ export default function AddImage({
       reader.onloadend = async () => {
         const buffer = reader.result as ArrayBuffer;
         const base64 = Buffer.from(buffer).toString("base64");
-        await onSave(base64, image.type);
+        await onSave({
+          fileBase64: base64,
+          fileType: image.type,
+        });
         setIsSubmitting(false);
       };
       reader.readAsArrayBuffer(image);
