@@ -5,13 +5,13 @@ import Channel from "../Channel";
 import { nanoid } from "nanoid";
 
 type PpParams = {
-  searchParams: { username: string };
+  searchParams: { username?: string };
 };
 
 export default async function Page({ searchParams }: PpParams) {
   const channel: Partial<StChannel> = {
     id: nanoid(10),
-    username: searchParams.username.toLowerCase(),
+    username: searchParams.username?.toLowerCase(),
     telegramLinkCode: `LINK-${nanoid(4)}`,
   };
 

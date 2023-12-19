@@ -259,6 +259,10 @@ export default function Channel({
           <div>
             <div className="mt-4">
               <PriceInput
+                errorMessage={
+                  formState.errors.price?.message ||
+                  formState.errors.frequency?.message
+                }
                 priceRegisterProps={register("price")}
                 frequencyRegisterProps={register("frequency")}
                 editMode={edit}
