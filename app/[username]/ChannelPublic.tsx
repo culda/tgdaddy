@@ -80,7 +80,7 @@ export default function Channel({ channel, sub, link }: PpChannel) {
           <img
             className="w-5/6 mb-10 object-cover object-center rounded"
             alt="hero"
-            src={channel?.imagePath}
+            src={channel?.imagePath ?? "/images/channel-default.webp"}
           />
           <div className="text-center lg:w-2/3 w-full">
             <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">

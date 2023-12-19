@@ -24,6 +24,11 @@ export default async function Page({ params }: PpChannel) {
         cache: "no-cache",
       }
     );
+
+    if (!res.ok) {
+      return undefined;
+    }
+
     return (await res.json()) as StChannel;
   };
 
@@ -93,7 +98,9 @@ export default async function Page({ params }: PpChannel) {
         )}
         <AccountWidget />
       </div>
-      <ChannelPublic channel={channel} sub={sub} link={link} />
+      <div className="mt-8">
+        <ChannelPublic channel={channel} sub={sub} link={link} />
+      </div>
     </div>
   );
 }

@@ -3,13 +3,11 @@ import { Table } from "sst/node/table";
 import {
   AttributeValue,
   DynamoDBClient,
-  PutItemCommand,
   ScanCommand,
   TransactGetItemsCommandOutput,
   TransactWriteItem,
   TransactWriteItemsCommand,
   TransactionCanceledException,
-  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StChannel } from "../../app/model/types";
@@ -19,7 +17,6 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { Bucket } from "sst/node/bucket";
 import { ApiResponse } from "@/app/model/errors";
-import { Api } from "sst/node/api";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 const s3 = new S3Client({ region: "us-east-1" });
