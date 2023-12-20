@@ -63,7 +63,7 @@ const schema = yup.object().shape({
   frequency: yup.string().required("Frequency is required"),
 });
 
-export default function PageScreen({
+export default function PageScene({
   page,
   isNew = false,
   edit = false,

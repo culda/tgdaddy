@@ -44,16 +44,16 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   ) as TpJoinPageRequest;
 
   const user = await ddbGetUserById(userId);
-  const channel = await ddbGetPageById(pageId);
-  if (!channel) {
+  const page = await ddbGetPageById(pageId);
+  if (!page) {
     return ApiResponse({
       status: 400,
-      message: "Channel not found",
+      message: "Page not found",
     });
   }
-  const creatorUser = await ddbGetUserById(channel.userId);
+  const creatorUser = await ddbGetUserById(page.userId);
   const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
-  const pricing: StPagePrice | undefined = channel?.pricing?.find(
+  const pricing: StPagePrice | undefined = page?.pricing?.find(
     (p) => p.id === priceId
   );
 
@@ -97,7 +97,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   if (products.data.length === 0) {
     product = await client.products.create(
       {
-        name: channel.username,
+        name: page.username,
       },
       {
         stripeAccount: creatorStripeAccountId,

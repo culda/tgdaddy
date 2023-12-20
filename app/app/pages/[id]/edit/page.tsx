@@ -1,7 +1,7 @@
 import ContentLayout from "@/app/components/ContentLayout";
 import React from "react";
 import { StPage } from "@/app/model/types";
-import PageScreen from "../../PageScreen";
+import PageScene from "../../PageScene";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
 
 type PpParams = {
@@ -27,7 +27,7 @@ export default async function Page({ params }: PpParams) {
   const page = await fetchPage();
   return (
     <ContentLayout title="Edit Page">
-      <PageScreen edit page={page} />
+      <PageScene edit page={page} />
     </ContentLayout>
   );
 }

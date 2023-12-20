@@ -34,16 +34,14 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
       const { username } = JSON.parse(event.body) as TpGetSubscriptionRequest;
       console.log(username);
-      const channel = await ddbGetPageByUsername(username);
-      if (!channel) {
+      const page = await ddbGetPageByUsername(username);
+      if (!page) {
         return ApiResponse({
           status: 400,
           message: "Channel not found",
         });
       }
-      console.log(channel);
-      const sub = await dbGetSubscription(userId, channel?.id as string);
-      console.log(sub);
+      const sub = await dbGetSubscription(userId, page?.id as string);
 
       return ApiResponse({
         status: 200,
@@ -59,12 +57,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
 async function dbGetSubscription(
   userId: string,
-  channelId: string
+  pageId: string
 ): Promise<StConsumerSubscription | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({
       TableName: Table.ConsumerSubscriptions.tableName,
-      Key: marshall({ id: `${userId}/${channelId}` }),
+      Key: marshall({ id: `${userId}/${pageId}` }),
     })
   );
 

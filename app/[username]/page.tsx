@@ -14,7 +14,7 @@ type PpPage = {
 export default async function Page({ params }: PpPage) {
   const session = await auth();
 
-  const fetchChannel = async () => {
+  const fetchPage = async () => {
     const res = await fetch(
       `${process.env.API_ENDPOINT}/pages/${params.username}`,
       {
@@ -57,7 +57,7 @@ export default async function Page({ params }: PpPage) {
     return data as StConsumerSubscription;
   };
 
-  const page = await fetchChannel();
+  const page = await fetchPage();
 
   if (!page) {
     return notFound();
@@ -85,12 +85,12 @@ export default async function Page({ params }: PpPage) {
     }
   }
 
-  const myChannel = page.userId === session?.user?.id;
+  const myPage = page.userId === session?.user?.id;
 
   return (
     <div className="relative max-w-md flex mx-auto">
       <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
-        {myChannel && (
+        {myPage && (
           <Button variant="secondary" href={`/app/pages/${page.id}`}>
             {" "}
             Manage{" "}

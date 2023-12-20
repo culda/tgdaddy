@@ -30,7 +30,7 @@ export default function PagePublic({ page, sub, link }: PpPage) {
   useEffect(() => {
     if (!page?.pricing) {
       snack({
-        key: "channel-no-pricing",
+        key: "page-no-pricing",
         text: "Not verified",
         variant: "error",
       });
@@ -59,7 +59,7 @@ export default function PagePublic({ page, sub, link }: PpPage) {
 
     if (!joinRes.ok) {
       snack({
-        key: "channel-join",
+        key: "page-join",
         text: data.message,
         variant: "error",
       });

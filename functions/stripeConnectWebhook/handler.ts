@@ -17,12 +17,12 @@ export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export type CheckoutCompletedMetadata = {
   userId: string;
-  channelId: string;
+  pageId: string;
 };
 
 export type SubscriptionDeletedMetadata = {
   userId: string;
-  channelId: string;
+  pageId: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -53,8 +53,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 };
 
 async function handleSubscriptionDeleted(data: Stripe.Subscription) {
-  const { userId, channelId } = data.metadata as SubscriptionDeletedMetadata;
-  const subId = `${userId}/${channelId}`;
+  const { userId, pageId } = data.metadata as SubscriptionDeletedMetadata;
+  const subId = `${userId}/${pageId}`;
 
   // delete subscription
   await dynamoDb.send(
@@ -68,11 +68,11 @@ async function handleSubscriptionDeleted(data: Stripe.Subscription) {
 async function handleCheckoutCompleted(
   data: Stripe.CheckoutSessionCompletedEvent
 ) {
-  const { userId, channelId } = data.data.object
+  const { userId, pageId } = data.data.object
     .metadata as CheckoutCompletedMetadata;
 
   const consumerSub: StConsumerSubscription = {
-    id: `${userId}/${channelId}`,
+    id: `${userId}/${pageId}`,
     consumerStripeCustomerId: data.data.object.customer as string,
     consumerStripeSubscriptionId: data.data.object.subscription as string,
   };

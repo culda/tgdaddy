@@ -3,21 +3,21 @@ import { auth } from "../api/auth/[...nextauth]/auth";
 import { client } from "../api/stripe/stripe";
 import ContentLayout from "../components/ContentLayout";
 import { StPage, StConnectStatus, StUser } from "../model/types";
-import Channels from "./Pages";
+import Pages from "./Pages";
 import { TpRevenueChartData, TpTotalRevenue } from "../components/RevenueChart";
 import Button from "../components/Button";
 
 export default async function Page() {
   const session = await auth();
 
-  const channelsRes = await fetch(`${process.env.API_ENDPOINT}/pages`, {
+  const pagesRes = await fetch(`${process.env.API_ENDPOINT}/pages`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
       ContentType: "application/json",
     },
     cache: "no-cache",
   });
-  const channels: StPage[] = await channelsRes.json();
+  const pages: StPage[] = await pagesRes.json();
 
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {
@@ -46,9 +46,9 @@ export default async function Page() {
           </Button>
         </div>
       )}
-      <Channels
+      <Pages
         chartData={revenueData?.chart}
-        channels={channels}
+        pages={pages}
         totalRevenue={revenueData?.total}
       />
     </ContentLayout>

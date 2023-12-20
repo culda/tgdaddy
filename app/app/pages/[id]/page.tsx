@@ -1,7 +1,7 @@
 import ContentLayout from "@/app/components/ContentLayout";
 import { StPage } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
-import Channel from "../PageScreen";
+import PageScene from "../PageScene";
 import { notFound } from "next/navigation";
 import Button from "@/app/components/Button";
 
@@ -43,7 +43,7 @@ export default async function Page({ params }: PpPage) {
         </Button> */}
       </div>
 
-      <Channel page={page} />
+      <PageScene page={page} />
     </ContentLayout>
   );
 }

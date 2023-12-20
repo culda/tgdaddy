@@ -1,7 +1,7 @@
 import ContentLayout from "@/app/components/ContentLayout";
 import React from "react";
 import { StPage } from "@/app/model/types";
-import PageScreen from "../PageScreen";
+import PageScene from "../PageScene";
 import { nanoid } from "nanoid";
 
 type PpParams = {
@@ -17,7 +17,7 @@ export default async function Page({ searchParams }: PpParams) {
 
   return (
     <ContentLayout title="Add Page">
-      <PageScreen edit isNew page={page} />
+      <PageScene edit isNew page={page} />
     </ContentLayout>
   );
 }

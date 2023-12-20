@@ -11,12 +11,12 @@ import RevenueChart, {
 } from "../components/RevenueChart";
 
 type PpPages = {
-  channels?: StPage[];
+  pages?: StPage[];
   chartData?: TpRevenueChartData;
   totalRevenue?: TpTotalRevenue;
 };
 
-export default function Pages({ chartData, channels, totalRevenue }: PpPages) {
+export default function Pages({ chartData, pages, totalRevenue }: PpPages) {
   return (
     <div className="mt-16">
       <div title="💸 Revenue">
@@ -28,18 +28,16 @@ export default function Pages({ chartData, channels, totalRevenue }: PpPages) {
         <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">
           Pages
         </h2>
-        {isFalseyOrEmptyArray(channels) && (
-          <h2>You don't have any pages yet. </h2>
-        )}
+        {isFalseyOrEmptyArray(pages) && <h2>You don't have any pages yet. </h2>}
 
-        {!isEmptyArray(channels) &&
-          channels.map((channel) => (
+        {!isEmptyArray(pages) &&
+          pages.map((page) => (
             <Button
               variant={"secondary"}
-              key={channel.id}
-              href={`/app/pages/${channel.id.split("/")[0]}`}
+              key={page.id}
+              href={`/app/pages/${page.id.split("/")[0]}`}
             >
-              {channel.username}
+              {page.username}
             </Button>
           ))}
         <Button href={`/app/pages/add`}>

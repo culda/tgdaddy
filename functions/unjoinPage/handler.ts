@@ -17,7 +17,7 @@ const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
 export type TpUnjoinChannelRequest = {
-  channelId: string;
+  pageId: string;
 };
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
@@ -38,18 +38,18 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     };
   }
 
-  const { channelId } = JSON.parse(event.body) as TpUnjoinChannelRequest;
+  const { pageId } = JSON.parse(event.body) as TpUnjoinChannelRequest;
 
-  const channel = await ddbGetPageById(channelId);
-  if (!channel) {
+  const page = await ddbGetPageById(pageId);
+  if (!page) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "Channel not found" }),
     };
   }
-  const creatorUserId = channel.userId;
+  const creatorUserId = page.userId;
   const creatorUser = await ddbGetUserById(creatorUserId);
-  const subId = `${userId}/${channelId}`;
+  const subId = `${userId}/${pageId}`;
   const sub = await ddbGetSub(subId);
 
   await client.subscriptions.cancel(
