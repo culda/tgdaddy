@@ -1,8 +1,7 @@
-import PageLayout from "@/app/components/PageLayout";
+import ContentLayout from "@/app/components/ContentLayout";
 import React from "react";
 import { StPage } from "@/app/model/types";
-import { nanoid } from "nanoid";
-import Channel from "../../Channel";
+import PageScreen from "../../PageScreen";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
 
 type PpParams = {
@@ -11,9 +10,9 @@ type PpParams = {
 
 export default async function Page({ params }: PpParams) {
   const session = await auth();
-  const fetchChannel = async () => {
+  const fetchPage = async () => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/channels?id=${params.id}`,
+      `${process.env.API_ENDPOINT}/pages?id=${params.id}`,
       {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
@@ -25,10 +24,10 @@ export default async function Page({ params }: PpParams) {
     return (await res.json()) as StPage;
   };
 
-  const channel = await fetchChannel();
+  const page = await fetchPage();
   return (
-    <PageLayout title="Edit Page">
-      <Channel edit channel={channel} />
-    </PageLayout>
+    <ContentLayout title="Edit Page">
+      <PageScreen edit page={page} />
+    </ContentLayout>
   );
 }

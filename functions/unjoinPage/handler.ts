@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { ddbGetChannelById, ddbGetUserById } from "../utils";
+import { ddbGetPageById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import {
@@ -40,7 +40,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
   const { channelId } = JSON.parse(event.body) as TpUnjoinChannelRequest;
 
-  const channel = await ddbGetChannelById(channelId);
+  const channel = await ddbGetPageById(channelId);
   if (!channel) {
     return {
       statusCode: 400,

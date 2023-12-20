@@ -1,14 +1,14 @@
-type PpPageLayout = {
+type PpContentLayout = {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
 };
 
-export default function PageLayout({
+export default function ContentLayout({
   subtitle,
   title,
   children,
-}: PpPageLayout) {
+}: PpContentLayout) {
   return (
     <div className="flex flex-col py-6 max-w-md">
       {title ? (

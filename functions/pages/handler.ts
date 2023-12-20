@@ -12,7 +12,7 @@ import {
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StPage } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
-import { ddbGetChannelById } from "../utils";
+import { ddbGetPageById } from "../utils";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { Bucket } from "sst/node/bucket";
@@ -31,6 +31,7 @@ type Request = Partial<StPage & TpImage>;
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
+  console.log(event);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {
@@ -59,7 +60,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
 
       try {
-        const res = await ddbPutChannel(obj);
+        const res = await ddbPutPage(obj);
 
         return ApiResponse({
           status: 200,
@@ -104,21 +105,21 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
        * If the username was updated, we attempt to need to verify that the new username is unique
        */
       if (req.username) {
-        const ch = await ddbGetChannelById(req.id as string);
+        const ch = await ddbGetPageById(req.id as string);
         // If the username wasn't changed, nothing to do
         if (ch?.username !== req.username) {
-          // Delete old username from UniqueChannels table
+          // Delete old username from UniquePages table
           commands.push({
             Delete: {
-              TableName: Table.UniqueChannels.tableName,
+              TableName: Table.UniquePages.tableName,
               Key: marshall({ username: ch?.username }),
             },
           });
 
-          // Add new username to UniqueChannels table
+          // Add new username to UniquePages table
           commands.push({
             Put: {
-              TableName: Table.UniqueChannels.tableName,
+              TableName: Table.UniquePages.tableName,
               Item: marshall({ username: req.username, id: req.id }),
               ConditionExpression: "attribute_not_exists(username)",
             },
@@ -136,8 +137,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         );
       }
 
-      const updateChannel = await ddbUpdateChannelTransactItem(obj);
-      commands.push(updateChannel);
+      const updatePage = await ddbUpdatePageTransactItem(obj);
+      commands.push(updatePage);
 
       const res = await dynamoDb.send(
         new TransactWriteItemsCommand({
@@ -153,23 +154,23 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     case "GET": {
       if (event.queryStringParameters?.id) {
         const id = event.queryStringParameters?.id;
-        const channel = await ddbGetChannelById(id);
-        if (userId !== channel?.userId) {
+        const page = await ddbGetPageById(id);
+        if (userId !== page?.userId) {
           return ApiResponse({
             status: 403,
           });
         }
         return ApiResponse({
           status: 200,
-          body: channel,
+          body: page,
         });
       }
 
-      const channels = await dbGetUserChannels(userId);
+      const pages = await dbGetUserPages(userId);
 
       return ApiResponse({
         status: 200,
-        body: channels,
+        body: pages,
       });
     }
     default:
@@ -195,10 +196,10 @@ async function s3PutImage(
   );
 }
 
-async function dbGetUserChannels(id: string): Promise<StPage[] | undefined> {
+async function dbGetUserPages(id: string): Promise<StPage[] | undefined> {
   const { Items } = await dynamoDb.send(
     new ScanCommand({
-      TableName: Table.Channels.tableName,
+      TableName: Table.Pages.tableName,
       FilterExpression: "userId = :userId",
       ExpressionAttributeValues: {
         ":userId": { S: id },
@@ -213,16 +214,16 @@ async function dbGetUserChannels(id: string): Promise<StPage[] | undefined> {
   return Items.map((item) => unmarshall(item)) as StPage[];
 }
 
-async function ddbPutChannel(
-  channel: Partial<StPage>
+async function ddbPutPage(
+  page: Partial<StPage>
 ): Promise<TransactGetItemsCommandOutput> {
   const commands: TransactWriteItem[] = [];
 
   commands.push({
     Put: {
-      TableName: Table.UniqueChannels.tableName,
+      TableName: Table.UniquePages.tableName,
       Item: marshall(
-        { username: channel.username?.toLowerCase(), id: channel.id },
+        { username: page.username?.toLowerCase(), id: page.id },
         { removeUndefinedValues: true }
       ),
       ConditionExpression: "attribute_not_exists(username)",
@@ -231,8 +232,8 @@ async function ddbPutChannel(
 
   commands.push({
     Put: {
-      TableName: Table.Channels.tableName,
-      Item: marshall(channel, { removeUndefinedValues: true }),
+      TableName: Table.Pages.tableName,
+      Item: marshall(page, { removeUndefinedValues: true }),
       ConditionExpression: "attribute_not_exists(id)",
     },
   });
@@ -242,8 +243,8 @@ async function ddbPutChannel(
       TableName: Table.TelegramLinkCodes.tableName,
       Item: marshall(
         {
-          code: channel.telegramLinkCode,
-          channelId: channel.id,
+          code: page.telegramLinkCode,
+          pageId: page.id,
         },
         { removeUndefinedValues: true }
       ),
@@ -259,14 +260,14 @@ async function ddbPutChannel(
   return response;
 }
 
-async function ddbUpdateChannelTransactItem(
-  channel: Partial<StPage>
+async function ddbUpdatePageTransactItem(
+  page: Partial<StPage>
 ): Promise<TransactWriteItem> {
   const updateExpressionParts = [];
   const expressionAttributeValues: Record<string, AttributeValue> = {};
   const expressionAttributeNames: Record<string, string> = {};
 
-  for (const [key, value] of Object.entries(channel)) {
+  for (const [key, value] of Object.entries(page)) {
     if (key === "id") {
       continue;
     }
@@ -295,9 +296,9 @@ async function ddbUpdateChannelTransactItem(
 
   return {
     Update: {
-      TableName: Table.Channels.tableName,
+      TableName: Table.Pages.tableName,
       Key: {
-        id: { S: channel.id! },
+        id: { S: page.id! },
       },
       UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
       ExpressionAttributeNames: expressionAttributeNames,
@@ -308,16 +309,16 @@ async function ddbUpdateChannelTransactItem(
 
 async function addImagePathToObj(
   img: TpImage,
-  channel: Partial<StPage>
+  page: Partial<StPage>
 ): Promise<Partial<StPage>> {
   const buffer = Buffer.from(img.fileBase64!, "base64");
-  const imageKey = `${channel.id}/${uuidv4()}`;
-  const imageBucket = Bucket.ChannelImagesBucket.bucketName;
+  const imageKey = `${page.id}/${uuidv4()}`;
+  const imageBucket = Bucket.PagesImagesBucket.bucketName;
 
   await s3PutImage(buffer, imageKey, imageBucket, img.fileType!);
 
   return {
-    ...channel,
+    ...page,
     imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
   };
 }

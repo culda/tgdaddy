@@ -49,7 +49,7 @@ async function handleUpdate(u: TelegramUpdate) {
 
         await dynamoDb.send(
           new UpdateItemCommand({
-            TableName: Table.Channels.tableName,
+            TableName: Table.Pages.tableName,
             Key: marshall({ id: channelId }),
             UpdateExpression: "SET channelId = :channelId",
             ExpressionAttributeValues: {

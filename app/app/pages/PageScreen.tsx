@@ -7,7 +7,7 @@ import PriceInput from "../../components/PriceInput";
 import { useRouter } from "next/navigation";
 import AddImage from "@/app/components/AddImage";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
-import ChannelSection from "./ChannelSection";
+import PageSection from "./PageSection";
 import Button from "@/app/components/Button";
 import { FaCheckCircle, FaCopy } from "react-icons/fa";
 import { useForm } from "react-hook-form";
@@ -15,8 +15,8 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { nanoid } from "nanoid";
 
-type PpChannel = {
-  channel: Partial<StPage>;
+type PpPage = {
+  page: Partial<StPage>;
   isNew?: boolean;
   edit?: boolean;
 };
@@ -63,32 +63,32 @@ const schema = yup.object().shape({
   frequency: yup.string().required("Frequency is required"),
 });
 
-export default function Channel({
-  channel,
+export default function PageScreen({
+  page,
   isNew = false,
   edit = false,
-}: PpChannel) {
+}: PpPage) {
   const snack = useSnackbar();
   const router = useRouter();
-  const [ch, setCh] = useState(channel);
+  const [pg, setPg] = useState(page);
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState<TpImage | null>(null);
   const { getValues, formState, register, handleSubmit } = useForm<TpValues>({
     resolver: yupResolver(schema),
     defaultValues: {
-      username: ch?.username,
-      title: ch?.title,
-      description: ch?.description,
-      price: ch?.pricing?.[0] && ch.pricing[0].usd / 100,
-      frequency: ch?.pricing?.[0] && ch.pricing[0].frequency,
+      username: pg?.username,
+      title: pg?.title,
+      description: pg?.description,
+      price: pg?.pricing?.[0] && pg.pricing[0].usd / 100,
+      frequency: pg?.pricing?.[0] && pg.pricing[0].frequency,
     },
   });
 
   const checkTelegram = async () => {
     setIsLoading(true);
-    const channelRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels?id=${ch?.id}`,
+    const pageRes = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/pages?id=${pg?.id}`,
       {
         method: "GET",
         headers: {
@@ -98,17 +98,17 @@ export default function Channel({
       }
     );
 
-    const { channelId } = (await channelRes.json()) as StPage;
+    const { channelId } = (await pageRes.json()) as StPage;
 
-    setCh({ ...ch, channelId } as StPage);
+    setPg({ ...pg, channelId } as StPage);
     setIsLoading(false);
   };
 
   const copyTelegramCode = () => {
-    if (!ch?.telegramLinkCode) {
+    if (!pg?.telegramLinkCode) {
       return;
     }
-    navigator.clipboard.writeText(ch.telegramLinkCode);
+    navigator.clipboard.writeText(pg.telegramLinkCode);
     snack({
       key: "code-copied",
       text: "Code copied",
@@ -126,7 +126,7 @@ export default function Channel({
     if (session.status !== "authenticated") {
       snack({
         key: "not-authenticated",
-        text: "You must be logged in to create a channel",
+        text: "You must be logged in to create a page",
         variant: "error",
       });
       return;
@@ -145,7 +145,7 @@ export default function Channel({
       setIsLoading(true);
 
       const putRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/channels`,
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/pages`,
         {
           method: isNew ? "PUT" : "POST",
           headers: {
@@ -153,7 +153,7 @@ export default function Channel({
             Authorization: `Bearer ${session.data?.accessToken}`,
           },
           body: JSON.stringify({
-            id: ch?.id,
+            id: pg?.id,
             userId: session.data?.user?.id,
             pricing: [
               {
@@ -164,7 +164,7 @@ export default function Channel({
             ],
             fileBase64: image?.fileBase64,
             fileType: image?.fileType,
-            telegramLinkCode: ch?.telegramLinkCode,
+            telegramLinkCode: pg?.telegramLinkCode,
             description,
             title,
             username,
@@ -174,20 +174,20 @@ export default function Channel({
 
       if (putRes.status === 200) {
         snack({
-          key: "channel-success",
+          key: "page-success",
           text: "Success",
           variant: "success",
         });
-        router.push(`/app/channels/${ch?.id}`);
+        router.push(`/app/pages/${pg?.id}`);
       } else if (putRes.status === 409) {
         snack({
-          key: "channel-create-failure",
+          key: "page-create-failure",
           text: "Username already exists",
           variant: "error",
         });
       } else {
         snack({
-          key: "channel-create-failure",
+          key: "page-create-failure",
           text: "Something went wrong",
           variant: "error",
         });
@@ -203,7 +203,7 @@ export default function Channel({
         onSubmit={handleSubmit(onSubmit)}
         className="container pt-5 mx-auto flex flex-wrap"
       >
-        <ChannelSection title="Username" isFirstSection>
+        <PageSection title="Username" isFirstSection>
           <p>This is the public URL of your page.</p>
           <div className="mt-4">
             <TextField
@@ -213,7 +213,7 @@ export default function Channel({
                 size: 1,
               }}
               editMode={edit}
-              defaultValue={ch?.username}
+              defaultValue={pg?.username}
               pretext="members.page/"
               onCopy={() => {
                 navigator.clipboard.writeText(
@@ -227,19 +227,19 @@ export default function Channel({
               }}
             />
           </div>
-        </ChannelSection>
-        <ChannelSection title="Title">
+        </PageSection>
+        <PageSection title="Title">
           <p>Sell your page with a catchy title</p>
           <div className="mt-4">
             <TextField
               errorMessage={formState.errors.title?.message}
               registerProps={register("title")}
               editMode={edit}
-              defaultValue={ch?.title}
+              defaultValue={pg?.title}
             />
           </div>
-        </ChannelSection>
-        <ChannelSection title="Description">
+        </PageSection>
+        <PageSection title="Description">
           <p className="leading-relaxed">
             Describe your page and what your audience can expect
           </p>
@@ -249,12 +249,12 @@ export default function Channel({
               errorMessage={formState.errors.description?.message}
               editMode={edit}
               textarea
-              defaultValue={ch?.description}
+              defaultValue={pg?.description}
             />
           </div>
-        </ChannelSection>
+        </PageSection>
 
-        <ChannelSection title="Pricing">
+        <PageSection title="Pricing">
           <p className="leading-relaxed">
             You can update prices anytime. Current memberships are not affected
           </p>
@@ -271,12 +271,12 @@ export default function Channel({
               />
             </div>
           </div>
-        </ChannelSection>
+        </PageSection>
 
         {!edit && (
-          <ChannelSection
+          <PageSection
             title={
-              !ch?.channelId ? (
+              !pg?.channelId ? (
                 "Connect Telegram"
               ) : (
                 <h2 className="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
@@ -287,7 +287,7 @@ export default function Channel({
             }
           >
             <div className="flex flex-col gap-2">
-              {!ch?.channelId && (
+              {!pg?.channelId && (
                 <Fragment>
                   {" "}
                   <p>
@@ -299,7 +299,7 @@ export default function Channel({
                   </p>
                   <p> Copy and paste the code below in your channel </p>
                   <div className="relative text-black text-center text-sm rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
-                    {channel?.telegramLinkCode}
+                    {page?.telegramLinkCode}
                     <div className="absolute right-4 inset-y-0 flex items-center">
                       <button onClick={copyTelegramCode}>
                         <FaCopy className="text-lg" />
@@ -312,27 +312,37 @@ export default function Channel({
                 </Fragment>
               )}
             </div>
-          </ChannelSection>
+          </PageSection>
         )}
 
-        <ChannelSection title="Photo" isLastSection>
+        <PageSection title="Photo" isLastSection>
           <p className="leading-relaxed">
             Add a photo to showcase your channel.
           </p>
           <div className="mt-4">
             <AddImage
-              currentImagePath={ch?.imagePath}
+              currentImagePath={pg?.imagePath}
               onSave={setImage}
               saveOnChange={edit}
             />
           </div>
-        </ChannelSection>
+        </PageSection>
 
         {edit && (
-          <div className="h-12 flex w-1/2 justify-center mx-auto">
+          <div className="h-12 flex w-1/2 flex-row gap-2 justify-center mx-auto">
             <Button type="submit" loading={isLoading}>
               {isNew ? "Create" : "Save"}
             </Button>
+            {edit && (
+              <Button
+                href={`/app/pages/${page.id}`}
+                variant="text"
+                type="button"
+                loading={isLoading}
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         )}
       </form>

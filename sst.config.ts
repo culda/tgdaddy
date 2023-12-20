@@ -12,7 +12,7 @@ export default {
     app.stack(function Site({ stack }) {
       // Tables
 
-      const channelsTable = new Table(stack, "Channels", {
+      const pagesTable = new Table(stack, "Pages", {
         fields: {
           id: "string",
           username: "string",
@@ -25,7 +25,7 @@ export default {
         },
       });
 
-      const uniqueChannelsTable = new Table(stack, "UniqueChannels", {
+      const uniquePagesTable = new Table(stack, "UniquePages", {
         fields: {
           username: "string",
         },
@@ -66,7 +66,7 @@ export default {
 
       // Buckets
 
-      const channelImagesBucket = new Bucket(stack, "ChannelImagesBucket", {
+      const pageImagesBucket = new Bucket(stack, "PagesImagesBucket", {
         cdk: {
           bucket: {
             publicReadAccess: true,
@@ -100,46 +100,37 @@ export default {
 
       const webhookHandler = new Function(stack, "WebhookHandler", {
         handler: "functions/webhook/handler.handler",
-        bind: [channelsTable, uniqueChannelsTable, telegramLinkCodesTable],
+        bind: [pagesTable, uniquePagesTable, telegramLinkCodesTable],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
       });
 
-      const channelHandler = new Function(stack, "ChannelHandler", {
-        handler: "functions/channel/handler.handler",
-        bind: [channelsTable, uniqueChannelsTable],
+      const pageHandler = new Function(stack, "PageHandler", {
+        handler: "functions/page/handler.handler",
+        bind: [pagesTable, uniquePagesTable],
       });
 
-      const channelsHandler = new Function(stack, "ChannelsHandler", {
-        handler: "functions/channels/handler.handler",
+      const pagesHandler = new Function(stack, "PagesHandler", {
+        handler: "functions/pages/handler.handler",
         bind: [
-          channelsTable,
-          uniqueChannelsTable,
+          pagesTable,
+          uniquePagesTable,
           telegramLinkCodesTable,
-          channelImagesBucket,
+          pageImagesBucket,
         ],
       });
 
-      const channelUsernameHandler = new Function(
-        stack,
-        "ChannelUsernameHandler",
-        {
-          handler: "functions/channelUsername/handler.handler",
-          bind: [channelsTable, uniqueChannelsTable],
-        }
-      );
-
-      const joinChannelHandler = new Function(stack, "JoinChannelHandler", {
-        handler: "functions/joinChannel/handler.handler",
-        bind: [channelsTable, usersTable],
+      const joinPageHandler = new Function(stack, "JoinPageHandler", {
+        handler: "functions/joinPage/handler.handler",
+        bind: [pagesTable, usersTable],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
       });
 
-      const unjoinChannelHandler = new Function(stack, "UnjoinChannelHandler", {
-        handler: "functions/unjoinChannel/handler.handler",
+      const unjoinPageHandler = new Function(stack, "UnjoinPageHandler", {
+        handler: "functions/unjoinPage/handler.handler",
         bind: [consumerSubscriptionsTable, usersTable],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
@@ -162,7 +153,7 @@ export default {
 
       const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
         handler: "functions/subscriptions/handler.handler",
-        bind: [consumerSubscriptionsTable, channelsTable],
+        bind: [consumerSubscriptionsTable, pagesTable],
       });
 
       const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
@@ -229,11 +220,11 @@ export default {
             function: webhookHandler,
             authorizer: "none",
           },
-          "POST /channels": channelsHandler,
-          "GET /channels": channelsHandler,
-          "PUT /channels": channelsHandler,
-          "GET /channels/{username}": {
-            function: channelHandler,
+          "POST /pages": pagesHandler,
+          "GET /pages": pagesHandler,
+          "PUT /pages": pagesHandler,
+          "GET /pages/{username}": {
+            function: pageHandler,
             authorizer: "none",
           },
           "POST /user": userHandler,
@@ -253,8 +244,8 @@ export default {
           },
 
           // Consumer endpoints
-          "POST /joinChannel": joinChannelHandler,
-          "POST /unjoinChannel": unjoinChannelHandler,
+          "POST /joinPage": joinPageHandler,
+          "POST /unjoinPage": unjoinPageHandler,
         },
       });
 

@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
 
   const getStarted = () => {
-    let path = "/app/channels/add?platformLogin=true";
+    let path = "/app/pages/add?platformLogin=true";
 
     if (username) {
       path += `&username=${username}`;
@@ -44,7 +44,7 @@ export default function Home() {
         </div>
       </header>
       <main>
-        {/* Enter channel name */}
+        {/* Enter page name */}
         <section className="text-gray-600 body-font flex items-center justify-center">
           <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
             <div className=" lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
@@ -132,15 +132,15 @@ export default function Home() {
               <nav className="list-none mb-10">
                 <li>
                   <a
-                    href="/app/channels/add"
+                    href="/app/pages/add"
                     className="text-gray-600 hover:text-gray-800"
                   >
-                    Add channel
+                    Add page
                   </a>
                 </li>
                 <li>
                   <a href="/app" className="text-gray-600 hover:text-gray-800">
-                    View channels
+                    View pages
                   </a>
                 </li>
               </nav>

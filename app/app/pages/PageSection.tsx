@@ -1,4 +1,4 @@
-export default function ChannelSection({
+export default function PageSection({
   title,
   children,
   isLastSection = false,

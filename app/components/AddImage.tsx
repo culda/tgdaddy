@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { useSnackbar } from "./SnackbarProvider";
-import { TpImage } from "@/functions/channels/handler";
+import { TpImage } from "@/functions/pages/handler";
 
 type PpAddImage = {
   currentImagePath?: string;

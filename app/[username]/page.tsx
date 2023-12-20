@@ -1,22 +1,22 @@
 import { StPage, StConsumerSubscription } from "../model/types";
-import ChannelPublic from "./ChannelPublic";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
 import { auth } from "../api/auth/[...nextauth]/auth";
 import { Telegram } from "puregram";
 import Button from "../components/Button";
 import AccountWidget from "../components/AccountWidget";
 import { notFound } from "next/navigation";
+import PagePublic from "./PagePublic";
 
-type PpChannel = {
+type PpPage = {
   params: { username: string };
 };
 
-export default async function Page({ params }: PpChannel) {
+export default async function Page({ params }: PpPage) {
   const session = await auth();
 
   const fetchChannel = async () => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/channels/${params.username}`,
+      `${process.env.API_ENDPOINT}/pages/${params.username}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -57,26 +57,26 @@ export default async function Page({ params }: PpChannel) {
     return data as StConsumerSubscription;
   };
 
-  const channel = await fetchChannel();
+  const page = await fetchChannel();
 
-  if (!channel) {
+  if (!page) {
     return notFound();
   }
 
   let sub;
 
   if (session?.user?.id) {
-    sub = await fetchSubscription(channel.username as string);
+    sub = await fetchSubscription(page.username as string);
   }
 
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
   let link: string | undefined;
 
-  if (sub && channel.channelId) {
+  if (sub && page.channelId) {
     try {
       const inviteLink = await telegram.api.createChatInviteLink({
-        chat_id: channel.channelId,
+        chat_id: page.channelId,
         member_limit: 1,
       });
       link = inviteLink.invite_link;
@@ -85,13 +85,13 @@ export default async function Page({ params }: PpChannel) {
     }
   }
 
-  const myChannel = channel.userId === session?.user?.id;
+  const myChannel = page.userId === session?.user?.id;
 
   return (
     <div className="relative max-w-md flex mx-auto">
       <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
         {myChannel && (
-          <Button variant="secondary" href={`/app/channels/${channel.id}`}>
+          <Button variant="secondary" href={`/app/pages/${page.id}`}>
             {" "}
             Manage{" "}
           </Button>
@@ -99,7 +99,7 @@ export default async function Page({ params }: PpChannel) {
         <AccountWidget platformLogin={false} />
       </div>
       <div className="mt-8">
-        <ChannelPublic channel={channel} sub={sub} link={link} />
+        <PagePublic page={page} sub={sub} link={link} />
       </div>
     </div>
   );

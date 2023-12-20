@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { ddbGetChannelById, ddbGetUserById } from "../utils";
+import { ddbGetPageById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import {
@@ -12,13 +12,13 @@ import { ApiResponse } from "@/app/model/errors";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export type TpJoinChannelRequest = {
+export type TpJoinPageRequest = {
   redirectUrl: string;
   priceId: string;
-  channelId: string;
+  pageId: string;
 };
 
-export type TpJoinChannelResponse = {
+export type TpJoinPageResponse = {
   paymentLink: string;
 };
 
@@ -39,12 +39,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     });
   }
 
-  const { priceId, channelId, redirectUrl } = JSON.parse(
+  const { priceId, pageId, redirectUrl } = JSON.parse(
     event.body
-  ) as TpJoinChannelRequest;
+  ) as TpJoinPageRequest;
 
   const user = await ddbGetUserById(userId);
-  const channel = await ddbGetChannelById(channelId);
+  const channel = await ddbGetPageById(pageId);
   if (!channel) {
     return ApiResponse({
       status: 400,
@@ -154,12 +154,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         application_fee_percent: getFeePercentage(creatorUser.creatorPlan),
         metadata: {
           userId,
-          channelId,
+          pageId,
         },
       },
       metadata: {
         userId,
-        channelId,
+        pageId,
       },
     },
     {
@@ -171,7 +171,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     statusCode: 200,
     body: JSON.stringify({
       paymentLink: session.url,
-    } as TpJoinChannelResponse),
+    } as TpJoinPageResponse),
   };
 };
 

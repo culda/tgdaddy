@@ -61,7 +61,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
     await dynamoDb.send(
       new UpdateItemCommand({
-        TableName: Table.Channels.tableName,
+        TableName: Table.Pages.tableName,
         Key: marshall({ id: channelId }),
         UpdateExpression: "SET imagePath = :imagePath",
         ExpressionAttributeValues: {

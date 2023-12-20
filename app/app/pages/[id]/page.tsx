@@ -1,20 +1,20 @@
-import PageLayout from "@/app/components/PageLayout";
+import ContentLayout from "@/app/components/ContentLayout";
 import { StPage } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
-import Channel from "../Channel";
+import Channel from "../PageScreen";
 import { notFound } from "next/navigation";
 import Button from "@/app/components/Button";
 
-type PpChannel = {
+type PpPage = {
   params: { id: string };
 };
 
-export default async function Page({ params }: PpChannel) {
+export default async function Page({ params }: PpPage) {
   const session = await auth();
 
-  const fetchChannel = async () => {
+  const fetchPage = async () => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/channels?id=${params.id}`,
+      `${process.env.API_ENDPOINT}/pages?id=${params.id}`,
       {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
@@ -26,24 +26,24 @@ export default async function Page({ params }: PpChannel) {
     return (await res.json()) as StPage;
   };
 
-  const channel = await fetchChannel();
+  const page = await fetchPage();
 
-  if (!channel) {
+  if (!page) {
     return notFound();
   }
 
   return (
-    <PageLayout title={channel?.username}>
+    <ContentLayout title={page?.username}>
       <div className="flex flex-row gap-2 mb-4">
-        <Button href={`/app/channels/${channel.id}/edit`} variant="secondary">
+        <Button href={`/app/pages/${page.id}/edit`} variant="secondary">
           Edit Details
         </Button>
-        {/* <Button href={`/app/channels/${channel.id}/edit`} variant="secondary">
+        {/* <Button href={`/app/pages/${channel.id}/edit`} variant="secondary">
           Edit Details
         </Button> */}
       </div>
 
-      <Channel channel={channel} />
-    </PageLayout>
+      <Channel page={page} />
+    </ContentLayout>
   );
 }

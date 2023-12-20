@@ -1,5 +1,5 @@
 import { StUser } from "../../model/types";
-import PageLayout from "../../components/PageLayout";
+import ContentLayout from "../../components/ContentLayout";
 import Plans from "@/app/app/plan/Plans";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
 
@@ -19,8 +19,8 @@ export default async function Page() {
   const user = await fetchUser();
 
   return (
-    <PageLayout subtitle={"Change anytime"} title={"Membership plan"}>
+    <ContentLayout subtitle={"Change anytime"} title={"Membership plan"}>
       <Plans user={user} />
-    </PageLayout>
+    </ContentLayout>
   );
 }

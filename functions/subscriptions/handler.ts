@@ -5,7 +5,7 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StConsumerSubscription } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { ApiResponse } from "@/app/model/errors";
-import { ddbGetChannelByUsername } from "../utils";
+import { ddbGetPageByUsername } from "../utils";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
@@ -34,7 +34,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
       const { username } = JSON.parse(event.body) as TpGetSubscriptionRequest;
       console.log(username);
-      const channel = await ddbGetChannelByUsername(username);
+      const channel = await ddbGetPageByUsername(username);
       if (!channel) {
         return ApiResponse({
           status: 400,

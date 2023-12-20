@@ -41,12 +41,10 @@ export async function ddbGetUserCredsByEmail(
   return unmarshall(Item) as StUserCredentials;
 }
 
-export async function ddbGetChannelById(
-  id: string
-): Promise<StPage | undefined> {
+export async function ddbGetPageById(id: string): Promise<StPage | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({
-      TableName: Table.Channels.tableName,
+      TableName: Table.Pages.tableName,
       Key: marshall({ id }),
     })
   );
@@ -58,12 +56,12 @@ export async function ddbGetChannelById(
   return unmarshall(Item) as StPage;
 }
 
-export async function ddbGetChannelByUsername(
+export async function ddbGetPageByUsername(
   username: string
 ): Promise<StPage | undefined> {
   const { Items } = await dynamoDb.send(
     new QueryCommand({
-      TableName: Table.Channels.tableName,
+      TableName: Table.Pages.tableName,
       IndexName: "UsernameIndex",
       KeyConditionExpression: "username = :username",
       ExpressionAttributeValues: marshall({ ":username": username }),

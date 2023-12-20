@@ -2,7 +2,7 @@
 import React from "react";
 import { StPage } from "../model/types";
 import Button from "../components/Button";
-import ChannelSection from "./channels/ChannelSection";
+import PageSection from "./pages/PageSection";
 import { FaArrowRight } from "react-icons/fa";
 import { isEmptyArray, isFalseyOrEmptyArray } from "./utils";
 import RevenueChart, {
@@ -10,17 +10,13 @@ import RevenueChart, {
   TpTotalRevenue,
 } from "../components/RevenueChart";
 
-type PpChannels = {
+type PpPages = {
   channels?: StPage[];
   chartData?: TpRevenueChartData;
   totalRevenue?: TpTotalRevenue;
 };
 
-export default function Channels({
-  chartData,
-  channels,
-  totalRevenue,
-}: PpChannels) {
+export default function Pages({ chartData, channels, totalRevenue }: PpPages) {
   return (
     <div className="mt-16">
       <div title="💸 Revenue">
@@ -41,12 +37,12 @@ export default function Channels({
             <Button
               variant={"secondary"}
               key={channel.id}
-              href={`/app/channels/${channel.id.split("/")[0]}`}
+              href={`/app/pages/${channel.id.split("/")[0]}`}
             >
               {channel.username}
             </Button>
           ))}
-        <Button href={`/app/channels/add`}>
+        <Button href={`/app/pages/add`}>
           <div className="flex flex-row gap-2 items-center">
             New Page
             <FaArrowRight />
