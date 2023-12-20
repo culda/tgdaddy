@@ -1,5 +1,5 @@
 import PageLayout from "@/app/components/PageLayout";
-import { StChannel } from "../../../model/types";
+import { StPage } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
 import Channel from "../Channel";
 import { notFound } from "next/navigation";
@@ -23,7 +23,7 @@ export default async function Page({ params }: PpChannel) {
         cache: "no-cache",
       }
     );
-    return (await res.json()) as StChannel;
+    return (await res.json()) as StPage;
   };
 
   const channel = await fetchChannel();

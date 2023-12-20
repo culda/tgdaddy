@@ -3,7 +3,7 @@ import { ddbGetChannelById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import {
-  StChannelPrice,
+  StPagePrice,
   StConnectStatus,
   StPlan,
   frequencyToInterval,
@@ -53,7 +53,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   }
   const creatorUser = await ddbGetUserById(channel.userId);
   const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
-  const pricing: StChannelPrice | undefined = channel?.pricing?.find(
+  const pricing: StPagePrice | undefined = channel?.pricing?.find(
     (p) => p.id === priceId
   );
 

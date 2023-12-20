@@ -2,14 +2,9 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { Table } from "sst/node/table";
 import { TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import {
-  StConnectStatus,
-  StPlan,
-  StUser,
-  StUserCredentials,
-} from "../../app/model/types";
+import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
 import { ddbGetUserById, ddbGetUserCredsByEmail, dynamoDb } from "../utils";
-import { createHash, randomUUID, timingSafeEqual } from "crypto";
+import { randomUUID, timingSafeEqual } from "crypto";
 import { ApiResponse } from "@/app/model/errors";
 import dayjs from "dayjs";
 
@@ -38,12 +33,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     });
   }
 
-  const hashedPassword = createHash("sha256").update(password).digest("hex");
-
   // Check if user exists in DynamoDB
-  const creds = await ddbGetUserCredsByEmail(email);
-  console.log("creds", creds);
+  let creds = await ddbGetUserCredsByEmail(email);
   if (creds) {
+    console.log("found creds", creds);
     // If a code was supplied, verify code
     if (resetCode) {
       if (!creds.resetCode || !creds.resetCodeExpiry) {
@@ -79,7 +72,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
                   UpdateExpression:
                     "remove resetCode, resetCodeExpiry set password = :password",
                   ExpressionAttributeValues: {
-                    ":password": { S: hashedPassword },
+                    ":password": { S: password },
                   },
                 },
               },
@@ -101,7 +94,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     }
 
     const match = timingSafeEqual(
-      Buffer.from(hashedPassword),
+      Buffer.from(password),
       Buffer.from(creds.password)
     );
     if (match) {
@@ -118,50 +111,50 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         message: "Invalid credentials",
       });
     }
-  } else {
-    console.log("no creds");
-    // User does not exist
-    const user: StUser = {
-      id: randomUUID(),
-      email: email,
-      creatorPlan: StPlan.Starter,
-      platformLogin: platformLogin,
-      creatorStripeAccountStatus: StConnectStatus.NotStarted,
-    };
+  }
 
-    const creds: StUserCredentials = {
-      id: user.id,
-      email: email,
-      password: hashedPassword,
-    };
+  console.log("no creds");
+  // User does not exist
+  const user: StUser = {
+    id: randomUUID(),
+    email: email,
+    creatorPlan: StPlan.Starter,
+    platformLogin: platformLogin,
+    creatorStripeAccountStatus: StConnectStatus.NotStarted,
+  };
 
-    const transactWriteParams = {
-      TransactItems: [
-        {
-          Put: {
-            TableName: Table.Users.tableName,
-            Item: marshall(user),
-          },
+  creds = {
+    id: user.id,
+    email: email,
+    password: password,
+  };
+
+  const transactWriteParams = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: Table.Users.tableName,
+          Item: marshall(user, { removeUndefinedValues: true }),
         },
-        {
-          Put: {
-            TableName: Table.UsersCreds.tableName,
-            Item: marshall(creds),
-          },
+      },
+      {
+        Put: {
+          TableName: Table.UsersCreds.tableName,
+          Item: marshall(creds, { removeUndefinedValues: true }),
         },
-      ],
-    };
+      },
+    ],
+  };
 
-    try {
-      await dynamoDb.send(new TransactWriteItemsCommand(transactWriteParams));
-    } catch (error) {
-      return ApiResponse({
-        status: 500,
-      });
-    }
+  try {
+    await dynamoDb.send(new TransactWriteItemsCommand(transactWriteParams));
+  } catch (error) {
     return ApiResponse({
-      status: 200,
-      body: user,
+      status: 500,
     });
   }
+  return ApiResponse({
+    status: 200,
+    body: user,
+  });
 };

@@ -61,7 +61,6 @@ export const config = {
 
         // Check if the response is successful and has a user
         if (res.ok && user) {
-          console.log("ok", res, user);
           return user;
         }
 
@@ -89,7 +88,7 @@ export const config = {
           method: "POST",
           body: JSON.stringify({
             id: credentials.id,
-            platformLogin: Boolean(credentials.platformLogin),
+            platformLogin: credentials.platformLogin === "true" ? true : false,
             username: credentials.username,
             first_name: credentials.first_name,
             last_name: credentials.last_name,
@@ -100,16 +99,14 @@ export const config = {
         });
 
         const user = await res.json();
-        console.log("user", user);
 
-        return {
-          id: user.id,
-          platformLogin: user.platformLogin,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          photoUrl: user.photoUrl,
-        };
+        // Check if the response is successful and has a user
+        if (res.ok && user) {
+          return user;
+        }
+
+        // Return null if user data could not be retrieved
+        throw new Error(user.message);
       },
     }),
   ],

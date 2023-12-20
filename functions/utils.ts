@@ -1,4 +1,4 @@
-import { StChannel, StUser, StUserCredentials } from "@/app/model/types";
+import { StPage, StUser, StUserCredentials } from "@/app/model/types";
 import {
   DynamoDBClient,
   GetItemCommand,
@@ -43,7 +43,7 @@ export async function ddbGetUserCredsByEmail(
 
 export async function ddbGetChannelById(
   id: string
-): Promise<StChannel | undefined> {
+): Promise<StPage | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({
       TableName: Table.Channels.tableName,
@@ -55,12 +55,12 @@ export async function ddbGetChannelById(
     return undefined;
   }
 
-  return unmarshall(Item) as StChannel;
+  return unmarshall(Item) as StPage;
 }
 
 export async function ddbGetChannelByUsername(
   username: string
-): Promise<StChannel | undefined> {
+): Promise<StPage | undefined> {
   const { Items } = await dynamoDb.send(
     new QueryCommand({
       TableName: Table.Channels.tableName,
@@ -74,7 +74,7 @@ export async function ddbGetChannelByUsername(
     return undefined;
   }
 
-  const data = unmarshall(Items[0]) as StChannel;
+  const data = unmarshall(Items[0]) as StPage;
 
   return data;
 }

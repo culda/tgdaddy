@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { StChannel } from "../model/types";
+import { StPage } from "../model/types";
 import Button from "../components/Button";
 import ChannelSection from "./channels/ChannelSection";
 import { FaArrowRight } from "react-icons/fa";
@@ -11,7 +11,7 @@ import RevenueChart, {
 } from "../components/RevenueChart";
 
 type PpChannels = {
-  channels?: StChannel[];
+  channels?: StPage[];
   chartData?: TpRevenueChartData;
   totalRevenue?: TpTotalRevenue;
 };

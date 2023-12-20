@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { StChannel } from "../../model/types";
+import { StPage } from "../../model/types";
 import TextField from "../../components/TextField";
 import { Fragment, useState } from "react";
 import PriceInput from "../../components/PriceInput";
@@ -16,7 +16,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { nanoid } from "nanoid";
 
 type PpChannel = {
-  channel: Partial<StChannel>;
+  channel: Partial<StPage>;
   isNew?: boolean;
   edit?: boolean;
 };
@@ -98,9 +98,9 @@ export default function Channel({
       }
     );
 
-    const { channelId } = (await channelRes.json()) as StChannel;
+    const { channelId } = (await channelRes.json()) as StPage;
 
-    setCh({ ...ch, channelId } as StChannel);
+    setCh({ ...ch, channelId } as StPage);
     setIsLoading(false);
   };
 
@@ -168,7 +168,7 @@ export default function Channel({
             description,
             title,
             username,
-          } as StChannel),
+          } as StPage),
         }
       );
 

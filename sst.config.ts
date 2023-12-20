@@ -197,15 +197,6 @@ export default {
         }
       );
 
-      const setChannelImageHandler = new Function(
-        stack,
-        "SetChannelImageHandler",
-        {
-          handler: "functions/setChannelImage/handler.handler",
-          bind: [channelsTable, channelImagesBucket],
-        }
-      );
-
       const api = new Api(stack, "Api", {
         authorizers: {
           telegramAuth: {
@@ -245,7 +236,6 @@ export default {
             function: channelHandler,
             authorizer: "none",
           },
-          "POST /channelUsername": channelUsernameHandler,
           "POST /user": userHandler,
           "GET /user": userHandler,
           "POST /subscriptions": subscriptionsHandler,
@@ -261,7 +251,6 @@ export default {
             function: loginTelegramHandler,
             authorizer: "none",
           },
-          "POST /setChannelImage": setChannelImageHandler,
 
           // Consumer endpoints
           "POST /joinChannel": joinChannelHandler,

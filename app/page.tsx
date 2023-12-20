@@ -8,10 +8,10 @@ export default function Home() {
   const router = useRouter();
 
   const getStarted = () => {
-    let path = "/app/channels/add";
+    let path = "/app/channels/add?platformLogin=true";
 
     if (username) {
-      path += `?username=${username}`;
+      path += `&username=${username}`;
     }
     router.push(path);
   };
@@ -19,9 +19,6 @@ export default function Home() {
   const handleUsernameChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value = e.target.value.trim();
     const sanitizedValue = value.replace(/\s/g, "");
-
-    console.log("setting", sanitizedValue);
-
     setUsername(sanitizedValue);
   };
 
@@ -42,13 +39,7 @@ export default function Home() {
           </a>
 
           <div>
-            <Button
-              href={`/login?platformLogin=true&callbackUrl=${encodeURIComponent(
-                "/app"
-              )}`}
-            >
-              Login
-            </Button>
+            <Button href="/app">Login</Button>
           </div>
         </div>
       </header>
@@ -71,12 +62,14 @@ export default function Home() {
                       type="text"
                       value={username}
                       onChange={handleUsernameChange}
-                      className="w-full text-base outline-none rounded-md text-gray-700 py-1 pl-1 pr-2 leading-8 transition-colors duration-200 ease-in-out"
+                      className="w-full text-base outline-none focus:outline-none rounded-md text-gray-700 py-1 pl-1 pr-2 leading-8 transition-colors duration-200 ease-in-out"
                       placeholder="username"
                     />
                   </form>
                 </div>
-                <Button onClick={() => getStarted()}>Get Started</Button>
+                <div>
+                  <Button onClick={() => getStarted()}>Get Started</Button>
+                </div>
               </div>
 
               <p className="hidden sm:flex text-sm mt-2 text-gray-500 mb-8 w-full">

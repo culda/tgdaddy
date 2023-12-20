@@ -1,6 +1,6 @@
 import PageLayout from "@/app/components/PageLayout";
 import React from "react";
-import { StChannel } from "@/app/model/types";
+import { StPage } from "@/app/model/types";
 import Channel from "../Channel";
 import { nanoid } from "nanoid";
 
@@ -9,7 +9,7 @@ type PpParams = {
 };
 
 export default async function Page({ searchParams }: PpParams) {
-  const channel: Partial<StChannel> = {
+  const channel: Partial<StPage> = {
     id: nanoid(10),
     username: searchParams.username?.toLowerCase(),
     telegramLinkCode: `LINK-${nanoid(4)}`,

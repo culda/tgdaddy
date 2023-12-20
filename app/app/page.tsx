@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { auth } from "../api/auth/[...nextauth]/auth";
 import { client } from "../api/stripe/stripe";
 import PageLayout from "../components/PageLayout";
-import { StChannel, StConnectStatus, StUser } from "../model/types";
+import { StPage, StConnectStatus, StUser } from "../model/types";
 import Channels from "./Channels";
 import { TpRevenueChartData, TpTotalRevenue } from "../components/RevenueChart";
 import Button from "../components/Button";
@@ -17,7 +17,7 @@ export default async function Page() {
     },
     cache: "no-cache",
   });
-  const channels: StChannel[] = await channelsRes.json();
+  const channels: StPage[] = await channelsRes.json();
 
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {

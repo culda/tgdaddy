@@ -1,6 +1,6 @@
 import PageLayout from "@/app/components/PageLayout";
 import React from "react";
-import { StChannel } from "@/app/model/types";
+import { StPage } from "@/app/model/types";
 import { nanoid } from "nanoid";
 import Channel from "../../Channel";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
@@ -22,7 +22,7 @@ export default async function Page({ params }: PpParams) {
         cache: "no-cache",
       }
     );
-    return (await res.json()) as StChannel;
+    return (await res.json()) as StPage;
   };
 
   const channel = await fetchChannel();

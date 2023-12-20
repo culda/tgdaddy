@@ -10,7 +10,7 @@ import {
   TransactionCanceledException,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { StChannel } from "../../app/model/types";
+import { StPage } from "../../app/model/types";
 import { AuthorizerContext } from "../telegramAuth/handler";
 import { ddbGetChannelById } from "../utils";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -26,7 +26,7 @@ export type TpImage = {
   fileType: string;
 };
 
-type Request = Partial<StChannel & TpImage>;
+type Request = Partial<StPage & TpImage>;
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
@@ -49,7 +49,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
 
       const req = JSON.parse(event.body) as Request;
-      let obj: Partial<StChannel> = req;
+      let obj: Partial<StPage> = req;
 
       if (req.fileBase64 && req.fileType) {
         obj = await addImagePathToObj(
@@ -96,7 +96,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
 
       const req = JSON.parse(event.body) as Request;
-      let obj: Partial<StChannel> = req;
+      let obj: Partial<StPage> = req;
 
       const commands = [];
 
@@ -195,7 +195,7 @@ async function s3PutImage(
   );
 }
 
-async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
+async function dbGetUserChannels(id: string): Promise<StPage[] | undefined> {
   const { Items } = await dynamoDb.send(
     new ScanCommand({
       TableName: Table.Channels.tableName,
@@ -210,11 +210,11 @@ async function dbGetUserChannels(id: string): Promise<StChannel[] | undefined> {
     return undefined;
   }
 
-  return Items.map((item) => unmarshall(item)) as StChannel[];
+  return Items.map((item) => unmarshall(item)) as StPage[];
 }
 
 async function ddbPutChannel(
-  channel: Partial<StChannel>
+  channel: Partial<StPage>
 ): Promise<TransactGetItemsCommandOutput> {
   const commands: TransactWriteItem[] = [];
 
@@ -260,7 +260,7 @@ async function ddbPutChannel(
 }
 
 async function ddbUpdateChannelTransactItem(
-  channel: Partial<StChannel>
+  channel: Partial<StPage>
 ): Promise<TransactWriteItem> {
   const updateExpressionParts = [];
   const expressionAttributeValues: Record<string, AttributeValue> = {};
@@ -308,8 +308,8 @@ async function ddbUpdateChannelTransactItem(
 
 async function addImagePathToObj(
   img: TpImage,
-  channel: Partial<StChannel>
-): Promise<Partial<StChannel>> {
+  channel: Partial<StPage>
+): Promise<Partial<StPage>> {
   const buffer = Buffer.from(img.fileBase64!, "base64");
   const imageKey = `${channel.id}/${uuidv4()}`;
   const imageBucket = Bucket.ChannelImagesBucket.bucketName;

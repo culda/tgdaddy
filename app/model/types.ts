@@ -1,16 +1,6 @@
 import Stripe from "stripe";
 
-export type StChat = {
-  id: number;
-  type: "link";
-};
-
-export type StLinkChat = {
-  id: number;
-  type: "link";
-};
-
-export type StChannel = {
+export type StPage = {
   id: string;
   channelId?: string;
   userId: string;
@@ -19,7 +9,7 @@ export type StChannel = {
   title?: string;
   username: string;
   description?: string;
-  pricing?: StChannelPrice[];
+  pricing?: StPagePrice[];
 };
 
 export type StInviteLink = {
@@ -29,7 +19,7 @@ export type StInviteLink = {
   link: string;
 };
 
-export type StChannelPrice = {
+export type StPagePrice = {
   id: string;
   usd: number; // Price in USD cents
   frequency: StPriceFrequency;
@@ -67,7 +57,7 @@ export type StUserCredentials = {
 };
 
 export type StConsumerSubscription = {
-  id: string; // userId/channelId
+  id: string; // userId/pageId
   consumerStripeCustomerId: string;
   consumerStripeSubscriptionId: string;
 };

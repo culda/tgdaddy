@@ -1,6 +1,6 @@
 "use client";
 import {
-  StChannel,
+  StPage,
   StConsumerSubscription,
   StPriceFrequency,
 } from "../model/types";
@@ -17,7 +17,7 @@ import {
 import { TpUnjoinChannelRequest } from "@/functions/unjoinChannel/handler";
 
 type PpChannel = {
-  channel?: StChannel;
+  channel?: StPage;
   sub?: StConsumerSubscription;
   link?: string;
 };

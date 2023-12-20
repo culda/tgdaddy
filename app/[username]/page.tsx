@@ -1,4 +1,4 @@
-import { StChannel, StConsumerSubscription } from "../model/types";
+import { StPage, StConsumerSubscription } from "../model/types";
 import ChannelPublic from "./ChannelPublic";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
 import { auth } from "../api/auth/[...nextauth]/auth";
@@ -29,7 +29,7 @@ export default async function Page({ params }: PpChannel) {
       return undefined;
     }
 
-    return (await res.json()) as StChannel;
+    return (await res.json()) as StPage;
   };
 
   const fetchSubscription = async (username: string) => {
@@ -96,7 +96,7 @@ export default async function Page({ params }: PpChannel) {
             Manage{" "}
           </Button>
         )}
-        <AccountWidget />
+        <AccountWidget platformLogin={false} />
       </div>
       <div className="mt-8">
         <ChannelPublic channel={channel} sub={sub} link={link} />
