@@ -47,6 +47,7 @@ const schema = yup.object().shape({
   description: yup.string().required("Description is required"),
   price: yup
     .number()
+    .typeError("Please enter a valid number")
     .required("Price is required")
     .test(
       "maxDecimals",
@@ -245,6 +246,7 @@ export default function Channel({
           <div className="mt-4">
             <TextField
               registerProps={register("description")}
+              errorMessage={formState.errors.description?.message}
               editMode={edit}
               textarea
               defaultValue={ch?.description}

@@ -1,6 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 
-export const config = { matcher: ["/app", "/app/plan", "/app/connect"] };
+export const config = { matcher: ["/app/:path*", "/app"] };
 export default withAuth({
   callbacks: {
     authorized: async ({ token, req }) => {
