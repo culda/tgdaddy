@@ -3,7 +3,7 @@ import { Table } from "sst/node/table";
 import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
-import { ddbGetUserById, dynamoDb } from "../utils";
+import { ddbGetUserById, ddbGetUserByTelegramId, dynamoDb } from "../utils";
 import crypto, { randomUUID } from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
 import { ApiResponse } from "@/app/model/errors";
@@ -13,7 +13,7 @@ export type LoginRequest = TelegramAuthData & {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
+  console.log(event.body);
   if (!event.body) {
     return ApiResponse({
       status: 400,
@@ -49,7 +49,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   /**
    * Check if user exists in DynamoDB, if not, create a new user
    */
-  user = await ddbGetUserById(req.id.toString());
+  user = await ddbGetUserByTelegramId(req.id.toString());
   if (!user) {
     user = {
       id: randomUUID(),

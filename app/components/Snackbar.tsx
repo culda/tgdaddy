@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { FaPlus } from "react-icons/fa";
 
 export type SnackbarType = {
   key: string;
@@ -54,10 +55,10 @@ export default function Snackbar({
       <span>{text}</span>
       {dismissable && (
         <button
-          className="bg-transparent !p-0 text-current font-extrabold"
+          className="bg-transparent !p-0 text-current"
           onClick={handleClose}
         >
-          X
+          <FaPlus className="transform rotate-45" />
         </button>
       )}
     </div>

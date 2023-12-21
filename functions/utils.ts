@@ -9,6 +9,27 @@ import { Table } from "sst/node/table";
 
 export const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
+export async function ddbGetUserByTelegramId(
+  tgid: string
+): Promise<StUser | undefined> {
+  const { Items } = await dynamoDb.send(
+    new QueryCommand({
+      TableName: Table.Users.tableName,
+      IndexName: "TelegramIdIndex",
+      KeyConditionExpression: "telegramId = :telegramId",
+      ExpressionAttributeValues: marshall({ ":telegramId": tgid }),
+    })
+  );
+
+  if (!Items || Items.length === 0) {
+    return undefined;
+  }
+
+  const data = unmarshall(Items[0]) as StUser;
+
+  return data;
+}
+
 export async function ddbGetUserById(id: string): Promise<StUser | undefined> {
   const { Item } = await dynamoDb.send(
     new GetItemCommand({

@@ -4,7 +4,7 @@ import {
 } from "aws-lambda";
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event) => {
-  console.log(event);
+  console.log(event.body);
   if (event.authorizationToken === process.env.ADMIN_AUTH_TOKEN) {
     return generatePolicy("user", "Allow", event.methodArn);
   } else {

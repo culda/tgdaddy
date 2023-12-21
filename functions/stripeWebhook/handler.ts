@@ -18,7 +18,7 @@ export type SubscriptionUpdatedMetadata = {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
+  console.log(event.body);
   const sig = event.headers?.["stripe-signature"];
   const verify = Stripe.webhooks.constructEvent(
     Buffer.from(event.body ?? ""),

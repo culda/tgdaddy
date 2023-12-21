@@ -14,7 +14,7 @@ import { ApiResponse } from "@/app/model/errors";
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event);
+  console.log(event.body);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return ApiResponse({

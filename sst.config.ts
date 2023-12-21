@@ -35,8 +35,14 @@ export default {
       const usersTable = new Table(stack, "Users", {
         fields: {
           id: "string",
+          telegramId: "string",
         },
         primaryIndex: { partitionKey: "id" },
+        globalIndexes: {
+          TelegramIdIndex: {
+            partitionKey: "telegramId",
+          },
+        },
       });
 
       const usersCredsTable = new Table(stack, "UsersCreds", {

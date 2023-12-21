@@ -31,7 +31,7 @@ type Request = Partial<StPage & TpImage>;
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event);
+  console.log(event.body);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {

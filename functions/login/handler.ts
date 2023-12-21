@@ -16,7 +16,7 @@ export type LoginRequest = {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
+  console.log(event.body);
   if (!event.body) {
     return ApiResponse({
       status: 400,

@@ -13,7 +13,7 @@ const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event);
+  console.log(event.body);
   try {
     const update: TelegramUpdate = JSON.parse(event.body as string);
     await handleUpdate(update);
