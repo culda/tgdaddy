@@ -99,6 +99,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       const req = JSON.parse(event.body) as Request;
       let obj: Partial<StPage> = req;
 
+      console.log(obj);
+
       const commands = [];
 
       /**
@@ -311,14 +313,37 @@ async function addImagePathToObj(
   img: TpImage,
   page: Partial<StPage>
 ): Promise<Partial<StPage>> {
-  const buffer = Buffer.from(img.fileBase64!, "base64");
-  const imageKey = `${page.id}/${uuidv4()}`;
-  const imageBucket = Bucket.PagesImagesBucket.bucketName;
+  try {
+    let buffer = Buffer.from(img.fileBase64, "base64");
 
-  await s3PutImage(buffer, imageKey, imageBucket, img.fileType!);
+    try {
+      const sharp = require("sharp");
 
-  return {
-    ...page,
-    imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
-  };
+      // Image optimization
+      buffer = await sharp(buffer)
+        // .resize({
+        //   width: 1080,
+        //   height: 1080,
+        //   fit: "inside",
+        //   withoutEnlargement: true,
+        // }) // Resize to max width/height
+        .toFormat("webp", { quality: 80 }) // Convert to Webp with 80% quality
+        .toBuffer();
+    } catch (err) {
+      console.log(err);
+    }
+
+    const imageKey = `${page.id}/${uuidv4()}`;
+    const imageBucket = Bucket.PagesImagesBucket.bucketName;
+
+    await s3PutImage(buffer, imageKey, imageBucket, "image/webp"); // Upload the optimized image
+
+    return {
+      ...page,
+      imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
+    };
+  } catch (error) {
+    console.error("Error processing image:", error);
+    throw error; // Rethrow the error for handling upstream
+  }
 }

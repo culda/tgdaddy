@@ -116,6 +116,8 @@ export default function PageScene({
     });
   };
 
+  console.log("image", image);
+
   const onSubmit = async ({
     description,
     title,
@@ -123,6 +125,15 @@ export default function PageScene({
     price,
     frequency,
   }: TpValues) => {
+    console.log(
+      "onsubmit",
+      description,
+      title,
+      username,
+      price,
+      frequency,
+      image
+    );
     if (session.status !== "authenticated") {
       snack({
         key: "not-authenticated",
@@ -323,7 +334,7 @@ export default function PageScene({
             <AddImage
               currentImagePath={pg?.imagePath}
               onSave={setImage}
-              saveOnChange={edit}
+              editMode={edit}
             />
           </div>
         </PageSection>

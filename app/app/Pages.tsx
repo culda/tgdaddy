@@ -30,7 +30,7 @@ export default function Pages({ chartData, pages, totalRevenue }: PpPages) {
         </h2>
         {isFalseyOrEmptyArray(pages) && <h2>You don't have any pages yet. </h2>}
 
-        {!isEmptyArray(pages) &&
+        {!isFalseyOrEmptyArray(pages) &&
           pages.map((page) => (
             <Button
               variant={"secondary"}

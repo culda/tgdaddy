@@ -19,6 +19,8 @@ export default async function Page() {
   });
   const pages: StPage[] = await pagesRes.json();
 
+  console.log(pages);
+
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,

@@ -9,7 +9,6 @@ export type AuthorizerContext = {
 };
 
 export const handler: APIGatewayAuthorizerHandler = async (event) => {
-  console.log(event.body);
   if (event.type === "REQUEST") {
     const auth = event.headers?.["authorization"];
     const token = auth?.split("Bearer ")[1];

@@ -1,5 +1,6 @@
 import { SSTConfig } from "sst";
 import { NextjsSite, Function, Api, Table, Bucket } from "sst/constructs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
 export default {
   config(_input) {
@@ -119,6 +120,11 @@ export default {
 
       const pagesHandler = new Function(stack, "PagesHandler", {
         handler: "functions/pages/handler.handler",
+        // layers: [
+        //   new lambda.LayerVersion(stack, "SharpLayer", {
+        //     code: lambda.Code.fromAsset("layers/sharp"),
+        //   }),
+        // ],
         bind: [
           pagesTable,
           uniquePagesTable,
@@ -126,6 +132,12 @@ export default {
           pageImagesBucket,
         ],
       });
+
+      pagesHandler.addLayers(
+        new lambda.LayerVersion(stack, "SharpLayer", {
+          code: lambda.Code.fromAsset("layers/sharp"),
+        })
+      );
 
       const joinPageHandler = new Function(stack, "JoinPageHandler", {
         handler: "functions/joinPage/handler.handler",

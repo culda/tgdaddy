@@ -1,4 +1,4 @@
-node_modules
+/node_modules
 .next
 .sst
 .env.local
@@ -6,3 +6,5 @@ node_modules
 tsconfig.tsbuildinfo
 .yarn/cache
 .open-next/
+
+layers!
