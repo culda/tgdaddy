@@ -17,11 +17,15 @@ export default {
         fields: {
           id: "string",
           username: "string",
+          userId: "string",
         },
         primaryIndex: { partitionKey: "id" },
         globalIndexes: {
           UsernameIndex: {
             partitionKey: "username",
+          },
+          UserIdIndex: {
+            partitionKey: "userId",
           },
         },
       });
@@ -120,11 +124,6 @@ export default {
 
       const pagesHandler = new Function(stack, "PagesHandler", {
         handler: "functions/pages/handler.handler",
-        // layers: [
-        //   new lambda.LayerVersion(stack, "SharpLayer", {
-        //     code: lambda.Code.fromAsset("layers/sharp"),
-        //   }),
-        // ],
         bind: [
           pagesTable,
           uniquePagesTable,
@@ -132,7 +131,6 @@ export default {
           pageImagesBucket,
         ],
       });
-
       pagesHandler.addLayers(
         new lambda.LayerVersion(stack, "SharpLayer", {
           code: lambda.Code.fromAsset("layers/sharp"),
@@ -161,10 +159,9 @@ export default {
         permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
       });
 
-      const telegramAuthHandler = new Function(stack, "TelegramAuthHandler", {
-        handler: "functions/telegramAuth/handler.handler",
+      const jwtAuthHandler = new Function(stack, "TelegramAuthHandler", {
+        handler: "functions/jwtAuth/handler.handler",
         environment: {
-          BOT_TOKEN: process.env.BOT_TOKEN as string,
           NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
         },
       });
@@ -172,6 +169,14 @@ export default {
       const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
         handler: "functions/subscriptions/handler.handler",
         bind: [consumerSubscriptionsTable, pagesTable],
+      });
+
+      const connectStripeHandler = new Function(stack, "ConnectStripe", {
+        handler: "functions/connectStripe/handler.handler",
+        bind: [usersTable],
+        environment: {
+          STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+        },
       });
 
       const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
@@ -208,9 +213,9 @@ export default {
 
       const api = new Api(stack, "Api", {
         authorizers: {
-          telegramAuth: {
+          jwtAuth: {
             type: "lambda",
-            function: telegramAuthHandler,
+            function: jwtAuthHandler,
           },
           admin: {
             type: "lambda",
@@ -223,9 +228,10 @@ export default {
             ? "api.members.page"
             : "api-dev.members.page",
         defaults: {
-          authorizer: "telegramAuth",
+          authorizer: "jwtAuth",
         },
         routes: {
+          // Webhooks
           "POST /stripeWebhook": {
             function: stripeWebhookHandler,
             authorizer: "none", // auth is handled inside the function
@@ -238,6 +244,8 @@ export default {
             function: webhookHandler,
             authorizer: "none",
           },
+
+          // App routes
           "POST /pages": pagesHandler,
           "GET /pages": pagesHandler,
           "PUT /pages": pagesHandler,
@@ -248,6 +256,8 @@ export default {
           "POST /user": userHandler,
           "GET /user": userHandler,
           "POST /subscriptions": subscriptionsHandler,
+
+          // Auth routes
           "POST /forgotPassword": {
             function: forgotPasswordHandler,
             authorizer: "none",
@@ -260,6 +270,9 @@ export default {
             function: loginTelegramHandler,
             authorizer: "none",
           },
+
+          // Stripe routes
+          "POST /connectStripe": connectStripeHandler,
 
           // Consumer endpoints
           "POST /joinPage": joinPageHandler,

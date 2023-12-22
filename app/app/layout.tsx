@@ -60,6 +60,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   />
                 </Link>
               </li>
+              <li className="mb-4" onClick={toggleMenu}>
+                <Link
+                  href="/app"
+                  className="text-black text-xl font-semibold whitespace-nowrap"
+                >
+                  Pages
+                </Link>
+              </li>
               <li onClick={toggleMenu}>
                 <Link
                   href="/app/plan"

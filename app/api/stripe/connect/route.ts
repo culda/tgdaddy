@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
           transfers: { requested: true },
         },
         metadata: {
-          userId: session?.user?.id as string,
+          userId: user.id as string,
         },
       });
 

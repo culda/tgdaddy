@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
 import { ddbGetPageById, ddbGetUserById } from "../utils";
 import Stripe from "stripe";
-import { AuthorizerContext } from "../telegramAuth/handler";
+import { AuthorizerContext } from "../jwtAuth/handler";
 import {
   StPagePrice,
   StConnectStatus,
@@ -138,6 +138,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
     );
   }
+
+  console.log("New checkout session", userId, pageId);
 
   /**
    * Create a Stripe Checkout session

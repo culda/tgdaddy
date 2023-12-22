@@ -3,7 +3,7 @@ import { Table } from "sst/node/table";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StConsumerSubscription } from "../../app/model/types";
-import { AuthorizerContext } from "../telegramAuth/handler";
+import { AuthorizerContext } from "../jwtAuth/handler";
 import { ApiResponse } from "@/app/model/errors";
 import { ddbGetPageByUsername } from "../utils";
 

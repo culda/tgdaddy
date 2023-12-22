@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { StUser } from "../../app/model/types";
-import { AuthorizerContext } from "../telegramAuth/handler";
+import { AuthorizerContext } from "../jwtAuth/handler";
 import { ddbGetUserById, dynamoDb } from "../utils";
 import { ApiResponse } from "@/app/model/errors";
 

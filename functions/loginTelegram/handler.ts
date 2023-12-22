@@ -3,7 +3,7 @@ import { Table } from "sst/node/table";
 import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
-import { ddbGetUserById, ddbGetUserByTelegramId, dynamoDb } from "../utils";
+import { ddbGetUserByTelegramId, dynamoDb } from "../utils";
 import crypto, { randomUUID } from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
 import { ApiResponse } from "@/app/model/errors";
@@ -53,6 +53,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (!user) {
     user = {
       id: randomUUID(),
+      createdAt: new Date().toISOString(),
       telegramId: req.id.toString(),
       firstName: req.first_name,
       lastName: req.last_name,
@@ -62,6 +63,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       photoUrl: req.photo_url,
       creatorStripeAccountStatus: StConnectStatus.NotStarted,
     };
+    console.log("creating new user", user);
     await dynamoDb.send(
       new PutItemCommand({
         TableName: Table.Users.tableName,

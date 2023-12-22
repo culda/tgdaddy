@@ -1,28 +1,19 @@
-"use client";
-import Loader from "@/app/components/Loader";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { auth } from "@/app/api/auth/[...nextauth]/auth";
+import { TpConnectStripeResponse } from "@/functions/connectStripe/handler";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  const router = useRouter();
+export default async function Page() {
+  const session = await auth();
 
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_HOST}/api/stripe/connect`, {
-      method: "POST",
-      headers: {
-        ContentType: "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const { connectUrl } = data;
-        router.push(connectUrl);
-      });
-  }, []);
+  const connectRes = await fetch(`${process.env.API_ENDPOINT}/connectStripe`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      ContentType: "application/json",
+    },
+  });
 
-  return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 p-5 text-center">
-      <Loader />
-    </div>
-  );
+  const { connectUrl } = (await connectRes.json()) as TpConnectStripeResponse;
+
+  return redirect(connectUrl);
 }

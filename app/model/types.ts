@@ -33,6 +33,7 @@ export enum StPriceFrequency {
 
 export type StUser = {
   id: string;
+  createdAt: string;
   telegramId?: string;
   email?: string;
   platformLogin?: boolean;

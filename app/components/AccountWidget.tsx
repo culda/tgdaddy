@@ -30,7 +30,6 @@ export default function AccountWidget({
 
   return (
     <div className="flex gap-2">
-      <AppButton />
       {status === "unauthenticated" && (
         <Button
           href={`/login?platformLogin=${Boolean(

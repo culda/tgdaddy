@@ -228,7 +228,7 @@ export default function PageScene({
               pretext="members.page/"
               onCopy={() => {
                 navigator.clipboard.writeText(
-                  `members.page/${getValues("username")}`
+                  `https://members.page/${getValues("username")}`
                 );
                 snack({
                   key: "code-copied",

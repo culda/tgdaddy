@@ -3,6 +3,7 @@ import { Table } from "sst/node/table";
 import {
   AttributeValue,
   DynamoDBClient,
+  QueryCommand,
   ScanCommand,
   TransactGetItemsCommandOutput,
   TransactWriteItem,
@@ -11,7 +12,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { StPage } from "../../app/model/types";
-import { AuthorizerContext } from "../telegramAuth/handler";
+import { AuthorizerContext } from "../jwtAuth/handler";
 import { ddbGetPageById } from "../utils";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
@@ -98,8 +99,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 
       const req = JSON.parse(event.body) as Request;
       let obj: Partial<StPage> = req;
-
-      console.log(obj);
 
       const commands = [];
 
@@ -200,9 +199,10 @@ async function s3PutImage(
 
 async function dbGetUserPages(id: string): Promise<StPage[] | undefined> {
   const { Items } = await dynamoDb.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: Table.Pages.tableName,
-      FilterExpression: "userId = :userId",
+      IndexName: "UserIdIndex",
+      KeyConditionExpression: "userId = :userId",
       ExpressionAttributeValues: {
         ":userId": { S: id },
       },
