@@ -129,7 +129,7 @@ export default function Home() {
               <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3">
                 Site map
               </h2>
-              <nav className="list-none mb-10">
+              <nav className="list-none mb-10 flex flex-col md:items-start items-center gap-2">
                 <li>
                   <a
                     href="/app/pages/add"
@@ -147,9 +147,46 @@ export default function Home() {
             </div>
             <div className="lg:w-1/4 md:w-1/2 w-full px-4">
               <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3">
+                Support
+              </h2>
+              <nav className="list-none mb-10 flex flex-col md:items-start items-center gap-2">
+                <li>
+                  <a
+                    href="https://t.me/+EnW5wj5k_FU3NDRk"
+                    target="_blank"
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    <div className="flex flex-row gap-2">
+                      <img
+                        className="text-sm w-6 h-6"
+                        src="/images/telegram-logo.svg"
+                      ></img>
+                      Creators
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://t.me/+fYI2ovBL9uI2YjNk"
+                    target="_blank"
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    <div className="flex flex-row gap-2">
+                      <img
+                        className="text-sm w-6 h-6"
+                        src="/images/telegram-logo.svg"
+                      ></img>
+                      Subscribers
+                    </div>
+                  </a>
+                </li>
+              </nav>
+            </div>
+            <div className="lg:w-1/4 md:w-1/2 w-full px-4">
+              <h2 className="title-font font-medium text-gray-900 tracking-widest text-sm mb-3">
                 Company
               </h2>
-              <nav className="list-none mb-10">
+              <nav className="list-none mb-10 flex flex-col md:items-start items-center gap-2">
                 <li>
                   <a
                     href="/privacyPolicy"
