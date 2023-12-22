@@ -117,6 +117,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   // User does not exist
   const user: StUser = {
     id: randomUUID(),
+    createdAt: new Date().toISOString(),
     email: email,
     creatorPlan: StPlan.Starter,
     platformLogin: platformLogin,
