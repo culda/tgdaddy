@@ -19,7 +19,7 @@ export default function PageSection({
         ></div>
         <div className="flex-shrink-0 w-14 h-14 bg-indigo-100 text-indigo-500 rounded-full inline-flex items-center justify-center absolute -translate-y-2/4"></div>
       </div>
-      <div className="flex-grow pl-20 flex sm:items-center items-start flex-col sm:flex-row">
+      <div className="flex-grow pl-20 flex sm:items-center items-start flex-row">
         <div className=" flex flex-col flex-grow sm:pl-6 mt-6 sm:mt-0 gap-2">
           {title && (
             <h2 className="font-bold title-font text-gray-900 mb-1 text-xl">

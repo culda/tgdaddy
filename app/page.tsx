@@ -2,6 +2,13 @@
 import { ChangeEventHandler, Fragment, useState } from "react";
 import Button from "./components/Button";
 import { useRouter } from "next/navigation";
+import {
+  FaLightbulb,
+  FaMoneyBill,
+  FaMoneyBillWave,
+  FaMoneyCheck,
+  FaRocket,
+} from "react-icons/fa";
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -47,12 +54,12 @@ export default function Home() {
         {/* Enter page name */}
         <section className="text-gray-600 body-font flex items-center justify-center">
           <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
-            <div className=" lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
+            <div className=" lg:pl-24 md:pl-16 flex flex-col sm:items-start sm:text-left items-center text-center">
               <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
-                Monetize your Telegram audience in under 5 minutes
+                Monetize your Telegram audience in under 2 minutes
               </h1>
               <p className="mb-8 leading-relaxed">Get your free landing page</p>
-              <div className="flex w-full md:justify-start justify-center items-end">
+              <div className="flex w-full sm:justify-start justify-center items-end">
                 <div className="hidden sm:flex relative mr-4 rounded-md border border-indigo-500 ">
                   <span className="flex items-center pl-3 text-gray-700 font-bold rounded-md">
                     members.page/
@@ -60,6 +67,7 @@ export default function Home() {
                   <form>
                     <input
                       type="text"
+                      data-lpignore="true"
                       value={username}
                       onChange={handleUsernameChange}
                       className="w-full text-base outline-none focus:outline-none rounded-md text-gray-700 py-1 pl-1 pr-2 leading-8 transition-colors duration-200 ease-in-out"
@@ -101,6 +109,65 @@ export default function Home() {
                   $4822
                 </h2>
                 <p className="leading-relaxed">Earned</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="text-gray-600 body-font">
+          <div className="container px-5 py-24 mx-auto flex flex-wrap">
+            <div className="lg:w-1/2 w-full mb-10 lg:mb-0 rounded-lg overflow-hidden">
+              <iframe
+                // style="border:0;"
+                width="600"
+                height="850"
+                src="https://www.tella.tv/video/clqgqe03500000hl504bmdfwt/embed?b=0&title=0&a=1&loop=0&t=0&muted=0"
+                allowFullScreen
+                allowTransparency
+              ></iframe>
+            </div>
+            <div className="flex flex-col flex-wrap lg:py-6 -mb-10 lg:w-1/2 lg:pl-12 lg:text-left text-center">
+              <div className="flex flex-col mb-10 lg:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5">
+                  <FaRocket className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Quick setup
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Create your customized landing page in seconds and start
+                    accepting subscribers straight away.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col mb-10 lg:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5">
+                  <FaLightbulb className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Track conversions and optimise
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Connect your pixel of choice and identity where the traffic
+                    and conversions are coming from.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col mb-10 lg:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 mb-5">
+                  <FaMoneyBill className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Sell adspace (coming soon)
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Allow other creators to post ads on your page and earn
+                    commission
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -152,7 +219,7 @@ export default function Home() {
               <nav className="list-none mb-10 flex flex-col md:items-start items-center gap-2">
                 <li>
                   <a
-                    href="https://t.me/+EnW5wj5k_FU3NDRk"
+                    href="https://t.me/+I0aDf8KIG9g3N2Q0"
                     target="_blank"
                     className="text-gray-600 hover:text-gray-800"
                   >
@@ -167,7 +234,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="https://t.me/+fYI2ovBL9uI2YjNk"
+                    href="https://t.me/+R0W1d5xweVQzOWQ0"
                     target="_blank"
                     className="text-gray-600 hover:text-gray-800"
                   >

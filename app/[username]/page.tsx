@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import AccountWidget from "../components/AccountWidget";
 import { notFound } from "next/navigation";
 import PagePublic from "./PagePublic";
+import { isProd } from "../app/utils";
 
 type PpPage = {
   params: { username: string };
@@ -65,15 +66,21 @@ export default async function Page({ params }: PpPage) {
 
   let sub;
 
-  if (session?.user?.id) {
+  if (session?.user?.id && isProd()) {
     sub = await fetchSubscription(page.username as string);
+  } else {
+    sub = {
+      id: "1234",
+      consumerStripeCustomerId: "1234",
+      consumerStripeSubscriptionId: "1234",
+    };
   }
 
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
 
   let link: string | undefined;
 
-  if (sub && page.channelId) {
+  if (sub && isProd() && page.channelId) {
     try {
       const inviteLink = await telegram.api.createChatInviteLink({
         chat_id: page.channelId,
@@ -83,6 +90,8 @@ export default async function Page({ params }: PpPage) {
     } catch (err) {
       console.log(err);
     }
+  } else {
+    link = "https://t.me/thisislink";
   }
 
   const myPage = page.userId === session?.user?.id;

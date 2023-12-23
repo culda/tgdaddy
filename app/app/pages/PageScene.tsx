@@ -302,11 +302,11 @@ export default function PageScene({
                 <Fragment>
                   {" "}
                   <p>
-                    Add{" "}
+                    Make{" "}
                     <a href="https://t.me/tgdadybot" target="_blank">
                       <b>{process.env.NEXT_PUBLIC_BOT_USERNAME}</b>
                     </a>{" "}
-                    as an admin to your channel.
+                    an admin to your channel.
                   </p>
                   <p> Copy and paste the code below in your channel </p>
                   <div className="relative text-black text-center text-sm rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">

@@ -116,7 +116,7 @@ export default function Plans({ user }: PpPlans) {
       <hr className="bg-neutral-200 self-stretch min-h-[1px] w-full mt-9" />
       <div className="text-black text-xs italic font-light max-w-[316px] ml-8 mt-9 mb-24 self-start max-md:ml-2.5 max-md:mb-10">
         *the transaction fee is incurred whenever a user subscribes to your
-        channel
+        page.
       </div>
     </div>
   );

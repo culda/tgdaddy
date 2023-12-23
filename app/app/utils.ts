@@ -13,3 +13,7 @@ export function isFalseyOrEmptyArray<T extends [] | undefined>(
 export function isArrayOfLength(value: unknown, len: number): boolean {
   return Array.isArray(value) && value.length === len;
 }
+
+export function isProd(): boolean {
+  return process.env.NODE_ENV === "production";
+}

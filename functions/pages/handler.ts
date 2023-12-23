@@ -32,7 +32,6 @@ type Request = Partial<StPage & TpImage>;
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event.body);
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {
@@ -50,14 +49,13 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         };
       }
 
-      const req = JSON.parse(event.body) as Request;
-      let obj: Partial<StPage> = req;
+      const { fileBase64, fileType, ...rest } = JSON.parse(
+        event.body
+      ) as Request;
+      let obj: Partial<StPage> = rest;
 
-      if (req.fileBase64 && req.fileType) {
-        obj = await addImagePathToObj(
-          { fileBase64: req.fileBase64, fileType: req.fileType },
-          obj
-        );
+      if (fileBase64 && fileType) {
+        obj = await addImagePathToObj({ fileBase64, fileType }, obj);
       }
 
       try {
@@ -97,18 +95,21 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         });
       }
 
-      const req = JSON.parse(event.body) as Request;
-      let obj: Partial<StPage> = req;
+      const { fileBase64, fileType, ...rest } = JSON.parse(
+        event.body
+      ) as Request;
+
+      let obj: Partial<StPage> = rest;
 
       const commands = [];
 
       /**
        * If the username was updated, we attempt to need to verify that the new username is unique
        */
-      if (req.username) {
-        const ch = await ddbGetPageById(req.id as string);
+      if (obj.username) {
+        const ch = await ddbGetPageById(obj.id as string);
         // If the username wasn't changed, nothing to do
-        if (ch?.username !== req.username) {
+        if (ch?.username !== obj.username) {
           // Delete old username from UniquePages table
           commands.push({
             Delete: {
@@ -121,7 +122,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           commands.push({
             Put: {
               TableName: Table.UniquePages.tableName,
-              Item: marshall({ username: req.username, id: req.id }),
+              Item: marshall({ username: obj.username, id: obj.id }),
               ConditionExpression: "attribute_not_exists(username)",
             },
           });
@@ -131,11 +132,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       /**
        * If a new image was uploaded, we need to upload it to S3
        */
-      if (req.fileBase64 && req.fileType) {
-        obj = await addImagePathToObj(
-          { fileBase64: req.fileBase64, fileType: req.fileType },
-          obj
-        );
+      if (fileBase64 && fileType) {
+        obj = await addImagePathToObj({ fileBase64, fileType }, obj);
       }
 
       const updatePage = await ddbUpdatePageTransactItem(obj);
@@ -321,13 +319,13 @@ async function addImagePathToObj(
 
       // Image optimization
       buffer = await sharp(buffer)
-        // .resize({
-        //   width: 1080,
-        //   height: 1080,
-        //   fit: "inside",
-        //   withoutEnlargement: true,
-        // }) // Resize to max width/height
-        .toFormat("webp", { quality: 80 }) // Convert to Webp with 80% quality
+        .resize({
+          width: 1080,
+          height: 1080,
+          fit: "inside",
+          withoutEnlargement: true,
+        }) // Resize to max width/height
+        .toFormat("webp") // Convert to Webp with 80% quality
         .toBuffer();
     } catch (err) {
       console.log(err);

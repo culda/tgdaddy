@@ -32,7 +32,7 @@ const RevenueChart = ({ data, total }: PpRevenueChart) => {
   const updateChartData = (timeframe: "day" | "day2") => {
     switch (timeframe) {
       case "day":
-        setTimeframe("day");
+        setTimeframe("week");
         break;
       case "day2":
         setTimeframe("month");
@@ -65,7 +65,7 @@ const RevenueChart = ({ data, total }: PpRevenueChart) => {
           size="sm"
           variant="secondary"
           onClick={() => updateChartData("day")}
-          active={timeframe === "day"}
+          active={timeframe === "week"}
         >
           Week
         </Button>
