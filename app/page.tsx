@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   FaLightbulb,
   FaMoneyBill,
-  FaMoneyBillWave,
-  FaMoneyCheck,
   FaRocket,
 } from "react-icons/fa";
 

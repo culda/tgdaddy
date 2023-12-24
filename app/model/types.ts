@@ -2,9 +2,9 @@ import Stripe from "stripe";
 
 export type StPage = {
   id: string;
-  channelId?: string;
   userId: string;
   imagePath?: string;
+  products: StProduct[];
   telegramLinkCode?: string;
   title?: string;
   username: string;
@@ -22,6 +22,7 @@ export type StInviteLink = {
 export type StPagePrice = {
   id: string;
   usd: number; // Price in USD cents
+  oldUsd?: number; // Strikethrough price for promo
   frequency: StPriceFrequency;
 };
 
@@ -47,6 +48,17 @@ export type StUser = {
   creatorStripeAccountId?: string;
   creatorStripeCustomerId?: string;
   consumerStripeCustomerId?: string;
+};
+
+export type StProductType = "telegramAccess";
+
+export type StProduct = {
+  type: StProductType;
+  title: string;
+  description: string;
+  inviteLink: string;
+  active: boolean;
+  activationCode: string;
 };
 
 export type StUserCredentials = {

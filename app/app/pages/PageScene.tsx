@@ -98,9 +98,9 @@ export default function PageScene({
       }
     );
 
-    const { channelId } = (await pageRes.json()) as StPage;
+    const { products } = (await pageRes.json()) as StPage;
 
-    setPg({ ...pg, channelId } as StPage);
+    setPg({ ...pg, products } as StPage);
     setIsLoading(false);
   };
 
@@ -115,8 +115,6 @@ export default function PageScene({
       variant: "success",
     });
   };
-
-  console.log("image", image);
 
   const onSubmit = async ({
     description,
@@ -175,7 +173,7 @@ export default function PageScene({
             ],
             fileBase64: image?.fileBase64,
             fileType: image?.fileType,
-            telegramLinkCode: pg?.telegramLinkCode,
+            products: [],
             description,
             title,
             username,
@@ -284,7 +282,30 @@ export default function PageScene({
           </div>
         </PageSection>
 
+        <PageSection title="Photo" isLastSection>
+          <p className="leading-relaxed">
+            Add a photo to showcase your page.
+          </p>
+          <div className="mt-4">
+            <AddImage
+              currentImagePath={pg?.imagePath}
+              onSave={setImage}
+              editMode={edit}
+            />
+          </div>
+        </PageSection>
+
         {!edit && (
+          <PageSection title="Products">
+            {pg.products?.map(pr => 
+              <div>
+                {pr.title}
+              </div>
+            )}
+          </PageSection>
+        )}
+
+        {/* {!edit && (
           <PageSection
             title={
               !pg?.channelId ? (
@@ -324,20 +345,9 @@ export default function PageScene({
               )}
             </div>
           </PageSection>
-        )}
+        )} */}
 
-        <PageSection title="Photo" isLastSection>
-          <p className="leading-relaxed">
-            Add a photo to showcase your channel.
-          </p>
-          <div className="mt-4">
-            <AddImage
-              currentImagePath={pg?.imagePath}
-              onSave={setImage}
-              editMode={edit}
-            />
-          </div>
-        </PageSection>
+
 
         {edit && (
           <div className="h-12 flex w-1/2 flex-row gap-2 justify-center mx-auto">
