@@ -1,6 +1,7 @@
 import { StPage, StPagePrice } from "@/app/model/types";
 import { AttributeValue, TransactWriteItem } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { Table } from "sst/node/table";
 
 export async function ddbUpdatePageTransactItem(
   id: string,
@@ -12,6 +13,10 @@ export async function ddbUpdatePageTransactItem(
   const expressionAttributeNames: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(updateObj)) {
+    if (key === "id") {
+      continue;
+    }
+
     const attributeName = `#${key}`;
     const attributeValue = `:${key}`;
 
@@ -57,7 +62,7 @@ export async function ddbUpdatePageTransactItem(
 
   return {
     Update: {
-      TableName: "YourTableName",
+      TableName: Table.Pages.tableName,
       Key: marshall({ id }),
       UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
       ExpressionAttributeNames: expressionAttributeNames,

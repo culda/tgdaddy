@@ -135,7 +135,6 @@ const PageScene = ({
     username,
     prices,
   }: TpPageValues) => {
-    console.log(prices);
     if (session.status !== "authenticated") {
       snack({
         key: "not-authenticated",

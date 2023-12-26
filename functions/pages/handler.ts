@@ -110,13 +110,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         }
 
         /**
-         * If pricing is updated, update the appropriate price or create new ones
-         */
-        if (obj.pricing) {
-          const pricing = obj.pricing;
-        }
-
-        /**
          * If a new image was uploaded, we need to upload it to S3
          */
         if (fileBase64 && fileType) {
@@ -130,6 +123,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         );
         commands.push(updatePage);
 
+        console.log(commands);
         const res = await dynamoDb.send(
           new TransactWriteItemsCommand({
             TransactItems: commands,

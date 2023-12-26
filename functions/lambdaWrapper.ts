@@ -1,15 +1,16 @@
 import { ApiResponse, checkNull } from "@/functions/errors";
+import { TransactionCanceledException } from "@aws-sdk/client-dynamodb";
 import {
   APIGatewayProxyEventV2WithLambdaAuthorizer,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 import { AuthorizerContext } from "./jwtAuth/handler";
 
-export function lambdaWrapper(
+export async function lambdaWrapper(
   eventHandler: () => Promise<APIGatewayProxyResultV2>
 ) {
   try {
-    return eventHandler();
+    return await eventHandler();
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("{")) {
       const errorObject = JSON.parse(error.message);
@@ -17,6 +18,11 @@ export function lambdaWrapper(
         status: errorObject.statusCode || 500,
         message: errorObject.message,
       });
+    } else if (
+      error instanceof TransactionCanceledException &&
+      error?.CancellationReasons
+    ) {
+      console.log(error.CancellationReasons);
     } else {
       return ApiResponse({
         status: 500,
