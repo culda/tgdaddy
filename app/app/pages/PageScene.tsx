@@ -158,7 +158,11 @@ const PageScene = ({
       
       const newPage: Partial<StPage> = {
         id: pg?.id,
-        pricing: prices,
+        pricing: prices.map((p) => ({
+          id: p.id,
+          usd: p.usd * 100,
+          frequency: p.frequency,
+        })),
         // products: [],
         description,
         title,

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { forwardRef } from "react";
-import { FaCopy } from "react-icons/fa";
 import { UseFormRegisterReturn } from "react-hook-form";
+import { FaCopy } from "react-icons/fa";
 
 type PpTextField = {
   editMode?: boolean;
@@ -31,7 +31,7 @@ const TextField = forwardRef<
     },
     ref
   ) => {
-    const inputClass = `flex flex-grow min-w-0 text-black bg-neutral-50 text-sm text-gray-600 focus:outline-none rounded-md py-2.5 px-1 ${
+    const inputClass = `flex flex-grow min-w-0 text-black ${editMode ? "bg-white" : "bg-neutral-50"} text-sm text-gray-600 focus:outline-none rounded-md py-2.5 px-1 ${
       pretext ? "" : "text-center"
     }`;
 

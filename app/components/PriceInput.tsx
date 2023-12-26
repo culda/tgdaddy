@@ -1,6 +1,5 @@
-import React from "react";
-import { StPriceFrequency } from "../model/types";
 import { UseFormRegisterReturn } from "react-hook-form";
+import { StPriceFrequency } from "../model/types";
 
 type PpPriceInput = {
   editMode?: boolean;
@@ -8,8 +7,6 @@ type PpPriceInput = {
   priceRegisterProps: UseFormRegisterReturn;
   frequencyRegisterProps: UseFormRegisterReturn;
   errorMessage?: string;
-  // price: string | null; // Receive the price value from props
-  // frequency: StPriceFrequency; // Receive the frequency value from props
 };
 
 const PriceInput = ({
@@ -17,8 +14,7 @@ const PriceInput = ({
   errorMessage,
   priceRegisterProps,
   frequencyRegisterProps,
-  // price,
-  // frequency,
+  
 }: PpPriceInput) => {
   return (
     <div className="flex flex-col justify-between gap-2 flex-wrap max-w-sm">
@@ -33,15 +29,14 @@ const PriceInput = ({
             type="text"
             placeholder="0.00"
             disabled={!editMode}
-            className="text-black text-center text-sm whitespace-nowrap focus:outline-none justify-center items-center bg-transparent flex-grow"
-            // value={price || ""}
+            className={`text-black text-center text-sm whitespace-nowrap focus:outline-none justify-center items-center ${editMode ? "bg-white" : "bg-neutral-50"}  flex-grow`}            
             {...priceRegisterProps}
           />
         </div>
         <select
           disabled={!editMode}
           className="border border-zinc-300 text-black text-sm px-4 py-2.5 rounded-md shadow-sm  disabled:bg-neutral-100 appearance-none"
-          // value={frequency}
+          
           {...frequencyRegisterProps}
         >
           <option value={StPriceFrequency.Monthly}>Monthly</option>
@@ -49,13 +44,6 @@ const PriceInput = ({
         </select>
       </div>
 
-      {/* <div
-        className={`mt-2 h-8 text-sm ${errorMessage ? "text-red-600" : ""} ${
-          errorMessage ? "visible" : "invisible"
-        }`}
-      >
-        {errorMessage}
-      </div> */}
     </div>
   );
 };
