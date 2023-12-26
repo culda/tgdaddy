@@ -48,6 +48,14 @@ export function lambdaWrapperAuth(
         status: errorObject.statusCode || 500,
         message: errorObject.message,
       });
+    } else if (
+      error instanceof TransactionCanceledException &&
+      error?.CancellationReasons
+    ) {
+      console.log(error.CancellationReasons);
+      return ApiResponse({
+        status: 500,
+      });
     } else {
       return ApiResponse({
         status: 500,
