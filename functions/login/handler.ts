@@ -5,7 +5,7 @@ import { marshall } from "@aws-sdk/util-dynamodb";
 import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
 import { ddbGetUserById, ddbGetUserCredsByEmail, dynamoDb } from "../utils";
 import { randomUUID, timingSafeEqual } from "crypto";
-import { ApiResponse } from "@/app/model/errors";
+import { ApiResponse } from "@/functions/errors";
 import dayjs from "dayjs";
 
 export type LoginRequest = {
@@ -92,25 +92,25 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         });
       }
     }
-
     const match = timingSafeEqual(
       Buffer.from(password),
       Buffer.from(creds.password)
     );
-    if (match) {
-      const user = await ddbGetUserById(creds.id);
-      // Passwords match
-      return ApiResponse({
-        status: 200,
-        body: user,
-      });
-    } else {
+    if (!match) {
+      console.log("passwords do not match");
       // Passwords do not match
       return ApiResponse({
         status: 401,
         message: "Invalid credentials",
       });
     }
+    const user = await ddbGetUserById(creds.id);
+    console.log("passwords match", user);
+    // Passwords match
+    return ApiResponse({
+      status: 200,
+      body: user,
+    });
   }
 
   console.log("no creds");

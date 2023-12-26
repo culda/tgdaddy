@@ -5,7 +5,7 @@ import Pages from "./Pages";
 import Button from "../components/Button";
 import { fetchRevenueData } from "./fetchRevenueData";
 import { getFakeRevenueData } from "./fakeRevenueData";
-import { isProd } from "./utils";
+import { isProd } from "../../utils";
 
 export default async function Page() {
   const session = await auth();
@@ -18,8 +18,6 @@ export default async function Page() {
     cache: "no-cache",
   });
   const pages: StPage[] = await pagesRes.json();
-
-  console.log(pages);
 
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {

@@ -4,7 +4,7 @@ import { StPage } from "../model/types";
 import Button from "../components/Button";
 import PageSection from "./pages/PageSection";
 import { FaArrowRight } from "react-icons/fa";
-import { isEmptyArray, isFalseyOrEmptyArray } from "./utils";
+import { isEmptyArray, isFalseyOrEmptyArray } from "../../utils";
 import RevenueChart, {
   TpRevenueChartData,
   TpTotalRevenue,

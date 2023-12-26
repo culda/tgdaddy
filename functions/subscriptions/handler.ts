@@ -1,10 +1,11 @@
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { Table } from "sst/node/table";
+import { ApiResponse, checkNull } from "@/functions/errors";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
+import { Table } from "sst/node/table";
 import { StConsumerSubscription } from "../../app/model/types";
 import { AuthorizerContext } from "../jwtAuth/handler";
-import { ApiResponse } from "@/app/model/errors";
+import { lambdaWrapperAuth } from "../lambdaWrapper";
 import { ddbGetPageByUsername } from "../utils";
 
 const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
@@ -16,43 +17,32 @@ export type TpGetSubscriptionRequest = {
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event.body);
-  const userId = event.requestContext.authorizer.lambda.userId;
-  if (!userId) {
-    return ApiResponse({
-      status: 403,
-    });
-  }
+  return lambdaWrapperAuth(event, async (userId: string) => {
+    switch (event.requestContext.http.method) {
+      case "POST": {
+        const body = checkNull(event.body, 400);
+        const { username } = JSON.parse(body) as TpGetSubscriptionRequest;
+        console.log(username);
+        const page = await ddbGetPageByUsername(username);
+        if (!page) {
+          return ApiResponse({
+            status: 400,
+            message: "Channel not found",
+          });
+        }
+        const sub = await dbGetSubscription(userId, page?.id as string);
 
-  switch (event.requestContext.http.method) {
-    case "POST": {
-      if (!event.body) {
         return ApiResponse({
-          status: 400,
+          status: 200,
+          body: sub,
         });
       }
-
-      const { username } = JSON.parse(event.body) as TpGetSubscriptionRequest;
-      console.log(username);
-      const page = await ddbGetPageByUsername(username);
-      if (!page) {
+      default:
         return ApiResponse({
-          status: 400,
-          message: "Channel not found",
+          status: 405,
         });
-      }
-      const sub = await dbGetSubscription(userId, page?.id as string);
-
-      return ApiResponse({
-        status: 200,
-        body: sub,
-      });
     }
-    default:
-      return ApiResponse({
-        status: 405,
-      });
-  }
+  });
 };
 
 async function dbGetSubscription(

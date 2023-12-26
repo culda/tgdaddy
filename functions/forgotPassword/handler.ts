@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { ddbGetUserCredsByEmail, dynamoDb } from "../utils";
-import { ApiResponse } from "@/app/model/errors";
+import { ApiResponse } from "@/functions/errors";
 import Mailgun from "mailgun.js";
 import formData from "form-data";
 import { randomBytes } from "crypto";

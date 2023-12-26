@@ -153,6 +153,11 @@ export default {
         },
       });
 
+      const addProductHandler = new Function(stack, "AddProductHandler", {
+        handler: "functions/addProduct/handler.handler",
+        bind: [pagesTable, telegramLinkCodesTable, pageImagesBucket],
+      });
+
       const userHandler = new Function(stack, "UserHandler", {
         handler: "functions/user/handler.handler",
         bind: [usersTable],

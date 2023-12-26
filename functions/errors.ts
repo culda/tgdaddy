@@ -1,3 +1,5 @@
+import { APIGatewayProxyResultV2 } from "aws-lambda";
+
 type ApiResponseParams = {
   status: number;
   body?: any;
@@ -5,7 +7,11 @@ type ApiResponseParams = {
 };
 
 // The ApiResponse function
-function ApiResponse({ status, body, message }: ApiResponseParams) {
+function ApiResponse({
+  status,
+  body,
+  message,
+}: ApiResponseParams): APIGatewayProxyResultV2 {
   if (status >= 400) {
     // Handle error responses
     return {
@@ -19,6 +25,21 @@ function ApiResponse({ status, body, message }: ApiResponseParams) {
       body: JSON.stringify(body || {}),
     };
   }
+}
+
+export function checkNull<T>(
+  value: T | null | undefined,
+  statusCode: number
+): T {
+  if (value === null || value === undefined) {
+    throw new Error(
+      JSON.stringify({
+        statusCode,
+        message: "Value is null",
+      })
+    );
+  }
+  return value as T;
 }
 
 export { ApiResponse };

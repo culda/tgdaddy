@@ -6,7 +6,7 @@ import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
 import { ddbGetUserByTelegramId, dynamoDb } from "../utils";
 import crypto, { randomUUID } from "crypto";
 import { TelegramAuthData } from "@/app/components/telegramLogin/types";
-import { ApiResponse } from "@/app/model/errors";
+import { ApiResponse } from "@/functions/errors";
 
 export type LoginRequest = TelegramAuthData & {
   platformLogin?: boolean;

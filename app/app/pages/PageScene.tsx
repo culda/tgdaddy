@@ -1,22 +1,21 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { StPage } from "../../model/types";
-import TextField from "../../components/TextField";
-import { Fragment, useState } from "react";
-import PriceInput from "../../components/PriceInput";
-import { useRouter } from "next/navigation";
 import AddImage from "@/app/components/AddImage";
-import { useSnackbar } from "@/app/components/SnackbarProvider";
-import PageSection from "./PageSection";
 import Button from "@/app/components/Button";
-import { FaCheckCircle, FaCopy } from "react-icons/fa";
+import PriceInputs from "@/app/components/PriceInputs";
+import { useSnackbar } from "@/app/components/SnackbarProvider";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { nanoid } from "nanoid";
+import TextField from "../../components/TextField";
+import { StPage, StPagePrice } from "../../model/types";
+import PageSection from "./PageSection";
+import { getChangedProps } from "./getChangedProps";
 
 type PpPage = {
-  page: Partial<StPage>;
+  page: StPage;
   isNew?: boolean;
   edit?: boolean;
 };
@@ -26,12 +25,11 @@ type TpImage = {
   fileType: string;
 };
 
-type TpValues = {
+export type TpPageValues = {
   username: string;
   title: string;
   description: string;
-  price: number;
-  frequency: string;
+  prices: StPagePrice[];
 };
 
 const schema = yup.object().shape({
@@ -45,45 +43,60 @@ const schema = yup.object().shape({
     ),
   title: yup.string().required("Title is required"),
   description: yup.string().required("Description is required"),
-  price: yup
-    .number()
-    .typeError("Please enter a valid number")
-    .required("Price is required")
-    .test(
-      "maxDecimals",
-      "Price can have a maximum of 2 decimal places",
-      (value) => {
-        if (value) {
-          const decimalCount = value.toString().split(".")[1]?.length || 0;
-          return decimalCount <= 2;
+  prices: yup.array().of(
+    yup.object().shape({
+      id: yup.string().required(),
+      usd: yup.number().required()
+      .typeError("Please enter a valid number")
+      .min(0)
+      .test(
+        "maxDecimals",
+        "Price can have a maximum of 2 decimal places",
+        (value) => {
+          if (value) {
+            const decimalCount = value.toString().split(".")[1]?.length || 0;
+            return decimalCount <= 2;
+          }
+          return true;
         }
-        return true;
-      }
-    ),
-  frequency: yup.string().required("Frequency is required"),
+      ),
+      frequency: yup.string().required("Frequency is required"),
+    }))
+    .required()
+    .test("uniqueFrequencies", "Frequencies must be unique", (values) => {
+      const frequencies = values?.map((item) => item.frequency);
+      const uniqueFrequencies = [...new Set(frequencies)]; // Remove duplicates
+      return uniqueFrequencies.length === frequencies?.length;
+    })
 });
 
-export default function PageScene({
+const PageScene = ({
   page,
   isNew = false,
   edit = false,
-}: PpPage) {
+}: PpPage) => {
   const snack = useSnackbar();
   const router = useRouter();
   const [pg, setPg] = useState(page);
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState<TpImage | null>(null);
-  const { getValues, formState, register, handleSubmit } = useForm<TpValues>({
-    resolver: yupResolver(schema),
+  const { getValues, watch, setValue, formState, register, handleSubmit } = useForm<TpPageValues>({
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       username: pg?.username,
       title: pg?.title,
       description: pg?.description,
-      price: pg?.pricing?.[0] && pg.pricing[0].usd / 100,
-      frequency: pg?.pricing?.[0] && pg.pricing[0].frequency,
+      prices: pg.pricing?.map((p) => ({
+        id: p.id,
+        usd: p.usd / 100,
+        frequency: p.frequency,
+      })),
     },
   });
+
+  const prices = watch("prices");
+
 
   const checkTelegram = async () => {
     setIsLoading(true);
@@ -120,18 +133,9 @@ export default function PageScene({
     description,
     title,
     username,
-    price,
-    frequency,
-  }: TpValues) => {
-    console.log(
-      "onsubmit",
-      description,
-      title,
-      username,
-      price,
-      frequency,
-      image
-    );
+    prices,
+  }: TpPageValues) => {
+    console.log(prices);
     if (session.status !== "authenticated") {
       snack({
         key: "not-authenticated",
@@ -152,8 +156,26 @@ export default function PageScene({
 
     try {
       setIsLoading(true);
+      
+      const newPage: Partial<StPage> = {
+        id: pg?.id,
+        pricing: prices,
+        // products: [],
+        description,
+        title,
+        username,
+      }
 
-      const putRes = await fetch(
+      const newProps = await getChangedProps(pg, newPage)
+
+      if (image) {
+        Object.assign(newProps, {
+          fileBase64: image?.fileBase64,
+          fileType: image?.fileType
+        })
+      }
+
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/pages`,
         {
           method: isNew ? "PUT" : "POST",
@@ -163,32 +185,20 @@ export default function PageScene({
           },
           body: JSON.stringify({
             id: pg?.id,
-            userId: session.data?.user?.id,
-            pricing: [
-              {
-                id: nanoid(),
-                frequency,
-                usd: price * 100,
-              },
-            ],
-            fileBase64: image?.fileBase64,
-            fileType: image?.fileType,
-            products: [],
-            description,
-            title,
-            username,
+            ...newProps
           } as StPage),
         }
       );
+      
 
-      if (putRes.status === 200) {
+      if (res.status === 200) {
         snack({
           key: "page-success",
           text: "Success",
           variant: "success",
         });
         router.push(`/app/pages/${pg?.id}`);
-      } else if (putRes.status === 409) {
+      } else if (res.status === 409) {
         snack({
           key: "page-create-failure",
           text: "Username already exists",
@@ -267,19 +277,13 @@ export default function PageScene({
           <p className="leading-relaxed">
             You can update prices anytime. Current memberships are not affected
           </p>
-          <div>
-            <div className="mt-4">
-              <PriceInput
-                errorMessage={
-                  formState.errors.price?.message ||
-                  formState.errors.frequency?.message
-                }
-                priceRegisterProps={register("price")}
-                frequencyRegisterProps={register("frequency")}
-                editMode={edit}
-              />
-            </div>
-          </div>
+            <PriceInputs
+              edit={edit}
+              register={register}
+              setValue={setValue}
+              prices={prices}
+              errorMessage={formState.errors.prices}
+             />
         </PageSection>
 
         <PageSection title="Photo" isLastSection>
@@ -295,7 +299,7 @@ export default function PageScene({
           </div>
         </PageSection>
 
-        {!edit && (
+        {/* {!edit && (
           <PageSection title="Products">
             {pg.products?.map(pr => 
               <div>
@@ -303,7 +307,7 @@ export default function PageScene({
               </div>
             )}
           </PageSection>
-        )}
+        )} */}
 
         {/* {!edit && (
           <PageSection
@@ -370,3 +374,5 @@ export default function PageScene({
     </div>
   );
 }
+
+export default PageScene;

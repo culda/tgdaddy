@@ -1,14 +1,15 @@
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { ddbGetPageById, ddbGetUserById } from "../utils";
-import Stripe from "stripe";
-import { AuthorizerContext } from "../jwtAuth/handler";
 import {
-  StPagePrice,
   StConnectStatus,
+  StPagePrice,
   StPlan,
   frequencyToInterval,
 } from "@/app/model/types";
-import { ApiResponse } from "@/app/model/errors";
+import { ApiResponse, checkNull } from "@/functions/errors";
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
+import Stripe from "stripe";
+import { AuthorizerContext } from "../jwtAuth/handler";
+import { lambdaWrapperAuth } from "../lambdaWrapper";
+import { ddbGetPageById, ddbGetUserById } from "../utils";
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -25,156 +26,153 @@ export type TpJoinPageResponse = {
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event.body);
-  const userId = event.requestContext.authorizer.lambda.userId;
-  if (!userId) {
-    return ApiResponse({
-      status: 403,
-    });
-  }
+  return lambdaWrapperAuth(event, async (userId: string) => {
+    if (!event.body) {
+      return ApiResponse({
+        status: 400,
+      });
+    }
 
-  if (!event.body) {
-    return ApiResponse({
-      status: 400,
-    });
-  }
+    const body = checkNull(event.body, 400);
+    console.log(body);
 
-  const { priceId, pageId, redirectUrl } = JSON.parse(
-    event.body
-  ) as TpJoinPageRequest;
+    const { priceId, pageId, redirectUrl } = JSON.parse(
+      body
+    ) as TpJoinPageRequest;
 
-  const user = await ddbGetUserById(userId);
-  const page = await ddbGetPageById(pageId);
-  if (!page) {
-    return ApiResponse({
-      status: 400,
-      message: "Page not found",
-    });
-  }
-  const creatorUser = await ddbGetUserById(page.userId);
-  const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
-  const pricing: StPagePrice | undefined = page?.pricing?.find(
-    (p) => p.id === priceId
-  );
+    const user = await ddbGetUserById(userId);
+    const page = await ddbGetPageById(pageId);
+    if (!page) {
+      return ApiResponse({
+        status: 400,
+        message: "Page not found",
+      });
+    }
+    const creatorUser = await ddbGetUserById(page.userId);
+    const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
+    const pricing: StPagePrice | undefined = page?.pricing?.find(
+      (p) => p.id === priceId
+    );
 
-  if (!pricing) {
-    return ApiResponse({
-      status: 400,
-      message: "Invalid price ID",
-    });
-  }
+    if (!pricing) {
+      return ApiResponse({
+        status: 400,
+        message: "Invalid price ID",
+      });
+    }
 
-  if (creatorUser?.creatorStripeAccountStatus !== StConnectStatus.Connected) {
-    return ApiResponse({
-      status: 400,
-      message: "Payments are not enabled",
-    });
-  }
+    if (creatorUser?.creatorStripeAccountStatus !== StConnectStatus.Connected) {
+      return ApiResponse({
+        status: 400,
+        message: "Payments are not enabled",
+      });
+    }
 
-  // Create custoer ID for the user if first time  customer
-  let customerId = user?.consumerStripeCustomerId;
-  if (!customerId) {
-    const customer = await client.customers.create(
+    // Create custoer ID for the user if first time  customer
+    let customerId = user?.consumerStripeCustomerId;
+    if (!customerId) {
+      const customer = await client.customers.create(
+        {},
+        {
+          stripeAccount: creatorStripeAccountId,
+        }
+      );
+      customerId = customer.id;
+    }
+
+    /**
+     * Find or create an appropriate product
+     */
+    let product;
+    const products = await client.products.list(
       {},
       {
         stripeAccount: creatorStripeAccountId,
       }
     );
-    customerId = customer.id;
-  }
 
-  /**
-   * Find or create an appropriate product
-   */
-  let product;
-  const products = await client.products.list(
-    {},
-    {
-      stripeAccount: creatorStripeAccountId,
+    if (products.data.length === 0) {
+      product = await client.products.create(
+        {
+          name: page.username,
+        },
+        {
+          stripeAccount: creatorStripeAccountId,
+        }
+      );
+    } else {
+      product = products.data[0];
     }
-  );
 
-  if (products.data.length === 0) {
-    product = await client.products.create(
-      {
-        name: page.username,
-      },
-      {
-        stripeAccount: creatorStripeAccountId,
-      }
-    );
-  } else {
-    product = products.data[0];
-  }
-
-  /**
-   * Find or create an appropriate price
-   */
-  const existingPrices = await client.prices.list(
-    {
-      product: product.id,
-    },
-    {
-      stripeAccount: creatorStripeAccountId,
-    }
-  );
-  let price = existingPrices.data.find(
-    (p) =>
-      p.unit_amount === pricing.usd &&
-      p.recurring?.interval === frequencyToInterval(pricing.frequency)
-  );
-
-  if (!price) {
-    // Create a new price if no matching price is found
-    price = await client.prices.create(
+    /**
+     * Find or create an appropriate price
+     */
+    const existingPrices = await client.prices.list(
       {
         product: product.id,
-        unit_amount: pricing.usd,
-        currency: "usd",
-        recurring: { interval: frequencyToInterval(pricing.frequency) },
       },
       {
         stripeAccount: creatorStripeAccountId,
       }
     );
-  }
+    let price = existingPrices.data.find(
+      (p) =>
+        p.unit_amount === pricing.usd &&
+        p.recurring?.interval === frequencyToInterval(pricing.frequency)
+    );
 
-  console.log("New checkout session", userId, pageId);
+    if (!price) {
+      // Create a new price if no matching price is found
+      price = await client.prices.create(
+        {
+          product: product.id,
+          unit_amount: pricing.usd,
+          currency: "usd",
+          recurring: { interval: frequencyToInterval(pricing.frequency) },
+        },
+        {
+          stripeAccount: creatorStripeAccountId,
+        }
+      );
+    }
 
-  /**
-   * Create a Stripe Checkout session
-   */
-  const session = await client.checkout.sessions.create(
-    {
-      payment_method_types: ["card"],
-      line_items: [{ price: price.id, quantity: 1 }],
-      mode: "subscription",
-      success_url: redirectUrl,
-      cancel_url: redirectUrl,
-      customer: customerId,
-      subscription_data: {
-        application_fee_percent: getFeePercentage(creatorUser.creatorPlan),
+    console.log("New checkout session", userId, pageId);
+
+    /**
+     * Create a Stripe Checkout session
+     */
+    const session = await client.checkout.sessions.create(
+      {
+        payment_method_types: ["card"],
+        line_items: [{ price: price.id, quantity: 1 }],
+        mode: "subscription",
+        success_url: redirectUrl,
+        cancel_url: redirectUrl,
+        customer: customerId,
+        subscription_data: {
+          application_fee_percent: getFeePercentage(creatorUser.creatorPlan),
+          metadata: {
+            userId,
+            pageId,
+          },
+        },
         metadata: {
           userId,
           pageId,
         },
       },
-      metadata: {
-        userId,
-        pageId,
-      },
-    },
-    {
-      stripeAccount: creatorStripeAccountId,
-    }
-  );
+      {
+        stripeAccount: creatorStripeAccountId,
+      }
+    );
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      paymentLink: session.url,
-    } as TpJoinPageResponse),
-  };
+    return ApiResponse({
+      status: 200,
+      body: {
+        paymentLink: session.url,
+      },
+    });
+  });
 };
 
 function getFeePercentage(plan: StPlan): number {

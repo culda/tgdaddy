@@ -1,56 +1,48 @@
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { Table } from "sst/node/table";
+import { ApiResponse, checkNull } from "@/functions/errors";
 import {
   AttributeValue,
   UpdateItemCommand,
   UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
+import { Table } from "sst/node/table";
 import { StUser } from "../../app/model/types";
 import { AuthorizerContext } from "../jwtAuth/handler";
+import { lambdaWrapperAuth } from "../lambdaWrapper";
 import { ddbGetUserById, dynamoDb } from "../utils";
-import { ApiResponse } from "@/app/model/errors";
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  console.log(event.body);
-  const userId = event.requestContext.authorizer.lambda.userId;
-  if (!userId) {
-    return ApiResponse({
-      status: 403,
-    });
-  }
+  return lambdaWrapperAuth(event, async (userId: string) => {
+    switch (event.requestContext.http.method) {
+      case "POST": {
+        const body = checkNull(event.body, 400);
+        console.log(body);
 
-  switch (event.requestContext.http.method) {
-    case "POST": {
-      if (!event.body) {
+        const req = JSON.parse(body) as Partial<StUser>;
+        const user = await ddbUpdateUser(userId, req);
+
         return ApiResponse({
-          status: 400,
+          status: 200,
+          body: user,
         });
       }
+      case "GET": {
+        const user = await ddbGetUserById(userId);
 
-      const req = JSON.parse(event.body) as Partial<StUser>;
-      const user = await ddbUpdateUser(userId, req);
-
-      return ApiResponse({
-        status: 200,
-        body: user,
-      });
+        return ApiResponse({
+          status: 200,
+          body: user,
+        });
+      }
+      default:
+        return ApiResponse({
+          status: 405,
+        });
     }
-    case "GET": {
-      const user = await ddbGetUserById(userId);
-
-      return ApiResponse({
-        status: 200,
-        body: user,
-      });
-    }
-    default:
-      return ApiResponse({
-        status: 405,
-      });
-  }
+  });
 };
 
 async function ddbUpdateUser(

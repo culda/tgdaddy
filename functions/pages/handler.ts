@@ -1,199 +1,175 @@
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { Table } from "sst/node/table";
+import { ApiResponse, checkNull } from "@/functions/errors";
 import {
-  AttributeValue,
-  DynamoDBClient,
   QueryCommand,
-  ScanCommand,
   TransactGetItemsCommandOutput,
   TransactWriteItem,
   TransactWriteItemsCommand,
   TransactionCanceledException,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
+import { Bucket } from "sst/node/bucket";
+import { Table } from "sst/node/table";
+import { v4 as uuidv4 } from "uuid";
 import { StPage } from "../../app/model/types";
 import { AuthorizerContext } from "../jwtAuth/handler";
-import { ddbGetPageById } from "../utils";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { v4 as uuidv4 } from "uuid";
-import { Bucket } from "sst/node/bucket";
-import { ApiResponse } from "@/app/model/errors";
-
-const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
-const s3 = new S3Client({ region: "us-east-1" });
+import { lambdaWrapperAuth } from "../lambdaWrapper";
+import { ddbGetPageById, dynamoDb, s3PutImage } from "../utils";
+import { ddbUpdatePageTransactItem } from "./updatePage";
 
 export type TpImage = {
   fileBase64: string;
   fileType: string;
 };
 
-type Request = Partial<StPage & TpImage>;
+export type TpPageRequest = Partial<StPage & TpImage>;
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
-  const userId = event.requestContext.authorizer.lambda.userId;
-  if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
-    };
-  }
+  return lambdaWrapperAuth(event, async (userId: string) => {
+    switch (event.requestContext.http.method) {
+      case "PUT": {
+        const body = checkNull(event.body, 400);
+        console.log(body);
 
-  switch (event.requestContext.http.method) {
-    case "PUT": {
-      if (!event.body) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Request body is required" }),
-        };
+        const { fileBase64, fileType, ...rest } = JSON.parse(
+          body
+        ) as TpPageRequest;
+        let obj: Partial<StPage> = rest;
+
+        if (fileBase64 && fileType) {
+          obj = await addImagePathToObj({ fileBase64, fileType }, obj);
+        }
+
+        try {
+          const res = await ddbPutPage(obj);
+
+          return ApiResponse({
+            status: 200,
+            body: res,
+          });
+        } catch (error) {
+          console.log(error);
+          if (
+            error instanceof TransactionCanceledException &&
+            error?.CancellationReasons
+          ) {
+            // Inspect the CancellationReasons from the error
+            for (const reason of error.CancellationReasons) {
+              if (reason.Code === "ConditionalCheckFailed") {
+                // Here you can determine which condition failed based on the reason
+                // The `reason.Message` property may contain more details
+                return ApiResponse({
+                  status: 409,
+                  message: "Username already exists",
+                });
+              }
+            }
+          }
+          return ApiResponse({
+            status: 500,
+          });
+        }
       }
+      case "POST": {
+        const body = checkNull(event.body, 400);
+        console.log(body);
 
-      const { fileBase64, fileType, ...rest } = JSON.parse(
-        event.body
-      ) as Request;
-      let obj: Partial<StPage> = rest;
+        const { fileBase64, fileType, ...rest } = JSON.parse(
+          body
+        ) as TpPageRequest;
+        let obj: Partial<StPage> = rest;
+        const commands = [];
 
-      if (fileBase64 && fileType) {
-        obj = await addImagePathToObj({ fileBase64, fileType }, obj);
-      }
+        const page = checkNull(await ddbGetPageById(obj.id as string), 500);
 
-      try {
-        const res = await ddbPutPage(obj);
+        /**
+         * If the username was updated, we attempt to need to verify that the new username is unique
+         */
+        if (obj.username) {
+          // If the username wasn't changed, nothing to do
+          if (page?.username !== obj.username) {
+            // Delete old username from UniquePages table
+            commands.push({
+              Delete: {
+                TableName: Table.UniquePages.tableName,
+                Key: marshall({ username: page?.username }),
+              },
+            });
+
+            // Add new username to UniquePages table
+            commands.push({
+              Put: {
+                TableName: Table.UniquePages.tableName,
+                Item: marshall({ username: obj.username, id: obj.id }),
+                ConditionExpression: "attribute_not_exists(username)",
+              },
+            });
+          }
+        }
+
+        /**
+         * If pricing is updated, update the appropriate price or create new ones
+         */
+        if (obj.pricing) {
+          const pricing = obj.pricing;
+        }
+
+        /**
+         * If a new image was uploaded, we need to upload it to S3
+         */
+        if (fileBase64 && fileType) {
+          obj = await addImagePathToObj({ fileBase64, fileType }, obj);
+        }
+
+        const updatePage = await ddbUpdatePageTransactItem(
+          page?.id as string,
+          obj,
+          page
+        );
+        commands.push(updatePage);
+
+        const res = await dynamoDb.send(
+          new TransactWriteItemsCommand({
+            TransactItems: commands,
+          })
+        );
 
         return ApiResponse({
           status: 200,
           body: res,
         });
-      } catch (error) {
-        console.log(error);
-        if (
-          error instanceof TransactionCanceledException &&
-          error?.CancellationReasons
-        ) {
-          // Inspect the CancellationReasons from the error
-          for (const reason of error.CancellationReasons) {
-            if (reason.Code === "ConditionalCheckFailed") {
-              // Here you can determine which condition failed based on the reason
-              // The `reason.Message` property may contain more details
-              return ApiResponse({
-                status: 409,
-                message: "Username already exists",
-              });
-            }
+      }
+      case "GET": {
+        if (event.queryStringParameters?.id) {
+          const id = event.queryStringParameters?.id;
+          const page = await ddbGetPageById(id);
+          if (userId !== page?.userId) {
+            return ApiResponse({
+              status: 403,
+            });
           }
-        }
-        return ApiResponse({
-          status: 500,
-        });
-      }
-    }
-    case "POST": {
-      if (!event.body) {
-        return ApiResponse({
-          status: 400,
-        });
-      }
-
-      const { fileBase64, fileType, ...rest } = JSON.parse(
-        event.body
-      ) as Request;
-
-      let obj: Partial<StPage> = rest;
-
-      const commands = [];
-
-      /**
-       * If the username was updated, we attempt to need to verify that the new username is unique
-       */
-      if (obj.username) {
-        const ch = await ddbGetPageById(obj.id as string);
-        // If the username wasn't changed, nothing to do
-        if (ch?.username !== obj.username) {
-          // Delete old username from UniquePages table
-          commands.push({
-            Delete: {
-              TableName: Table.UniquePages.tableName,
-              Key: marshall({ username: ch?.username }),
-            },
-          });
-
-          // Add new username to UniquePages table
-          commands.push({
-            Put: {
-              TableName: Table.UniquePages.tableName,
-              Item: marshall({ username: obj.username, id: obj.id }),
-              ConditionExpression: "attribute_not_exists(username)",
-            },
-          });
-        }
-      }
-
-      /**
-       * If a new image was uploaded, we need to upload it to S3
-       */
-      if (fileBase64 && fileType) {
-        obj = await addImagePathToObj({ fileBase64, fileType }, obj);
-      }
-
-      const updatePage = await ddbUpdatePageTransactItem(obj);
-      commands.push(updatePage);
-
-      const res = await dynamoDb.send(
-        new TransactWriteItemsCommand({
-          TransactItems: commands,
-        })
-      );
-
-      return ApiResponse({
-        status: 200,
-        body: res,
-      });
-    }
-    case "GET": {
-      if (event.queryStringParameters?.id) {
-        const id = event.queryStringParameters?.id;
-        const page = await ddbGetPageById(id);
-        if (userId !== page?.userId) {
           return ApiResponse({
-            status: 403,
+            status: 200,
+            body: page,
           });
         }
+
+        const pages = await dbGetUserPages(userId);
+
         return ApiResponse({
           status: 200,
-          body: page,
+          body: pages,
         });
       }
-
-      const pages = await dbGetUserPages(userId);
-
-      return ApiResponse({
-        status: 200,
-        body: pages,
-      });
+      default:
+        return ApiResponse({
+          status: 405,
+        });
     }
-    default:
-      return ApiResponse({
-        status: 405,
-      });
-  }
+  });
 };
-
-async function s3PutImage(
-  image: Buffer,
-  key: string,
-  bucket: string,
-  fileType: string
-) {
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: key,
-      Body: image,
-      ContentType: fileType,
-    })
-  );
-}
 
 async function dbGetUserPages(id: string): Promise<StPage[] | undefined> {
   const { Items } = await dynamoDb.send(
@@ -258,53 +234,6 @@ async function ddbPutPage(
   );
 
   return response;
-}
-
-async function ddbUpdatePageTransactItem(
-  page: Partial<StPage>
-): Promise<TransactWriteItem> {
-  const updateExpressionParts = [];
-  const expressionAttributeValues: Record<string, AttributeValue> = {};
-  const expressionAttributeNames: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(page)) {
-    if (key === "id") {
-      continue;
-    }
-    const attributeName = `#${key}`;
-    const attributeValue = `:${key}`;
-
-    updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
-    expressionAttributeNames[attributeName] = key;
-
-    if (typeof value === "string") {
-      expressionAttributeValues[attributeValue] = { S: value };
-    } else if (Array.isArray(value)) {
-      // Handle pricing array separately
-      if (key === "pricing") {
-        const pricingArray = value.map((item) => ({
-          M: {
-            id: { S: item.id! },
-            usd: { N: item.usd.toString() },
-            frequency: { S: item.frequency },
-          },
-        }));
-        expressionAttributeValues[attributeValue] = { L: pricingArray };
-      }
-    }
-  }
-
-  return {
-    Update: {
-      TableName: Table.Pages.tableName,
-      Key: {
-        id: { S: page.id! },
-      },
-      UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-    },
-  };
 }
 
 async function addImagePathToObj(

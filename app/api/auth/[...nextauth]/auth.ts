@@ -58,13 +58,13 @@ export const config = {
         });
 
         const user = await res.json();
+        console.log(user);
 
         // Check if the response is successful and has a user
         if (res.ok && user) {
           return user;
         }
 
-        // Return null if user data could not be retrieved
         throw new Error(user.message);
       },
     }),
@@ -86,6 +86,7 @@ export const config = {
         if (!credentials) return Promise.reject("no credentials");
         const res = await fetch(`${process.env.API_ENDPOINT}/loginTelegram`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: credentials.id,
             platformLogin: credentials.platformLogin === "true" ? true : false,
@@ -105,7 +106,6 @@ export const config = {
           return user;
         }
 
-        // Return null if user data could not be retrieved
         throw new Error(user.message);
       },
     }),

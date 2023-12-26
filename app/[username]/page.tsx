@@ -6,7 +6,7 @@ import Button from "../components/Button";
 import AccountWidget from "../components/AccountWidget";
 import { notFound } from "next/navigation";
 import PagePublic from "./PagePublic";
-import { isProd } from "../app/utils";
+import { isProd } from "../../utils";
 
 type PpPage = {
   params: { username: string };

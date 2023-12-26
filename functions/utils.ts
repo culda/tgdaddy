@@ -6,8 +6,10 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 export const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
+export const s3 = new S3Client({ region: "us-east-1" });
 
 export async function ddbGetUserByTelegramId(
   tgid: string
@@ -96,4 +98,20 @@ export async function ddbGetPageByUsername(
   const data = unmarshall(Items[0]) as StPage;
 
   return data;
+}
+
+export async function s3PutImage(
+  image: Buffer,
+  key: string,
+  bucket: string,
+  fileType: string
+) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: image,
+      ContentType: fileType,
+    })
+  );
 }
