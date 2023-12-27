@@ -1,18 +1,17 @@
-import { StPage, StPagePrice } from "@/app/model/types";
+import { StPage } from "@/app/model/types";
 import { AttributeValue, TransactWriteItem } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { Table } from "sst/node/table";
 
 export async function ddbUpdatePageTransactItem(
   id: string,
-  updateObj: Partial<StPage>,
-  currentObj: StPage
+  obj: Partial<StPage>
 ): Promise<TransactWriteItem> {
   const updateExpressionParts = [];
   const expressionAttributeValues: Record<string, AttributeValue> = {};
   const expressionAttributeNames: Record<string, string> = {};
 
-  for (const [key, value] of Object.entries(updateObj)) {
+  for (const [key, value] of Object.entries(obj)) {
     if (key === "id") {
       continue;
     }
@@ -28,28 +27,9 @@ export async function ddbUpdatePageTransactItem(
     }
 
     if (Array.isArray(value) && key === "pricing") {
-      // Extract the current pricing from the currentPage
-      const currentPricing = currentObj.pricing || [];
-
-      // Iterate through the new pricing items
-      for (const newItem of value as StPagePrice[]) {
-        // Find the index of an existing pricing item with the same ID
-        const existingIndex = currentPricing.findIndex(
-          (item) => item.id === newItem.id
-        );
-
-        if (existingIndex !== -1) {
-          // If found, update the existing item
-          currentPricing[existingIndex] = newItem;
-        } else {
-          // If not found, append the new item
-          currentPricing.push(newItem);
-        }
-      }
-
       // Update the pricing attribute with the modified array
       expressionAttributeValues[attributeValue] = {
-        L: currentPricing.map((item) => ({
+        L: obj.pricing!.map((item) => ({
           M: {
             id: { S: item.id },
             usd: { N: item.usd.toString() },

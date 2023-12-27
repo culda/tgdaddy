@@ -1,9 +1,9 @@
-import ContentLayout from "@/app/components/ContentLayout";
-import { StPage } from "../../../model/types";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
-import PageScene from "../PageScene";
-import { notFound } from "next/navigation";
 import Button from "@/app/components/Button";
+import ContentLayout from "@/app/components/ContentLayout";
+import { notFound } from "next/navigation";
+import { StPage } from "../../../model/types";
+import PageScene from "../PageScene";
 
 type PpPage = {
   params: { id: string };
@@ -37,10 +37,7 @@ export default async function Page({ params }: PpPage) {
       <div className="flex flex-row gap-2 mb-4">
         <Button href={`/app/pages/${page.id}/edit`} variant="secondary">
           Edit Details
-        </Button>
-        {/* <Button href={`/app/pages/${channel.id}/edit`} variant="secondary">
-          Edit Details
-        </Button> */}
+        </Button>        
       </div>
 
       <PageScene page={page} />

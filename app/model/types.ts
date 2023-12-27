@@ -10,7 +10,7 @@ export type StPage = {
   title?: string;
   username: string;
   description?: string;
-  pricing?: StPagePrice[];
+  pricing: StPagePrice[];
 };
 
 export type StInviteLink = {

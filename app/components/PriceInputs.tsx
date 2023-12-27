@@ -32,7 +32,7 @@ const PriceInputs = ({ edit, setValue, register, prices, errorMessage }: PpPrice
 
   return (
     <div className="mt-4 flex flex-col gap-2 items-center">
-    {prices?.map((entry, index) => (
+    {prices?.map((_, index) => (
       <div className="flex flex-row gap-2 justify-center items-center" key={index}>
         <PriceInput
           priceRegisterProps={register(`prices.${index}.usd`)}
@@ -44,9 +44,9 @@ const PriceInputs = ({ edit, setValue, register, prices, errorMessage }: PpPrice
         </Button>}
       </div>
       ))}
-    <Button type="button" onClick={addPriceEntry}>
+    {edit && <Button type="button" onClick={addPriceEntry}>
       Add Price
-    </Button>
+    </Button>}
       <div
         className={`mt-2 h-8 text-sm ${errorMessage?.root ? "text-red-600" : ""} ${
           errorMessage?.root ? "visible" : "invisible"

@@ -16,6 +16,7 @@ import { AuthorizerContext } from "../jwtAuth/handler";
 import { lambdaWrapperAuth } from "../lambdaWrapper";
 import { ddbGetPageById, dynamoDb, s3PutImage } from "../utils";
 import { ddbUpdatePageTransactItem } from "./updatePage";
+import { getUpdatedPrices } from "./updatePrices";
 
 export type TpImage = {
   fileBase64: string;
@@ -110,20 +111,26 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         }
 
         /**
+         * Append/Update/Remove pricing as changed in the form
+         */
+        if (obj.pricing) {
+          obj.pricing = getUpdatedPrices(page?.pricing, obj.pricing);
+        }
+
+        /**
          * If a new image was uploaded, we need to upload it to S3
          */
         if (fileBase64 && fileType) {
           obj = await addImagePathToObj({ fileBase64, fileType }, obj);
         }
 
+        console.log(obj);
         const updatePage = await ddbUpdatePageTransactItem(
           page?.id as string,
-          obj,
-          page
+          obj
         );
         commands.push(updatePage);
 
-        console.log(commands);
         const res = await dynamoDb.send(
           new TransactWriteItemsCommand({
             TransactItems: commands,

@@ -22,7 +22,7 @@ const PriceInput = ({
         <div
           className={`flex items-center border rounded-md ${
             errorMessage ? "border-red-600" : "border-zinc-300"
-          } bg-neutral-50 grow py-2.5 default-focus-within`}
+          }  grow py-2.5 default-focus-within`}
         >
           <span className="pl-3 text-sm text-gray-500">$</span>
           <input
