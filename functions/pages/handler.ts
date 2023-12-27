@@ -16,7 +16,6 @@ import { AuthorizerContext } from "../jwtAuth/handler";
 import { lambdaWrapperAuth } from "../lambdaWrapper";
 import { ddbGetPageById, dynamoDb, s3PutImage } from "../utils";
 import { ddbUpdatePageTransactItem } from "./updatePage";
-import { getUpdatedPrices } from "./updatePrices";
 
 export type TpImage = {
   fileBase64: string;
@@ -77,13 +76,18 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         const body = checkNull(event.body, 400);
         console.log(body);
 
-        const { fileBase64, fileType, ...rest } = JSON.parse(
+        const { fileBase64, fileType, id, ...rest } = JSON.parse(
           body
         ) as TpPageRequest;
         let obj: Partial<StPage> = rest;
         const commands = [];
 
-        const page = checkNull(await ddbGetPageById(obj.id as string), 500);
+        const page = checkNull(await ddbGetPageById(id as string), 500);
+        if (userId !== page?.userId) {
+          return ApiResponse({
+            status: 403,
+          });
+        }
 
         /**
          * If the username was updated, we attempt to need to verify that the new username is unique
@@ -103,7 +107,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
             commands.push({
               Put: {
                 TableName: Table.UniquePages.tableName,
-                Item: marshall({ username: obj.username, id: obj.id }),
+                Item: marshall({ username: obj.username, id }),
                 ConditionExpression: "attribute_not_exists(username)",
               },
             });
@@ -113,9 +117,9 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         /**
          * Append/Update/Remove pricing as changed in the form
          */
-        if (obj.pricing) {
-          obj.pricing = getUpdatedPrices(page?.pricing, obj.pricing);
-        }
+        // if (obj.pricing) {
+        //   obj.pricing = getUpdatedPrices(page?.pricing, obj.pricing);
+        // }
 
         /**
          * If a new image was uploaded, we need to upload it to S3
@@ -124,12 +128,10 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           obj = await addImagePathToObj({ fileBase64, fileType }, obj);
         }
 
-        console.log(obj);
-        const updatePage = await ddbUpdatePageTransactItem(
-          page?.id as string,
-          obj
-        );
-        commands.push(updatePage);
+        console.log("updateObj", obj);
+        if (Object.keys(obj).length > 0) {
+          commands.push(await ddbUpdatePageTransactItem(id as string, obj));
+        }
 
         const res = await dynamoDb.send(
           new TransactWriteItemsCommand({
@@ -145,7 +147,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       case "GET": {
         if (event.queryStringParameters?.id) {
           const id = event.queryStringParameters?.id;
-          const page = await ddbGetPageById(id);
+          const page = checkNull(await ddbGetPageById(id as string), 500);
           if (userId !== page?.userId) {
             return ApiResponse({
               status: 403,

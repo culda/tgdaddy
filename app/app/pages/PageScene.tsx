@@ -4,13 +4,14 @@ import Button from "@/app/components/Button";
 import PriceInputs from "@/app/components/PriceInputs";
 import { useSnackbar } from "@/app/components/SnackbarProvider";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { nanoid } from "nanoid";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import TextField from "../../components/TextField";
-import { StPage, StPagePrice } from "../../model/types";
+import { StPage, StPagePrice, StPriceFrequency } from "../../model/types";
 import PageSection from "./PageSection";
 import { getChangedProps } from "./getChangedProps";
 
@@ -70,6 +71,21 @@ const schema = yup.object().shape({
     })
 });
 
+const getDefaultPrices = (prices: StPagePrice[], edit: boolean): StPagePrice[] => {
+  if (prices.length > 0) {
+    return prices.map(p => ({
+      ...p,
+      usd: p.usd / 100
+    }))
+  }
+  if (!edit) return []
+  return [{
+    id: nanoid(10),
+    usd: 0,
+    frequency: StPriceFrequency.Monthly
+  }]
+}
+
 const PageScene = ({
   page,
   isNew = false,
@@ -87,11 +103,7 @@ const PageScene = ({
       username: pg?.username,
       title: pg?.title,
       description: pg?.description,
-      prices: pg.pricing?.map((p) => ({
-        id: p.id,
-        usd: p.usd / 100,
-        frequency: p.frequency,
-      })),
+      prices: getDefaultPrices(pg.pricing, edit),
     },
   });
 
@@ -171,11 +183,21 @@ const PageScene = ({
 
       const newProps = await getChangedProps(pg, newPage)
 
+
       if (image) {
         Object.assign(newProps, {
           fileBase64: image?.fileBase64,
           fileType: image?.fileType
         })
+      }
+
+      if (Object.keys(newProps).length === 0) {
+        snack({
+          key: "page-create-failure",
+          text: "No changes detected",
+          variant: "error",
+        });
+        return;
       }
 
       const res = await fetch(
@@ -200,7 +222,9 @@ const PageScene = ({
           text: "Success",
           variant: "success",
         });
-        router.push(`/app/pages/${pg?.id}`);
+        // we don't use router because we want to force a browser refetch to get the updated page
+        // not sure how to use router.push to force a refetch
+        window.location.href=`${process.env.NEXT_PUBLIC_HOST}/app/pages/${pg?.id}`
       } else if (res.status === 409) {
         snack({
           key: "page-create-failure",

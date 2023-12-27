@@ -1,17 +1,9 @@
-import { StPage } from "@/app/model/types";
+export async function getChangedProps(base: any, obj: any): Promise<any> {
+  const changedProperties: any = {};
 
-export async function getChangedProps(
-  currPage: StPage,
-  newPage: Partial<StPage>
-): Promise<Partial<StPage>> {
-  const changedProperties: Partial<StPage> = {};
-
-  for (const key in newPage) {
-    if (
-      newPage.hasOwnProperty(key) &&
-      (newPage as any)[key] !== (currPage as any)[key]
-    ) {
-      (changedProperties as any)[key] = (newPage as any)[key];
+  for (const key in obj) {
+    if (JSON.stringify(base[key]) !== JSON.stringify(obj[key])) {
+      changedProperties[key] = obj[key];
     }
   }
 
