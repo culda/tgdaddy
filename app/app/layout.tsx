@@ -1,8 +1,8 @@
 "use client";
-import React, { Fragment, useState } from "react";
 import Link from "next/link";
-import AccountWidget from "../components/AccountWidget";
+import React, { Fragment, useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import AccountWidget from "../components/AccountWidget";
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -79,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Main Content */}
           <div className="flex flex-col items-stretch mt-16 w-full md:ml-[35%] lg:ml-[35%]">
-            <div className="flex grow flex-col overflow-auto relative min-h-[500px]">
+            <div className="flex grow flex-col text-gray-900 overflow-auto relative min-h-[500px]">
               {children}
             </div>
           </div>

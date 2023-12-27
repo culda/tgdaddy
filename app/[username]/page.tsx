@@ -1,12 +1,12 @@
-import { StPage, StConsumerSubscription } from "../model/types";
 import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
-import { auth } from "../api/auth/[...nextauth]/auth";
-import { Telegram } from "puregram";
-import Button from "../components/Button";
-import AccountWidget from "../components/AccountWidget";
 import { notFound } from "next/navigation";
-import PagePublic from "./PagePublic";
+import { Telegram } from "puregram";
 import { isProd } from "../../utils";
+import { auth } from "../api/auth/[...nextauth]/auth";
+import AccountWidget from "../components/AccountWidget";
+import Button from "../components/Button";
+import { StConsumerSubscription, StPage } from "../model/types";
+import PagePublic from "./PagePublic";
 
 type PpPage = {
   params: { username: string };
@@ -66,14 +66,16 @@ export default async function Page({ params }: PpPage) {
 
   let sub;
 
-  if (session?.user?.id && isProd()) {
-    sub = await fetchSubscription(page.username as string);
-  } else {
-    sub = {
-      id: "1234",
-      consumerStripeCustomerId: "1234",
-      consumerStripeSubscriptionId: "1234",
-    };
+  if (session?.user?.id) {
+    if (isProd()){
+      sub = await fetchSubscription(page.username as string);
+    }  else {
+      sub = {
+        id: "1234",
+        consumerStripeCustomerId: "1234",
+        consumerStripeSubscriptionId: "1234",
+      };
+    }
   }
 
   const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);

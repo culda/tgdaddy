@@ -5,6 +5,7 @@ export type StPage = {
   userId: string;
   imagePath?: string;
   products: StProduct[];
+  channelId?: string;
   telegramLinkCode?: string;
   title?: string;
   username: string;

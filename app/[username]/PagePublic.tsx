@@ -1,19 +1,19 @@
 "use client";
 import {
-  StPage,
-  StConsumerSubscription,
-  StPriceFrequency,
-} from "../model/types";
-import Button from "../components/Button";
-import { FaArrowRight, FaCheckCircle } from "react-icons/fa";
-import { useSnackbar } from "../components/SnackbarProvider";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import {
   TpJoinPageRequest,
   TpJoinPageResponse,
 } from "@/functions/joinPage/handler";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { FaArrowRight, FaCheckCircle } from "react-icons/fa";
+import Button from "../components/Button";
+import { useSnackbar } from "../components/SnackbarProvider";
+import {
+  StConsumerSubscription,
+  StPage,
+  StPriceFrequency,
+} from "../model/types";
 
 type PpPage = {
   page?: StPage;
@@ -26,16 +26,6 @@ export default function PagePublic({ page, sub, link }: PpPage) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const snack = useSnackbar();
-
-  useEffect(() => {
-    if (!page?.pricing) {
-      snack({
-        key: "page-no-pricing",
-        text: "Not verified",
-        variant: "error",
-      });
-    }
-  }, [snack, page?.pricing]);
 
   const joinPage = async (priceId: string) => {
     setIsLoading(true);
@@ -101,17 +91,17 @@ export default function PagePublic({ page, sub, link }: PpPage) {
       </section>
       <section className="text-gray-600 body-font overflow-hidden">
         <div className="container px-5 py-8 mx-auto">
-          <div className="flex flex-wrap -m-4">
+          <div className="flex flex-row flex-wrap -m-2 gap-2">
             {!sub &&
               page?.pricing?.map((p) => (
-                <div key={p.id} className="p-4 mx-auto max-w-md">
+                <div key={p.id} className="">
                   <div className="h-full p-6  rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
                     <span className="text-sm tracking-widest title-font mb-1 font-medium">
                       {p.frequency === StPriceFrequency.Monthly && "Monthly"}
                       {p.frequency === StPriceFrequency.Yearly && "Yearly"}
                     </span>
 
-                    <header className="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
+                    <header className="text-3xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
                       ${(p.usd / 100).toFixed(2)}
                     </header>
                     <p className="flex items-center text-gray-600 mb-2">

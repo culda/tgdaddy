@@ -1,16 +1,18 @@
 import ContentLayout from "@/app/components/ContentLayout";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
 import PageSection from "../../PageSection";
-import { StProductType } from "@/app/model/types";
 
 type TpValues = {
-    type: StProductType;
+    type: string;
     title: string;
     description: string;
 }
 
 const schema = yup.object().shape({
-    type: yup.string(),
-    title: yup.string().required("Please choose a title")    
+    type: yup.string().required(),
+    title: yup.string().required("Please choose a title"),
     description: yup.string().required("Please choose a description")
 })
 
