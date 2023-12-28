@@ -1,4 +1,4 @@
-import Stripe from "stripe";
+import Stripe from 'stripe';
 
 export type StPage = {
   id: string;
@@ -6,7 +6,6 @@ export type StPage = {
   imagePath?: string;
   products: StProduct[];
   channelId?: string;
-  telegramLinkCode?: string;
   title?: string;
   username: string;
   description?: string;
@@ -28,9 +27,9 @@ export type StPagePrice = {
 };
 
 export enum StPriceFrequency {
-  OneOff = "oneoff",
-  Monthly = "monthly",
-  Yearly = "yearly",
+  OneOff = 'oneoff',
+  Monthly = 'monthly',
+  Yearly = 'yearly',
 }
 
 export type StUser = {
@@ -51,15 +50,22 @@ export type StUser = {
   consumerStripeCustomerId?: string;
 };
 
-export type StProductType = "telegramAccess";
+export type StProductType = 'telegramAccess';
 
 export type StProduct = {
-  type: StProductType;
+  id: string;
+  productType: StProductType;
   title: string;
   description: string;
-  inviteLink: string;
   active: boolean;
+};
+
+export type StTelegramProduct = StProduct & {
+  productType: 'telegramAccess';
+  type: 'channel' | 'group';
+  accessLink?: string;
   activationCode: string;
+  channelId?: string;
 };
 
 export type StUserCredentials = {
@@ -77,21 +83,23 @@ export type StConsumerSubscription = {
 };
 
 export enum StConnectStatus {
-  Connected = "connected",
-  Pending = "pending",
-  NotStarted = "notStarted",
+  Connected = 'connected',
+  Pending = 'pending',
+  NotStarted = 'notStarted',
 }
 
 export enum StPlan {
-  Starter = "Starter",
-  Growth = "Growth",
-  Pro = "Pro",
-  Business = "Business",
+  Starter = 'Starter',
+  Growth = 'Growth',
+  Pro = 'Pro',
+  Business = 'Business',
 }
 
-export type StTelegramLinkCodes = {
+export type StTelegramLinkCode = {
   code: string;
-  channelId: string;
+  productId: string;
+  pageId: string;
+  channelId?: string;
 };
 
 export const frequencyToInterval = (
@@ -99,10 +107,10 @@ export const frequencyToInterval = (
 ): Stripe.PriceCreateParams.Recurring.Interval => {
   switch (frequency) {
     case StPriceFrequency.Monthly:
-      return "month";
+      return 'month';
     case StPriceFrequency.Yearly:
-      return "year";
+      return 'year';
     default:
-      throw new Error("Invalid frequency");
+      throw new Error('Invalid frequency');
   }
 };

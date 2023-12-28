@@ -1,21 +1,21 @@
-import { ApiResponse, checkNull } from "@/functions/errors";
+import { ApiResponse, checkNull, checkPermission } from '@/functions/errors';
 import {
   QueryCommand,
   TransactGetItemsCommandOutput,
   TransactWriteItem,
   TransactWriteItemsCommand,
   TransactionCanceledException,
-} from "@aws-sdk/client-dynamodb";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import { Bucket } from "sst/node/bucket";
-import { Table } from "sst/node/table";
-import { v4 as uuidv4 } from "uuid";
-import { StPage } from "../../app/model/types";
-import { AuthorizerContext } from "../jwtAuth/handler";
-import { lambdaWrapperAuth } from "../lambdaWrapper";
-import { ddbGetPageById, dynamoDb, s3PutImage } from "../utils";
-import { ddbUpdatePageTransactItem } from "./updatePage";
+} from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
+import { Bucket } from 'sst/node/bucket';
+import { Table } from 'sst/node/table';
+import { v4 as uuidv4 } from 'uuid';
+import { StPage } from '../../app/model/types';
+import { AuthorizerContext } from '../jwtAuth/handler';
+import { lambdaWrapperAuth } from '../lambdaWrapper';
+import { ddbGetPageById, dynamoDb, s3PutImage } from '../utils';
+import { ddbUpdatePageTransactItem } from './updatePage';
 
 export type TpImage = {
   fileBase64: string;
@@ -29,7 +29,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 > = async (event) => {
   return lambdaWrapperAuth(event, async (userId: string) => {
     switch (event.requestContext.http.method) {
-      case "PUT": {
+      case 'PUT': {
         const body = checkNull(event.body, 400);
         console.log(body);
 
@@ -57,12 +57,12 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           ) {
             // Inspect the CancellationReasons from the error
             for (const reason of error.CancellationReasons) {
-              if (reason.Code === "ConditionalCheckFailed") {
+              if (reason.Code === 'ConditionalCheckFailed') {
                 // Here you can determine which condition failed based on the reason
                 // The `reason.Message` property may contain more details
                 return ApiResponse({
                   status: 409,
-                  message: "Username already exists",
+                  message: 'Username already exists',
                 });
               }
             }
@@ -72,7 +72,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           });
         }
       }
-      case "POST": {
+      case 'POST': {
         const body = checkNull(event.body, 400);
         console.log(body);
 
@@ -83,11 +83,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         const commands = [];
 
         const page = checkNull(await ddbGetPageById(id as string), 500);
-        if (userId !== page?.userId) {
-          return ApiResponse({
-            status: 403,
-          });
-        }
+        checkPermission(userId, page.userId);
 
         /**
          * If the username was updated, we attempt to need to verify that the new username is unique
@@ -108,18 +104,11 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
               Put: {
                 TableName: Table.UniquePages.tableName,
                 Item: marshall({ username: obj.username, id }),
-                ConditionExpression: "attribute_not_exists(username)",
+                ConditionExpression: 'attribute_not_exists(username)',
               },
             });
           }
         }
-
-        /**
-         * Append/Update/Remove pricing as changed in the form
-         */
-        // if (obj.pricing) {
-        //   obj.pricing = getUpdatedPrices(page?.pricing, obj.pricing);
-        // }
 
         /**
          * If a new image was uploaded, we need to upload it to S3
@@ -128,7 +117,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           obj = await addImagePathToObj({ fileBase64, fileType }, obj);
         }
 
-        console.log("updateObj", obj);
+        console.log('updateObj', obj);
         if (Object.keys(obj).length > 0) {
           commands.push(await ddbUpdatePageTransactItem(id as string, obj));
         }
@@ -144,15 +133,11 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
           body: res,
         });
       }
-      case "GET": {
+      case 'GET': {
         if (event.queryStringParameters?.id) {
           const id = event.queryStringParameters?.id;
           const page = checkNull(await ddbGetPageById(id as string), 500);
-          if (userId !== page?.userId) {
-            return ApiResponse({
-              status: 403,
-            });
-          }
+          checkPermission(userId, page.userId);
           return ApiResponse({
             status: 200,
             body: page,
@@ -178,10 +163,10 @@ async function dbGetUserPages(id: string): Promise<StPage[] | undefined> {
   const { Items } = await dynamoDb.send(
     new QueryCommand({
       TableName: Table.Pages.tableName,
-      IndexName: "UserIdIndex",
-      KeyConditionExpression: "userId = :userId",
+      IndexName: 'UserIdIndex',
+      KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
-        ":userId": { S: id },
+        ':userId': { S: id },
       },
     })
   );
@@ -205,7 +190,7 @@ async function ddbPutPage(
         { username: page.username?.toLowerCase(), id: page.id },
         { removeUndefinedValues: true }
       ),
-      ConditionExpression: "attribute_not_exists(username)",
+      ConditionExpression: 'attribute_not_exists(username)',
     },
   });
 
@@ -213,20 +198,7 @@ async function ddbPutPage(
     Put: {
       TableName: Table.Pages.tableName,
       Item: marshall(page, { removeUndefinedValues: true }),
-      ConditionExpression: "attribute_not_exists(id)",
-    },
-  });
-
-  commands.push({
-    Put: {
-      TableName: Table.TelegramLinkCodes.tableName,
-      Item: marshall(
-        {
-          code: page.telegramLinkCode,
-          pageId: page.id,
-        },
-        { removeUndefinedValues: true }
-      ),
+      ConditionExpression: 'attribute_not_exists(id)',
     },
   });
 
@@ -244,20 +216,20 @@ async function addImagePathToObj(
   page: Partial<StPage>
 ): Promise<Partial<StPage>> {
   try {
-    let buffer = Buffer.from(img.fileBase64, "base64");
+    let buffer = Buffer.from(img.fileBase64, 'base64');
 
     try {
-      const sharp = require("sharp");
+      const sharp = require('sharp');
 
       // Image optimization
       buffer = await sharp(buffer)
         .resize({
           width: 1080,
           height: 1080,
-          fit: "inside",
+          fit: 'inside',
           withoutEnlargement: true,
         }) // Resize to max width/height
-        .toFormat("webp") // Convert to Webp with 80% quality
+        .toFormat('webp') // Convert to Webp with 80% quality
         .toBuffer();
     } catch (err) {
       console.log(err);
@@ -266,14 +238,14 @@ async function addImagePathToObj(
     const imageKey = `${page.id}/${uuidv4()}`;
     const imageBucket = Bucket.PagesImagesBucket.bucketName;
 
-    await s3PutImage(buffer, imageKey, imageBucket, "image/webp"); // Upload the optimized image
+    await s3PutImage(buffer, imageKey, imageBucket, 'image/webp'); // Upload the optimized image
 
     return {
       ...page,
       imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
     };
   } catch (error) {
-    console.error("Error processing image:", error);
+    console.error('Error processing image:', error);
     throw error; // Rethrow the error for handling upstream
   }
 }

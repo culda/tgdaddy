@@ -28,6 +28,7 @@
     "nanoid": "^5.0.4",
     "next": "14.0.3",
     "next-auth": "^4.24.5",
+    "prettier": "^3.1.1",
     "puregram": "^2.20.1",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",

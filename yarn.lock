@@ -10053,6 +10053,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "prettier@npm:3.1.1"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: e386855e3a1af86a748e16953f168be555ce66d6233f4ba54eb6449b88eb0c6b2ca79441b11eae6d28a7f9a5c96440ce50864b9d5f6356d331d39d6bb66c648e
+  languageName: node
+  linkType: hard
+
 "pretty-format@npm:^29.0.0, pretty-format@npm:^29.7.0":
   version: 29.7.0
   resolution: "pretty-format@npm:29.7.0"
@@ -11520,6 +11529,7 @@ __metadata:
     next: 14.0.3
     next-auth: ^4.24.5
     postcss: ^8
+    prettier: ^3.1.1
     puregram: ^2.20.1
     react: ^18
     react-chartjs-2: ^5.2.0

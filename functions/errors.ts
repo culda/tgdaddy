@@ -42,4 +42,18 @@ export function checkNull<T>(
   return value as T;
 }
 
+export function checkPermission(
+  jwtUserId: string,
+  requestUserId: string,
+) {
+  if (requestUserId !== jwtUserId) {
+    throw new Error(
+      JSON.stringify({
+        403,
+        message: "Not authorized",
+      })
+    );
+  }
+}
+
 export { ApiResponse };

@@ -1,83 +1,83 @@
-import { SSTConfig } from "sst";
-import { NextjsSite, Function, Api, Table, Bucket } from "sst/constructs";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { SSTConfig } from 'sst';
+import { Api, Bucket, Function, NextjsSite, Table } from 'sst/constructs';
 
 export default {
   config(_input) {
     return {
-      name: "memberspage",
-      region: "us-east-1",
+      name: 'memberspage',
+      region: 'us-east-1',
     };
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
       // Tables
 
-      const pagesTable = new Table(stack, "Pages", {
+      const pagesTable = new Table(stack, 'Pages', {
         fields: {
-          id: "string",
-          username: "string",
-          userId: "string",
+          id: 'string',
+          username: 'string',
+          userId: 'string',
         },
-        primaryIndex: { partitionKey: "id" },
+        primaryIndex: { partitionKey: 'id' },
         globalIndexes: {
           UsernameIndex: {
-            partitionKey: "username",
+            partitionKey: 'username',
           },
           UserIdIndex: {
-            partitionKey: "userId",
+            partitionKey: 'userId',
           },
         },
       });
 
-      const uniquePagesTable = new Table(stack, "UniquePages", {
+      const uniquePagesTable = new Table(stack, 'UniquePages', {
         fields: {
-          username: "string",
+          username: 'string',
         },
-        primaryIndex: { partitionKey: "username" },
+        primaryIndex: { partitionKey: 'username' },
       });
 
-      const usersTable = new Table(stack, "Users", {
+      const usersTable = new Table(stack, 'Users', {
         fields: {
-          id: "string",
-          telegramId: "string",
+          id: 'string',
+          telegramId: 'string',
         },
-        primaryIndex: { partitionKey: "id" },
+        primaryIndex: { partitionKey: 'id' },
         globalIndexes: {
           TelegramIdIndex: {
-            partitionKey: "telegramId",
+            partitionKey: 'telegramId',
           },
         },
       });
 
-      const usersCredsTable = new Table(stack, "UsersCreds", {
+      const usersCredsTable = new Table(stack, 'UsersCreds', {
         fields: {
-          email: "string",
+          email: 'string',
         },
-        primaryIndex: { partitionKey: "email" },
+        primaryIndex: { partitionKey: 'email' },
       });
 
       const consumerSubscriptionsTable = new Table(
         stack,
-        "ConsumerSubscriptions",
+        'ConsumerSubscriptions',
         {
           fields: {
-            id: "string",
+            id: 'string',
           },
-          primaryIndex: { partitionKey: "id" },
+          primaryIndex: { partitionKey: 'id' },
         }
       );
 
-      const telegramLinkCodesTable = new Table(stack, "TelegramLinkCodes", {
+      const telegramLinkCodesTable = new Table(stack, 'TelegramLinkCodes', {
         fields: {
-          code: "string",
+          code: 'string',
         },
-        primaryIndex: { partitionKey: "code" },
+        primaryIndex: { partitionKey: 'code' },
       });
 
       // Buckets
 
-      const pageImagesBucket = new Bucket(stack, "PagesImagesBucket", {
+      const pageImagesBucket = new Bucket(stack, 'PagesImagesBucket', {
         cdk: {
           bucket: {
             publicReadAccess: true,
@@ -87,8 +87,8 @@ export default {
 
       // Lambdas
 
-      const stripeWebhookHandler = new Function(stack, "StripeWebhookHandler", {
-        handler: "functions/stripeWebhook/handler.handler",
+      const stripeWebhookHandler = new Function(stack, 'StripeWebhookHandler', {
+        handler: 'functions/stripeWebhook/handler.handler',
         bind: [usersTable],
         environment: {
           STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
@@ -97,9 +97,9 @@ export default {
 
       const stripeConnectWebhookHandler = new Function(
         stack,
-        "StripeConnectWebhookHandler",
+        'StripeConnectWebhookHandler',
         {
-          handler: "functions/stripeConnectWebhook/handler.handler",
+          handler: 'functions/stripeConnectWebhook/handler.handler',
           bind: [usersTable, consumerSubscriptionsTable],
           environment: {
             STRIPE_CONNECT_WEBHOOK_SECRET: process.env
@@ -109,21 +109,21 @@ export default {
         }
       );
 
-      const webhookHandler = new Function(stack, "WebhookHandler", {
-        handler: "functions/webhook/handler.handler",
+      const webhookHandler = new Function(stack, 'WebhookHandler', {
+        handler: 'functions/webhook/handler.handler',
         bind: [pagesTable, uniquePagesTable, telegramLinkCodesTable],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
       });
 
-      const pageHandler = new Function(stack, "PageHandler", {
-        handler: "functions/page/handler.handler",
+      const pageHandler = new Function(stack, 'PageHandler', {
+        handler: 'functions/page/handler.handler',
         bind: [pagesTable, uniquePagesTable],
       });
 
-      const pagesHandler = new Function(stack, "PagesHandler", {
-        handler: "functions/pages/handler.handler",
+      const pagesHandler = new Function(stack, 'PagesHandler', {
+        handler: 'functions/pages/handler.handler',
         bind: [
           pagesTable,
           uniquePagesTable,
@@ -132,83 +132,88 @@ export default {
         ],
       });
       pagesHandler.addLayers(
-        new lambda.LayerVersion(stack, "SharpLayer", {
-          code: lambda.Code.fromAsset("layers/sharp"),
+        new lambda.LayerVersion(stack, 'SharpLayer', {
+          code: lambda.Code.fromAsset('layers/sharp'),
         })
       );
 
-      const joinPageHandler = new Function(stack, "JoinPageHandler", {
-        handler: "functions/joinPage/handler.handler",
+      const joinPageHandler = new Function(stack, 'JoinPageHandler', {
+        handler: 'functions/joinPage/handler.handler',
         bind: [pagesTable, usersTable],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
       });
 
-      const unjoinPageHandler = new Function(stack, "UnjoinPageHandler", {
-        handler: "functions/unjoinPage/handler.handler",
+      const unjoinPageHandler = new Function(stack, 'UnjoinPageHandler', {
+        handler: 'functions/unjoinPage/handler.handler',
         bind: [consumerSubscriptionsTable, usersTable],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
       });
 
-      const addProductHandler = new Function(stack, "AddProductHandler", {
-        handler: "functions/addProduct/handler.handler",
+      const telegramCodeHandler = new Function(stack, 'TelegramCodeHandler', {
+        handler: 'functions/telegramCode/handler.handler',
+        bind: [telegramLinkCodesTable, pagesTable],
+      });
+
+      const addProductHandler = new Function(stack, 'AddProductHandler', {
+        handler: 'functions/addProduct/handler.handler',
         bind: [pagesTable, telegramLinkCodesTable, pageImagesBucket],
       });
 
-      const userHandler = new Function(stack, "UserHandler", {
-        handler: "functions/user/handler.handler",
+      const userHandler = new Function(stack, 'UserHandler', {
+        handler: 'functions/user/handler.handler',
         bind: [usersTable],
-        permissions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        permissions: ['dynamodb:PutItem', 'dynamodb:GetItem'],
       });
 
-      const jwtAuthHandler = new Function(stack, "TelegramAuthHandler", {
-        handler: "functions/jwtAuth/handler.handler",
+      const jwtAuthHandler = new Function(stack, 'TelegramAuthHandler', {
+        handler: 'functions/jwtAuth/handler.handler',
         environment: {
           NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET as string,
         },
       });
 
-      const subscriptionsHandler = new Function(stack, "SubscriptionsHandler", {
-        handler: "functions/subscriptions/handler.handler",
+      const subscriptionsHandler = new Function(stack, 'SubscriptionsHandler', {
+        handler: 'functions/subscriptions/handler.handler',
         bind: [consumerSubscriptionsTable, pagesTable],
       });
 
-      const connectStripeHandler = new Function(stack, "ConnectStripe", {
-        handler: "functions/connectStripe/handler.handler",
+      const connectStripeHandler = new Function(stack, 'ConnectStripe', {
+        handler: 'functions/connectStripe/handler.handler',
         bind: [usersTable],
         environment: {
           STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
         },
       });
 
-      const adminAuthHandler = new Function(stack, "AdminAuthHandler", {
-        handler: "functions/adminAuth/handler.handler",
+      const adminAuthHandler = new Function(stack, 'AdminAuthHandler', {
+        handler: 'functions/adminAuth/handler.handler',
         environment: {
           ADMIN_AUTH_TOKEN: process.env.ADMIN_AUTH_TOKEN as string,
         },
       });
 
-      const loginTelegramHandler = new Function(stack, "LoginTelegramHandler", {
-        handler: "functions/loginTelegram/handler.handler",
+      const loginTelegramHandler = new Function(stack, 'LoginTelegramHandler', {
+        handler: 'functions/loginTelegram/handler.handler',
         bind: [usersTable],
         environment: {
           BOT_TOKEN: process.env.BOT_TOKEN as string,
         },
       });
 
-      const loginHandler = new Function(stack, "LoginHandler", {
-        handler: "functions/login/handler.handler",
+      const loginHandler = new Function(stack, 'LoginHandler', {
+        handler: 'functions/login/handler.handler',
         bind: [usersTable, usersCredsTable],
       });
 
       const forgotPasswordHandler = new Function(
         stack,
-        "ForgotPasswordHandler",
+        'ForgotPasswordHandler',
         {
-          handler: "functions/forgotPassword/handler.handler",
+          handler: 'functions/forgotPassword/handler.handler',
           bind: [usersCredsTable],
           environment: {
             MAILGUN_API_KEY: process.env.MAILGUN_API_KEY as string,
@@ -216,83 +221,86 @@ export default {
         }
       );
 
-      const api = new Api(stack, "Api", {
+      const api = new Api(stack, 'Api', {
         authorizers: {
           jwtAuth: {
-            type: "lambda",
+            type: 'lambda',
             function: jwtAuthHandler,
           },
           admin: {
-            type: "lambda",
+            type: 'lambda',
             function: adminAuthHandler,
-            identitySource: ["$request.header.admintoken"],
+            identitySource: ['$request.header.admintoken'],
           },
         },
         customDomain:
-          stack.stage === "production"
-            ? "api.members.page"
-            : "api-dev.members.page",
+          stack.stage === 'production'
+            ? 'api.members.page'
+            : 'api-dev.members.page',
         defaults: {
-          authorizer: "jwtAuth",
+          authorizer: 'jwtAuth',
         },
         routes: {
           // Webhooks
-          "POST /stripeWebhook": {
+          'POST /stripeWebhook': {
             function: stripeWebhookHandler,
-            authorizer: "none", // auth is handled inside the function
+            authorizer: 'none', // auth is handled inside the function
           },
-          "POST /stripeConnectWebhook": {
+          'POST /stripeConnectWebhook': {
             function: stripeConnectWebhookHandler,
-            authorizer: "none", // auth is handled inside the function
+            authorizer: 'none', // auth is handled inside the function
           },
-          "POST /webhook": {
+          'POST /webhook': {
             function: webhookHandler,
-            authorizer: "none",
+            authorizer: 'none',
           },
 
           // App routes
-          "POST /pages": pagesHandler,
-          "GET /pages": pagesHandler,
-          "PUT /pages": pagesHandler,
-          "GET /pages/{username}": {
+          'POST /pages': pagesHandler,
+          'GET /pages': pagesHandler,
+          'PUT /pages': pagesHandler,
+          'GET /pages/{username}': {
             function: pageHandler,
-            authorizer: "none",
+            authorizer: 'none',
           },
-          "POST /user": userHandler,
-          "GET /user": userHandler,
-          "POST /subscriptions": subscriptionsHandler,
+          'PUT /addProduct': addProductHandler,
+          'PUT /telegramCode': telegramCodeHandler,
+          'GET /telegramCode': telegramCodeHandler,
+          'POST /user': userHandler,
+          'GET /user': userHandler,
+          'POST /subscriptions': subscriptionsHandler,
 
           // Auth routes
-          "POST /forgotPassword": {
+          'POST /forgotPassword': {
             function: forgotPasswordHandler,
-            authorizer: "none",
+            authorizer: 'none',
           },
-          "POST /login": {
+          'POST /login': {
             function: loginHandler,
-            authorizer: "none",
+            authorizer: 'none',
           },
-          "POST /loginTelegram": {
+          'POST /loginTelegram': {
             function: loginTelegramHandler,
-            authorizer: "none",
+            authorizer: 'none',
           },
 
           // Stripe routes
-          "POST /connectStripe": connectStripeHandler,
+          'POST /connectStripe': connectStripeHandler,
 
           // Consumer endpoints
-          "POST /joinPage": joinPageHandler,
-          "POST /unjoinPage": unjoinPageHandler,
+          'POST /joinPage': joinPageHandler,
+          'POST /unjoinPage': unjoinPageHandler,
         },
       });
 
-      const site = new NextjsSite(stack, "site", {
+      const site = new NextjsSite(stack, 'site', {
         bind: [api],
         environment: {
           NEXT_PUBLIC_API_ENDPOINT: api.url, // available on the client
           API_ENDPOINT: api.url, // available on the server
         },
         customDomain:
-          stack.stage === "production" ? "members.page" : "dev.members.page",
+          stack.stage === 'production' ? 'members.page' : 'dev.members.page',
       });
 
       stack.addOutputs({

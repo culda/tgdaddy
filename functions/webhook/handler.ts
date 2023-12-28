@@ -1,16 +1,16 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { Telegram } from "puregram";
-import { Table } from "sst/node/table";
-import { TelegramUpdate } from "puregram/generated";
 import {
-  DeleteItemCommand,
   DynamoDBClient,
+  GetItemCommand,
   UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+} from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { Telegram } from 'puregram';
+import { TelegramUpdate } from 'puregram/generated';
+import { Table } from 'sst/node/table';
 
 const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
-const dynamoDb = new DynamoDBClient({ region: "us-east-1" });
+const dynamoDb = new DynamoDBClient({ region: 'us-east-1' });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   console.log(event.body);
@@ -30,30 +30,29 @@ async function handleUpdate(u: TelegramUpdate) {
   const context = await telegram.updates.handleUpdate(u);
   console.log(context);
 
-  if (context?.is("channel_post")) {
+  if (context?.is('channel_post')) {
     const { text, chat } = context;
 
-    if (text?.startsWith("LINK-")) {
-      const { Attributes } = await dynamoDb.send(
-        new DeleteItemCommand({
+    if (text?.startsWith('LINK-')) {
+      const { Item } = await dynamoDb.send(
+        new GetItemCommand({
           TableName: Table.TelegramLinkCodes.tableName,
           Key: marshall({ code: text }),
-          ReturnValues: "ALL_OLD",
         })
       );
 
-      if (Attributes) {
-        const { channelId } = unmarshall(Attributes) as {
-          channelId: string;
-        };
+      if (Item) {
+        // const { code, pageId, productId } = unmarshall(
+        //   Attributes
+        // ) as StTelegramLinkCode;
 
         await dynamoDb.send(
           new UpdateItemCommand({
-            TableName: Table.Pages.tableName,
-            Key: marshall({ id: channelId }),
-            UpdateExpression: "SET channelId = :channelId",
+            TableName: Table.TelegramLinkCodes.tableName,
+            Key: marshall({ code: text }),
+            UpdateExpression: 'SET channelId = :channelId',
             ExpressionAttributeValues: {
-              ":channelId": { S: chat.id.toString() },
+              ':channelId': { S: String(chat.id) },
             },
           })
         );
