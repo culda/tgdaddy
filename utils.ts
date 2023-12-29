@@ -22,7 +22,7 @@ export function truncatedText(
   if (value.length < start + end) {
     return value;
   }
-  return `${value.slice(0, start)}...${value.slice(-end)}}`;
+  return `${value.slice(0, start)}...${value.slice(-end)}`;
 }
 
 export function isProd(): boolean {

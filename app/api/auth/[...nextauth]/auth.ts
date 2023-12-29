@@ -2,18 +2,18 @@ import {
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,
-} from "next";
-import { CookiesOptions, NextAuthOptions, getServerSession } from "next-auth";
-import { decode, encode } from "next-auth/jwt";
-import Credentials from "next-auth/providers/credentials";
+} from 'next';
+import { CookiesOptions, NextAuthOptions, getServerSession } from 'next-auth';
+import { decode, encode } from 'next-auth/jwt';
+import Credentials from 'next-auth/providers/credentials';
 
 const cookies: Partial<CookiesOptions> = {
   sessionToken: {
     name: `next-auth.session-token`,
     options: {
       httpOnly: true,
-      sameSite: "none",
-      path: "/",
+      sameSite: 'none',
+      path: '/',
       domain: process.env.NEXT_PUBLIC_DOMAIN,
       secure: true,
     },
@@ -23,7 +23,7 @@ const cookies: Partial<CookiesOptions> = {
     options: {},
   },
   csrfToken: {
-    name: "next-auth.csrf-token",
+    name: 'next-auth.csrf-token',
     options: {},
   },
 };
@@ -31,34 +31,32 @@ const cookies: Partial<CookiesOptions> = {
 export const config = {
   cookies,
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
   providers: [
     Credentials({
-      id: "email",
-      name: "Credentials",
+      id: 'email',
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        platformLogin: { label: "Platform Login", type: "text" },
-        resetCode: { label: "Reset Code", type: "text" },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+        platformLogin: { label: 'Platform Login', type: 'text' },
+        resetCode: { label: 'Reset Code', type: 'text' },
       },
       authorize: async (credentials) => {
-        if (!credentials) return Promise.reject("no credentials");
-        console.log("got credentials", credentials);
+        if (!credentials) return Promise.reject('no credentials');
         const res = await fetch(`${process.env.API_ENDPOINT}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: credentials.email,
             password: credentials.password,
             resetCode: credentials.resetCode,
-            platformLogin: credentials.platformLogin === "true" ? true : false,
+            platformLogin: credentials.platformLogin === 'true' ? true : false,
           }),
         });
 
         const user = await res.json();
-        console.log(user);
 
         // Check if the response is successful and has a user
         if (res.ok && user) {
@@ -69,27 +67,26 @@ export const config = {
       },
     }),
     Credentials({
-      id: "telegram",
-      name: "Telegram",
+      id: 'telegram',
+      name: 'Telegram',
       credentials: {
-        id: { label: "User ID", type: "text" },
-        platformLogin: { label: "Platform Login", type: "text" },
-        username: { label: "Username", type: "text" },
-        first_name: { label: "First Name", type: "text" },
-        last_name: { label: "Last Name", type: "text" },
-        photo_url: { label: "Photo URL", type: "text" },
-        auth_date: { label: "Auth Date", type: "text" },
-        hash: { label: "Hash", type: "text" },
+        id: { label: 'User ID', type: 'text' },
+        platformLogin: { label: 'Platform Login', type: 'text' },
+        username: { label: 'Username', type: 'text' },
+        first_name: { label: 'First Name', type: 'text' },
+        last_name: { label: 'Last Name', type: 'text' },
+        photo_url: { label: 'Photo URL', type: 'text' },
+        auth_date: { label: 'Auth Date', type: 'text' },
+        hash: { label: 'Hash', type: 'text' },
       },
       authorize: async (credentials) => {
-        console.log("got credentials", credentials);
-        if (!credentials) return Promise.reject("no credentials");
+        if (!credentials) return Promise.reject('no credentials');
         const res = await fetch(`${process.env.API_ENDPOINT}/loginTelegram`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: credentials.id,
-            platformLogin: credentials.platformLogin === "true" ? true : false,
+            platformLogin: credentials.platformLogin === 'true' ? true : false,
             username: credentials.username,
             first_name: credentials.first_name,
             last_name: credentials.last_name,
@@ -111,7 +108,7 @@ export const config = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   callbacks: {
     session: async ({ session, token }) => {
@@ -154,7 +151,7 @@ export const config = {
 
 export function auth(
   ...args:
-    | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
+    | [GetServerSidePropsContext['req'], GetServerSidePropsContext['res']]
     | [NextApiRequest, NextApiResponse]
     | []
 ) {

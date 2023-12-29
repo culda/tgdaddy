@@ -1,7 +1,7 @@
-import { StPage } from "@/app/model/types";
-import { AttributeValue, TransactWriteItem } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
-import { Table } from "sst/node/table";
+import { StPage } from '@/app/model/types';
+import { AttributeValue, TransactWriteItem } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { Table } from 'sst/node/table';
 
 export async function ddbUpdatePageTransactItem(
   id: string,
@@ -12,7 +12,11 @@ export async function ddbUpdatePageTransactItem(
   const expressionAttributeNames: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    if (key === "id") {
+    if (value === undefined) {
+      continue;
+    }
+
+    if (key === 'id') {
       continue;
     }
 
@@ -22,14 +26,14 @@ export async function ddbUpdatePageTransactItem(
     updateExpressionParts.push(`${attributeName} = ${attributeValue}`);
     expressionAttributeNames[attributeName] = key;
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       expressionAttributeValues[attributeValue] = { S: value };
     }
 
-    if (Array.isArray(value) && key === "pricing") {
-      // Update the pricing attribute with the modified array
+    if (Array.isArray(value) && key === 'prices') {
+      // Update the prices attribute with the modified array
       expressionAttributeValues[attributeValue] = {
-        L: obj.pricing!.map((item) => ({
+        L: obj.prices!.map((item) => ({
           M: {
             id: { S: item.id },
             usd: { N: item.usd.toString() },
@@ -44,7 +48,7 @@ export async function ddbUpdatePageTransactItem(
     Update: {
       TableName: Table.Pages.tableName,
       Key: marshall({ id }),
-      UpdateExpression: `SET ${updateExpressionParts.join(", ")}`,
+      UpdateExpression: `SET ${updateExpressionParts.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
     },

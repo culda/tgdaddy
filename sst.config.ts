@@ -30,6 +30,19 @@ export default {
         },
       });
 
+      const productsTable = new Table(stack, 'Products', {
+        fields: {
+          id: 'string',
+          pageId: 'string',
+        },
+        primaryIndex: { partitionKey: 'id' },
+        globalIndexes: {
+          PageIdIndex: {
+            partitionKey: 'pageId',
+          },
+        },
+      });
+
       const uniquePagesTable = new Table(stack, 'UniquePages', {
         fields: {
           username: 'string',
@@ -158,9 +171,9 @@ export default {
         bind: [telegramLinkCodesTable, pagesTable],
       });
 
-      const addProductHandler = new Function(stack, 'AddProductHandler', {
-        handler: 'functions/addProduct/handler.handler',
-        bind: [pagesTable, telegramLinkCodesTable, pageImagesBucket],
+      const productHandler = new Function(stack, 'ProductHandler', {
+        handler: 'functions/product/handler.handler',
+        bind: [pagesTable, productsTable, telegramLinkCodesTable],
       });
 
       const userHandler = new Function(stack, 'UserHandler', {
@@ -263,7 +276,9 @@ export default {
             function: pageHandler,
             authorizer: 'none',
           },
-          'PUT /addProduct': addProductHandler,
+          'PUT /products': productHandler,
+          'POST /products': productHandler,
+          'GET /products': productHandler,
           'PUT /telegramCode': telegramCodeHandler,
           'GET /telegramCode': telegramCodeHandler,
           'POST /user': userHandler,

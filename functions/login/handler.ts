@@ -1,12 +1,12 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { Table } from "sst/node/table";
-import { TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
-import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
-import { ddbGetUserById, ddbGetUserCredsByEmail, dynamoDb } from "../utils";
-import { randomUUID, timingSafeEqual } from "crypto";
-import { ApiResponse } from "@/functions/errors";
-import dayjs from "dayjs";
+import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { Table } from 'sst/node/table';
+import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { StConnectStatus, StPlan, StUser } from '../../app/model/types';
+import { ddbGetUserById, ddbGetUserCredsByEmail, dynamoDb } from '../utils';
+import { randomUUID, timingSafeEqual } from 'crypto';
+import { ApiResponse, checkNull } from '@/functions/errors';
+import dayjs from 'dayjs';
 
 export type LoginRequest = {
   email: string;
@@ -16,15 +16,9 @@ export type LoginRequest = {
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event.body);
-  if (!event.body) {
-    return ApiResponse({
-      status: 400,
-    });
-  }
-
+  const body = checkNull(event.body, 400);
   const { email, password, resetCode, platformLogin } = JSON.parse(
-    event.body
+    body
   ) as LoginRequest;
 
   if (!email || !password || password.length < 8) {
@@ -36,32 +30,31 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   // Check if user exists in DynamoDB
   let creds = await ddbGetUserCredsByEmail(email);
   if (creds) {
-    console.log("found creds", creds);
     // If a code was supplied, verify code
     if (resetCode) {
       if (!creds.resetCode || !creds.resetCodeExpiry) {
         return ApiResponse({
           status: 401,
-          message: "Invalid code",
+          message: 'Invalid code',
         });
       }
       if (creds.resetCode !== resetCode) {
         return ApiResponse({
           status: 401,
-          message: "Invalid code",
+          message: 'Invalid code',
         });
       }
 
       if (dayjs().isAfter(dayjs.unix(creds.resetCodeExpiry))) {
         return ApiResponse({
           status: 401,
-          message: "Code expired",
+          message: 'Code expired',
         });
       }
 
       // Code is valid, remove code from user creds and change password
       try {
-        console.log("code is valid, updating password");
+        console.log('code is valid, updating password');
         await dynamoDb.send(
           new TransactWriteItemsCommand({
             TransactItems: [
@@ -70,9 +63,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
                   TableName: Table.UsersCreds.tableName,
                   Key: marshall({ email }),
                   UpdateExpression:
-                    "remove resetCode, resetCodeExpiry set password = :password",
+                    'remove resetCode, resetCodeExpiry set password = :password',
                   ExpressionAttributeValues: {
-                    ":password": { S: password },
+                    ':password': { S: password },
                   },
                 },
               },
@@ -80,7 +73,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           })
         );
         const user = await ddbGetUserById(creds.id);
-        console.log("user", user);
         return ApiResponse({
           status: 200,
           body: user,
@@ -97,15 +89,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       Buffer.from(creds.password)
     );
     if (!match) {
-      console.log("passwords do not match");
       // Passwords do not match
       return ApiResponse({
         status: 401,
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
       });
     }
     const user = await ddbGetUserById(creds.id);
-    console.log("passwords match", user);
     // Passwords match
     return ApiResponse({
       status: 200,
@@ -113,7 +103,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     });
   }
 
-  console.log("no creds");
   // User does not exist
   const user: StUser = {
     id: randomUUID(),

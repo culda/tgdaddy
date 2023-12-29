@@ -11,7 +11,7 @@ import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
 import { Bucket } from 'sst/node/bucket';
 import { Table } from 'sst/node/table';
 import { v4 as uuidv4 } from 'uuid';
-import { StPage } from '../../app/model/types';
+import { StPage, StPagePrice } from '../../app/model/types';
 import { AuthorizerContext } from '../jwtAuth/handler';
 import { lambdaWrapperAuth } from '../lambdaWrapper';
 import { ddbGetPageById, dynamoDb, s3PutImage } from '../utils';
@@ -22,7 +22,14 @@ export type TpImage = {
   fileType: string;
 };
 
-export type TpPageRequest = Partial<StPage & TpImage>;
+export type TpPostPageRequest = {
+  id: string;
+  username?: string;
+  title?: string;
+  prices?: StPagePrice[];
+} & Partial<TpImage>;
+
+export type TpPutPageRequest = StPage & Partial<TpImage>;
 
 export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
@@ -31,19 +38,22 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     switch (event.requestContext.http.method) {
       case 'PUT': {
         const body = checkNull(event.body, 400);
-        console.log(body);
+        console.log(event.requestContext.http.method, body);
 
-        const { fileBase64, fileType, ...rest } = JSON.parse(
+        const { fileBase64, fileType, ...page } = JSON.parse(
           body
-        ) as TpPageRequest;
-        let obj: Partial<StPage> = rest;
+        ) as TpPutPageRequest;
 
         if (fileBase64 && fileType) {
-          obj = await addImagePathToObj({ fileBase64, fileType }, obj);
+          const imagePath = await getImagePath(
+            { fileBase64, fileType },
+            page.id
+          );
+          page.imagePath = imagePath;
         }
 
         try {
-          const res = await ddbPutPage(obj);
+          const res = await ddbPutPage(page);
 
           return ApiResponse({
             status: 200,
@@ -74,23 +84,28 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       }
       case 'POST': {
         const body = checkNull(event.body, 400);
-        console.log(body);
+        console.log(event.requestContext.http.method, body);
 
-        const { fileBase64, fileType, id, ...rest } = JSON.parse(
-          body
-        ) as TpPageRequest;
-        let obj: Partial<StPage> = rest;
+        const { fileBase64, fileType, id, prices, title, username } =
+          JSON.parse(body) as TpPostPageRequest;
+
+        let update: Partial<StPage> = {
+          prices,
+          title,
+          username,
+        };
+
         const commands = [];
 
-        const page = checkNull(await ddbGetPageById(id as string), 500);
+        const page = checkNull(await ddbGetPageById(id), 500);
         checkPermission(userId, page.userId);
 
         /**
          * If the username was updated, we attempt to need to verify that the new username is unique
          */
-        if (obj.username) {
+        if (update.username) {
           // If the username wasn't changed, nothing to do
-          if (page?.username !== obj.username) {
+          if (page?.username !== update.username) {
             // Delete old username from UniquePages table
             commands.push({
               Delete: {
@@ -103,7 +118,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
             commands.push({
               Put: {
                 TableName: Table.UniquePages.tableName,
-                Item: marshall({ username: obj.username, id }),
+                Item: marshall({ username: update.username, id }),
                 ConditionExpression: 'attribute_not_exists(username)',
               },
             });
@@ -114,12 +129,16 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
          * If a new image was uploaded, we need to upload it to S3
          */
         if (fileBase64 && fileType) {
-          obj = await addImagePathToObj({ fileBase64, fileType }, obj);
+          const imagePath = await getImagePath(
+            { fileBase64, fileType },
+            page.id
+          );
+          update.imagePath = imagePath;
         }
 
-        console.log('updateObj', obj);
-        if (Object.keys(obj).length > 0) {
-          commands.push(await ddbUpdatePageTransactItem(id as string, obj));
+        console.log('updateObj', update);
+        if (Object.keys(update).length > 0) {
+          commands.push(await ddbUpdatePageTransactItem(id, update));
         }
 
         const res = await dynamoDb.send(
@@ -211,10 +230,7 @@ async function ddbPutPage(
   return response;
 }
 
-async function addImagePathToObj(
-  img: TpImage,
-  page: Partial<StPage>
-): Promise<Partial<StPage>> {
+async function getImagePath(img: TpImage, pageId: string): Promise<string> {
   try {
     let buffer = Buffer.from(img.fileBase64, 'base64');
 
@@ -235,15 +251,12 @@ async function addImagePathToObj(
       console.log(err);
     }
 
-    const imageKey = `${page.id}/${uuidv4()}`;
+    const imageKey = `${pageId}/${uuidv4()}`;
     const imageBucket = Bucket.PagesImagesBucket.bucketName;
 
     await s3PutImage(buffer, imageKey, imageBucket, 'image/webp'); // Upload the optimized image
 
-    return {
-      ...page,
-      imagePath: `https://${imageBucket}.s3.amazonaws.com/${imageKey}`,
-    };
+    return `https://${imageBucket}.s3.amazonaws.com/${imageKey}`;
   } catch (error) {
     console.error('Error processing image:', error);
     throw error; // Rethrow the error for handling upstream

@@ -49,7 +49,7 @@ export function checkPermission(
   if (requestUserId !== jwtUserId) {
     throw new Error(
       JSON.stringify({
-        403,
+        statusCode: 403,
         message: "Not authorized",
       })
     );

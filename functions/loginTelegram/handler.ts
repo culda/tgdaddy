@@ -1,44 +1,39 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { Table } from "sst/node/table";
-import { PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
-import { StConnectStatus, StPlan, StUser } from "../../app/model/types";
-import { ddbGetUserByTelegramId, dynamoDb } from "../utils";
-import crypto, { randomUUID } from "crypto";
-import { TelegramAuthData } from "@/app/components/telegramLogin/types";
-import { ApiResponse } from "@/functions/errors";
+import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { Table } from 'sst/node/table';
+import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { StConnectStatus, StPlan, StUser } from '../../app/model/types';
+import { ddbGetUserByTelegramId, dynamoDb } from '../utils';
+import crypto, { randomUUID } from 'crypto';
+import { TelegramAuthData } from '@/app/components/telegramLogin/types';
+import { ApiResponse, checkNull } from '@/functions/errors';
 
 export type LoginRequest = TelegramAuthData & {
   platformLogin?: boolean;
 };
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event.body);
-  if (!event.body) {
-    return ApiResponse({
-      status: 400,
-    });
-  }
+  const body = checkNull(event.body, 400);
 
   let user: StUser | undefined;
-  const req = JSON.parse(event.body) as LoginRequest;
+  const req = JSON.parse(body) as LoginRequest;
 
   const dataCheckString = Object.keys(req)
-    .filter((key) => key !== "hash" && key !== "platformLogin")
+    .filter((key) => key !== 'hash' && key !== 'platformLogin')
     .sort()
     .map((key) => `${key}=${req[key as keyof LoginRequest]}`)
-    .join("\n");
+    .join('\n');
 
   const secretKey = crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(process.env.BOT_TOKEN as string)
     .digest();
 
   // Calculate HMAC-SHA-256 signature
   const hmac = crypto
-    .createHmac("sha256", secretKey)
+    .createHmac('sha256', secretKey)
     .update(dataCheckString)
-    .digest("hex");
+    .digest('hex');
 
   if (hmac !== req.hash) {
     return ApiResponse({
@@ -63,7 +58,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       photoUrl: req.photo_url,
       creatorStripeAccountStatus: StConnectStatus.NotStarted,
     };
-    console.log("creating new user", user);
+    console.log('creating new user', user);
     await dynamoDb.send(
       new PutItemCommand({
         TableName: Table.Users.tableName,

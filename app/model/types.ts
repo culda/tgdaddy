@@ -4,12 +4,11 @@ export type StPage = {
   id: string;
   userId: string;
   imagePath?: string;
-  products: StProduct[];
   channelId?: string;
   title?: string;
   username: string;
   description?: string;
-  pricing: StPagePrice[];
+  prices: StPagePrice[];
 };
 
 export type StInviteLink = {
@@ -54,6 +53,7 @@ export type StProductType = 'telegramAccess';
 
 export type StProduct = {
   id: string;
+  pageId: string;
   productType: StProductType;
   title: string;
   description: string;

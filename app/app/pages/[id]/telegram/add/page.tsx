@@ -2,7 +2,8 @@ import { auth } from '@/app/api/auth/[...nextauth]/auth';
 import { StTelegramProduct } from '@/app/model/types';
 import { nanoid } from 'nanoid';
 import { redirect } from 'next/navigation';
-import Product from '../Telegram';
+import Telegram from '../TelegramProduct';
+import ContentLayout from '@/app/components/ContentLayout';
 
 const Page = async ({ params }: { params: { id: string } }) => {
   const session = await auth();
@@ -10,6 +11,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
   const code = `LINK-${nanoid(4)}`;
   const product: StTelegramProduct = {
     id: nanoid(10),
+    pageId: params.id,
     type: 'channel',
     productType: 'telegramAccess',
     title: '',
@@ -35,11 +37,14 @@ const Page = async ({ params }: { params: { id: string } }) => {
   );
 
   if (!codeRes.ok) {
-    console.log(codeRes);
     return redirect(`/app/pages/${params.id}`);
   }
 
-  return <Product edit product={product} />;
+  return (
+    <ContentLayout title="Add Telegram">
+      <Telegram edit isNew product={product} />;
+    </ContentLayout>
+  );
 };
 
 export default Page;

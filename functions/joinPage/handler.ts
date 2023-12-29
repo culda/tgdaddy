@@ -3,13 +3,13 @@ import {
   StPagePrice,
   StPlan,
   frequencyToInterval,
-} from "@/app/model/types";
-import { ApiResponse, checkNull } from "@/functions/errors";
-import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from "aws-lambda";
-import Stripe from "stripe";
-import { AuthorizerContext } from "../jwtAuth/handler";
-import { lambdaWrapperAuth } from "../lambdaWrapper";
-import { ddbGetPageById, ddbGetUserById } from "../utils";
+} from '@/app/model/types';
+import { ApiResponse, checkNull } from '@/functions/errors';
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
+import Stripe from 'stripe';
+import { AuthorizerContext } from '../jwtAuth/handler';
+import { lambdaWrapperAuth } from '../lambdaWrapper';
+import { ddbGetPageById, ddbGetUserById } from '../utils';
 
 export const client = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -45,26 +45,26 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     if (!page) {
       return ApiResponse({
         status: 400,
-        message: "Page not found",
+        message: 'Page not found',
       });
     }
     const creatorUser = await ddbGetUserById(page.userId);
     const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
-    const pricing: StPagePrice | undefined = page?.pricing?.find(
+    const prices: StPagePrice | undefined = page?.prices?.find(
       (p) => p.id === priceId
     );
 
-    if (!pricing) {
+    if (!prices) {
       return ApiResponse({
         status: 400,
-        message: "Invalid price ID",
+        message: 'Invalid price ID',
       });
     }
 
     if (creatorUser?.creatorStripeAccountStatus !== StConnectStatus.Connected) {
       return ApiResponse({
         status: 400,
-        message: "Payments are not enabled",
+        message: 'Payments are not enabled',
       });
     }
 
@@ -117,8 +117,8 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     );
     let price = existingPrices.data.find(
       (p) =>
-        p.unit_amount === pricing.usd &&
-        p.recurring?.interval === frequencyToInterval(pricing.frequency)
+        p.unit_amount === prices.usd &&
+        p.recurring?.interval === frequencyToInterval(prices.frequency)
     );
 
     if (!price) {
@@ -126,9 +126,9 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       price = await client.prices.create(
         {
           product: product.id,
-          unit_amount: pricing.usd,
-          currency: "usd",
-          recurring: { interval: frequencyToInterval(pricing.frequency) },
+          unit_amount: prices.usd,
+          currency: 'usd',
+          recurring: { interval: frequencyToInterval(prices.frequency) },
         },
         {
           stripeAccount: creatorStripeAccountId,
@@ -136,16 +136,16 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       );
     }
 
-    console.log("New checkout session", userId, pageId);
+    console.log('New checkout session', userId, pageId);
 
     /**
      * Create a Stripe Checkout session
      */
     const session = await client.checkout.sessions.create(
       {
-        payment_method_types: ["card"],
+        payment_method_types: ['card'],
         line_items: [{ price: price.id, quantity: 1 }],
-        mode: "subscription",
+        mode: 'subscription',
         success_url: redirectUrl,
         cancel_url: redirectUrl,
         customer: customerId,
