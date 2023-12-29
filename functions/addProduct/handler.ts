@@ -45,7 +45,7 @@ export async function ddbPutProduct(pageId: string, product: StProduct) {
         '#products': 'products',
       },
       ExpressionAttributeValues: {
-        ':product': { L: [marshall(product)] },
+        ':product': { L: [{ M: marshall(product) }] },
         ':empty_list': { L: [] },
       },
     })

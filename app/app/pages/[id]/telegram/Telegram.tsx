@@ -3,7 +3,11 @@ import Button from '@/app/components/Button';
 import ContentLayout from '@/app/components/ContentLayout';
 import { useSnackbar } from '@/app/components/SnackbarProvider';
 import TextField from '@/app/components/TextField';
-import { StTelegramLinkCode, StTelegramProduct } from '@/app/model/types';
+import {
+  StProduct,
+  StTelegramLinkCode,
+  StTelegramProduct,
+} from '@/app/model/types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
@@ -31,8 +35,8 @@ const Telegram = ({
   edit = false,
 }: {
   product: StTelegramProduct;
-  isNew: boolean;
-  edit: boolean;
+  isNew?: boolean;
+  edit?: boolean;
 }) => {
   const snack = useSnackbar();
   const session = useSession();
@@ -86,20 +90,25 @@ const Telegram = ({
 
   const onSubmit = async (values: TpValues) => {
     setIsLoading(true);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/pages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.data?.accessToken}`,
-      },
-      body: JSON.stringify({
-        id: params.id,
-        products: [pr],
-      }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/addProduct`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.data?.accessToken}`,
+        },
+        body: JSON.stringify({
+          padeId: params.id,
+          product: {
+            ...pr,
+            ...values,
+          } as StProduct,
+        }),
+      }
+    );
 
     if (!res.ok) {
-      console.log(res);
       setIsLoading(false);
       return;
     }

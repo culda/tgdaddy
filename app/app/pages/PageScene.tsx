@@ -3,6 +3,7 @@ import AddImage from '@/app/components/AddImage';
 import Button from '@/app/components/Button';
 import PriceInputs from '@/app/components/PriceInputs';
 import { useSnackbar } from '@/app/components/SnackbarProvider';
+import { truncatedText } from '@/utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { nanoid } from 'nanoid';
 import { useSession } from 'next-auth/react';
@@ -11,7 +12,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import TextField from '../../components/TextField';
-import { StPage, StPagePrice, StPriceFrequency } from '../../model/types';
+import {
+  StPage,
+  StPagePrice,
+  StPriceFrequency,
+  StTelegramProduct,
+} from '../../model/types';
 import PageSection from './PageSection';
 import { getChangedProps } from './getChangedProps';
 
@@ -256,18 +262,39 @@ const PageScene = ({ page, isNew = false, edit = false }: PpPage) => {
             />
           </div>
         </PageSection>
-        <PageSection title="Telegram">
-          <p>
-            This is the heart of the page. Subscribers instantly gain access to
-            these products.
-          </p>
-          <div className="mt-4">
-            {/* list products */}
-            <Button href={`/app/pages/${page.id}/telegram/add`}>
-              Add Telegram
-            </Button>
-          </div>
-        </PageSection>
+        {!edit && (
+          <PageSection title="Telegram">
+            <p>
+              This is the heart of the page. Subscribers instantly gain access
+              to these products.
+            </p>
+            <div className="mt-4">
+              <div className="flex flex-col gap-2">
+                {(
+                  pg.products.filter(
+                    (pr) => pr.productType === 'telegramAccess'
+                  ) as StTelegramProduct[]
+                ).map((pr) => (
+                  <Button
+                    variant="text"
+                    href={`/app/pages/${page.id}/telegram/${pr.id}/edit`}
+                  >
+                    <div className="flex flex-row gap-2">
+                      <p className="font-bold">{truncatedText(pr.title, 5)}</p>
+                      <span className="bg-orange-200 rounded-md p-2">
+                        {pr.type}
+                      </span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+
+              <Button href={`/app/pages/${page.id}/telegram/add`}>
+                Add Telegram
+              </Button>
+            </div>
+          </PageSection>
+        )}
 
         <PageSection title="Pricing">
           <p>
@@ -292,58 +319,6 @@ const PageScene = ({ page, isNew = false, edit = false }: PpPage) => {
             />
           </div>
         </PageSection>
-
-        {/* {!edit && (
-          <PageSection title="Products">
-            {pg.products?.map(pr => 
-              <div>
-                {pr.title}
-              </div>
-            )}
-          </PageSection>
-        )} */}
-
-        {/* {!edit && (
-          <PageSection
-            title={
-              !pg?.channelId ? (
-                "Connect Telegram"
-              ) : (
-                <h2 className="font-bold title-font text-gray-900 mb-1 text-xl flex flex-row gap-2 items-center">
-                  Telegram Connected{" "}
-                  <FaCheckCircle className="text-green-500" />
-                </h2>
-              )
-            }
-          >
-            <div className="flex flex-col gap-2">
-              {!pg?.channelId && (
-                <Fragment>
-                  {" "}
-                  <p>
-                    Make{" "}
-                    <a href="https://t.me/tgdadybot" target="_blank">
-                      <b>{process.env.NEXT_PUBLIC_BOT_USERNAME}</b>
-                    </a>{" "}
-                    an admin to your channel.
-                  </p>
-                  <p> Copy and paste the code below in your channel </p>
-                  <div className="relative text-black text-center text-sm rounded-md justify-center items-center border border-zinc-300 bg-neutral-50 grow py-2.5 border-solid px-1 md:px-5">
-                    {page?.telegramLinkCode}
-                    <div className="absolute right-4 inset-y-0 flex items-center">
-                      <button onClick={copyTelegramCode}>
-                        <FaCopy className="text-lg" />
-                      </button>
-                    </div>
-                  </div>
-                  <Button loading={isLoading} onClick={checkTelegram}>
-                    Check
-                  </Button>
-                </Fragment>
-              )}
-            </div>
-          </PageSection>
-        )} */}
 
         {edit && (
           <div className="h-12 flex w-1/2 flex-row gap-2 justify-center mx-auto">
