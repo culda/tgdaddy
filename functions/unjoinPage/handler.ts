@@ -26,15 +26,13 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   const userId = event.requestContext.authorizer.lambda.userId;
   if (!userId) {
     return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No userId on the token" }),
+      statusCode: 403,
     };
   }
 
   if (!event.body) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: "Request body is required" }),
     };
   }
 

@@ -1,11 +1,11 @@
+import { isProd } from "../../utils";
 import { auth } from "../api/auth/[...nextauth]/auth";
-import ContentLayout from "../components/ContentLayout";
-import { StPage, StConnectStatus, StUser } from "../model/types";
-import Pages from "./Pages";
 import Button from "../components/Button";
-import { fetchRevenueData } from "./fetchRevenueData";
+import ContentLayout from "../components/ContentLayout";
+import { StConnectStatus, StPage, StUser } from "../model/types";
+import Pages from "./Pages";
 import { getFakeRevenueData } from "./fakeRevenueData";
-import { isProd } from "./utils";
+import { fetchRevenueData } from "./fetchRevenueData";
 
 export default async function Page() {
   const session = await auth();
@@ -19,8 +19,6 @@ export default async function Page() {
   });
   const pages: StPage[] = await pagesRes.json();
 
-  console.log(pages);
-
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
@@ -33,7 +31,7 @@ export default async function Page() {
 
   if (isProd() && user.creatorStripeAccountId) {
     revenueData = await fetchRevenueData(user.creatorStripeAccountId);
-  } else {
+  } else if (!isProd()) {
     revenueData = getFakeRevenueData();
   }
 

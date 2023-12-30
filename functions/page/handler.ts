@@ -1,13 +1,13 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { ddbGetPageByUsername } from "../utils";
-import { ApiResponse } from "@/app/model/errors";
+import { ApiResponse } from "@/functions/errors";
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  console.log(event.body);
+  console.log(event.pathParameters);
   const username = event.pathParameters?.username;
-  const channel = await ddbGetPageByUsername(username as string);
+  const page = await ddbGetPageByUsername(username as string);
   return ApiResponse({
     status: 200,
-    body: channel,
+    body: page,
   });
 };

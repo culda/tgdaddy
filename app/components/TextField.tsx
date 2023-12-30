@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useRef, useState, forwardRef, ForwardedRef } from "react";
-import Button from "./Button";
+import React, { forwardRef } from "react";
+import { UseFormRegisterReturn } from "react-hook-form";
 import { FaCopy } from "react-icons/fa";
-import { UseFormRegisterReturn, useForm } from "react-hook-form";
 
 type PpTextField = {
   editMode?: boolean;
@@ -32,7 +31,7 @@ const TextField = forwardRef<
     },
     ref
   ) => {
-    const inputClass = `flex flex-grow min-w-0 text-black bg-neutral-50 text-sm text-gray-600 focus:outline-none rounded-md py-2.5 px-1 ${
+    const inputClass = `flex flex-grow min-w-0 text-black ${editMode ? "bg-white" : "bg-neutral-50"} text-sm text-gray-600 focus:outline-none rounded-md py-2.5 px-1 ${
       pretext ? "" : "text-center"
     }`;
 
@@ -41,9 +40,10 @@ const TextField = forwardRef<
         {textarea ? (
           <div className="flex border-zinc-300 border default-focus-within rounded-md bg-neutral-50">
             <textarea
-              {...registerProps}
               disabled={!editMode}
               className={inputClass}
+              rows={6}
+              {...registerProps}
             />
           </div>
         ) : (

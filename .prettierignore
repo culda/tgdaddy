@@ -1,0 +1,10 @@
+/node_modules
+.next
+.sst
+.env.local
+.env.*
+tsconfig.tsbuildinfo
+.yarn/cache
+.open-next/
+
+layers!

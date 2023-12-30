@@ -1,14 +1,12 @@
 "use client";
-import React from "react";
-import { StPage } from "../model/types";
-import Button from "../components/Button";
-import PageSection from "./pages/PageSection";
 import { FaArrowRight } from "react-icons/fa";
-import { isEmptyArray, isFalseyOrEmptyArray } from "./utils";
+import { isFalseyOrEmptyArray } from "../../utils";
+import Button from "../components/Button";
 import RevenueChart, {
   TpRevenueChartData,
   TpTotalRevenue,
 } from "../components/RevenueChart";
+import { StPage } from "../model/types";
 
 type PpPages = {
   pages?: StPage[];

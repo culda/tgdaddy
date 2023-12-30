@@ -1,9 +1,9 @@
-import ContentLayout from "@/app/components/ContentLayout";
-import { StPage } from "../../../model/types";
-import { auth } from "@/app/api/auth/[...nextauth]/auth";
-import PageScene from "../PageScene";
-import { notFound } from "next/navigation";
-import Button from "@/app/components/Button";
+import { auth } from '@/app/api/auth/[...nextauth]/auth';
+import Button from '@/app/components/Button';
+import ContentLayout from '@/app/components/ContentLayout';
+import { notFound } from 'next/navigation';
+import { StPage, StProduct } from '../../../model/types';
+import PageScene from '../PageScene';
 
 type PpPage = {
   params: { id: string };
@@ -18,15 +18,31 @@ export default async function Page({ params }: PpPage) {
       {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
-          ContentType: "application/json",
+          ContentType: 'application/json',
         },
-        cache: "no-cache",
+        cache: 'no-cache',
       }
     );
     return (await res.json()) as StPage;
   };
 
+  const fetchProducts = async () => {
+    const res = await fetch(
+      `${process.env.API_ENDPOINT}/products?pageId=${params.id}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+          ContentType: 'application/json',
+        },
+        cache: 'no-cache',
+      }
+    );
+    return (await res.json()) as StProduct[];
+  };
+
   const page = await fetchPage();
+  const products = await fetchProducts();
 
   if (!page) {
     return notFound();
@@ -38,12 +54,9 @@ export default async function Page({ params }: PpPage) {
         <Button href={`/app/pages/${page.id}/edit`} variant="secondary">
           Edit Details
         </Button>
-        {/* <Button href={`/app/pages/${channel.id}/edit`} variant="secondary">
-          Edit Details
-        </Button> */}
       </div>
 
-      <PageScene page={page} />
+      <PageScene products={products} page={page} />
     </ContentLayout>
   );
 }

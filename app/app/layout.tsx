@@ -1,11 +1,9 @@
 "use client";
-import React, { Fragment, useState } from "react";
-import { Inter } from "next/font/google";
 import Link from "next/link";
+import React, { Fragment, useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import AccountWidget from "../components/AccountWidget";
-import { FaExpand, FaPlus } from "react-icons/fa";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <AccountWidget platformLogin />
         </div>
       </header>
-      <body className={inter.className}>
+      <body >
         <div className="relative flex flex-col md:flex-row md:items-stretch max-md:px-5 ">
           {/* Hamburger Icon */}
           <button
@@ -81,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Main Content */}
           <div className="flex flex-col items-stretch mt-16 w-full md:ml-[35%] lg:ml-[35%]">
-            <div className="flex grow flex-col overflow-auto relative min-h-[500px]">
+            <div className="flex grow flex-col text-gray-900 overflow-auto relative min-h-[500px]">
               {children}
             </div>
           </div>

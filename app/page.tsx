@@ -1,21 +1,15 @@
-"use client";
-import { ChangeEventHandler, Fragment, useState } from "react";
-import Button from "./components/Button";
-import { useRouter } from "next/navigation";
-import {
-  FaLightbulb,
-  FaMoneyBill,
-  FaMoneyBillWave,
-  FaMoneyCheck,
-  FaRocket,
-} from "react-icons/fa";
+'use client';
+import { useRouter } from 'next/navigation';
+import { ChangeEventHandler, Fragment, useState } from 'react';
+import { FaLightbulb, FaMoneyBill, FaRocket } from 'react-icons/fa';
+import Button from './components/Button';
 
 export default function Home() {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState('');
   const router = useRouter();
 
   const getStarted = () => {
-    let path = "/app/pages/add?platformLogin=true";
+    let path = '/app/pages/add?platformLogin=true';
 
     if (username) {
       path += `&username=${username}`;
@@ -25,7 +19,7 @@ export default function Home() {
 
   const handleUsernameChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value = e.target.value.trim();
-    const sanitizedValue = value.replace(/\s/g, "");
+    const sanitizedValue = value.replace(/\s/g, '');
     setUsername(sanitizedValue);
   };
 
@@ -96,19 +90,19 @@ export default function Home() {
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
                   25
                 </h2>
-                <p className="leading-relaxed">Channels</p>
+                <p>Channels</p>
               </div>
               <div className="p-4 w-1/3">
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
                   852
                 </h2>
-                <p className="leading-relaxed">Subscribers</p>
+                <p>Subscribers</p>
               </div>
               <div className="p-4 w-1/3">
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
                   $4822
                 </h2>
-                <p className="leading-relaxed">Earned</p>
+                <p>Earned</p>
               </div>
             </div>
           </div>

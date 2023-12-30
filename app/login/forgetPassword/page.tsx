@@ -1,12 +1,12 @@
-"use client";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
-import { useSnackbar } from "@/app/components/SnackbarProvider";
-import Button from "@/app/components/Button";
+'use client';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { redirect, useRouter } from 'next/navigation';
+import { useSnackbar } from '@/app/components/SnackbarProvider';
+import Button from '@/app/components/Button';
 
 type PpParams = {
   searchParams: {
@@ -27,13 +27,13 @@ const schema = yup
   .shape({
     newPassword: yup
       .string()
-      .required("Enter your password")
-      .min(8, "Password must be at least 8 characters"),
+      .required('Enter your password')
+      .min(8, 'Password must be at least 8 characters'),
     confirmPassword: yup
       .string()
-      .required("Please confirm your password")
-      .min(8, "Password must be at least 8 characters")
-      .test("passwords-match", "Passwords must match", function (value) {
+      .required('Please confirm your password')
+      .min(8, 'Password must be at least 8 characters')
+      .test('passwords-match', 'Passwords must match', function (value) {
         return this.parent.newPassword === value;
       }),
   })
@@ -47,11 +47,9 @@ export default function Page({ searchParams }: PpParams) {
     resolver: yupResolver(schema),
   });
 
-  console.log(searchParams);
-
   const onSubmit: SubmitHandler<TpFormValues> = async (values) => {
     setIsLoading(true);
-    const result = await signIn("email", {
+    const result = await signIn('email', {
       redirect: false,
       email: searchParams.email,
       password: values.newPassword,
@@ -60,12 +58,12 @@ export default function Page({ searchParams }: PpParams) {
     });
 
     if (result?.ok) {
-      router.push(searchParams.callbackUrl ?? "/app");
+      router.push(searchParams.callbackUrl ?? '/app');
     } else {
       snack({
-        key: "login-error",
-        text: result?.error ?? "Something went wrong",
-        variant: "error",
+        key: 'login-error',
+        text: result?.error ?? 'Something went wrong',
+        variant: 'error',
       });
     }
     setIsLoading(false);
@@ -86,9 +84,9 @@ export default function Page({ searchParams }: PpParams) {
               New Password
             </label>
             <input
-              {...register("newPassword")}
+              {...register('newPassword')}
               className={`shadow appearance-none border ${
-                formState.errors.newPassword ? "border-red-500" : ""
+                formState.errors.newPassword ? 'border-red-500' : ''
               } rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline`}
               id="password"
               type="password"
@@ -108,9 +106,9 @@ export default function Page({ searchParams }: PpParams) {
               Confirm
             </label>
             <input
-              {...register("confirmPassword")}
+              {...register('confirmPassword')}
               className={`shadow appearance-none border ${
-                formState.errors.confirmPassword ? "border-red-500" : ""
+                formState.errors.confirmPassword ? 'border-red-500' : ''
               } rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline`}
               id="password"
               type="password"

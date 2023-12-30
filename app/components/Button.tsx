@@ -1,25 +1,25 @@
-import Link from "next/link";
-import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
+import Link from 'next/link';
+import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 
 const variantStyles = {
-  primary: "text-white bg-indigo-500 hover:bg-indigo-600 border-0",
-  secondary: "text-black bg-orange-300 hover:bg-orange-400 border-0",
-  text: "bg-transparent hover:bg-gray-100 border border-transparent hover:border-gray-300",
+  primary: 'text-white bg-indigo-500 hover:bg-indigo-600 border-0',
+  secondary: 'text-black bg-orange-300 hover:bg-orange-400 border-0',
+  text: 'bg-transparent hover:bg-gray-100 border border-transparent hover:border-gray-300',
 };
 
-type Size = "sm" | "md" | "lg";
+type Size = 'sm' | 'md' | 'lg';
 
 const LoadingSpinner = ({ variant }: { variant: Variant }) => (
   <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
     <div
       className={`w-4 h-4 border-2 ${
-        variant === "text" ? "border-black" : "border-white"
+        variant === 'text' ? 'border-black' : 'border-white'
       } border-t-transparent rounded-full animate-spin`}
     ></div>
   </div>
 );
 
-type Variant = "primary" | "secondary" | "text";
+type Variant = 'primary' | 'secondary' | 'text';
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -29,8 +29,8 @@ type ButtonProps = {
   active?: boolean;
   variant?: Variant;
   onClick?: () => void;
-} & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick"> &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick">;
+} & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'> &
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>;
 
 export default function Button({
   children,
@@ -38,15 +38,15 @@ export default function Button({
   loading,
   onClick,
   active,
-  size = "md",
+  size = 'md',
   className,
-  variant = "primary",
+  variant = 'primary',
   ...props
 }: ButtonProps) {
   const content = loading ? <LoadingSpinner variant={variant} /> : children;
   const variantClassName = variantStyles[variant];
-  const buttonClassName = `flex flex-grow items-center justify-center py-2 px-4 h-10 disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
-    active ? "border-2 border-indigo-800 " : ""
+  const buttonClassName = `flex flex-grow items-center justify-center py-2 px-4 h-10 text-gray-700 disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
+    active ? 'border-2 border-indigo-800 ' : ''
   }`;
 
   if (href) {
@@ -59,7 +59,7 @@ export default function Button({
   return (
     <button
       type="button"
-      className={[buttonClassName, className || ""].join(" ")}
+      className={[buttonClassName, className || ''].join(' ')}
       onClick={onClick}
       {...props}
     >
