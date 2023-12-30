@@ -1,18 +1,18 @@
-import { TpGetSubscriptionRequest } from "@/functions/subscriptions/handler";
-import { notFound } from "next/navigation";
-import { Telegram } from "puregram";
-import { isProd } from "../../utils";
-import { auth } from "../api/auth/[...nextauth]/auth";
-import AccountWidget from "../components/AccountWidget";
-import Button from "../components/Button";
-import { StConsumerSubscription, StPage } from "../model/types";
-import PagePublic from "./PagePublic";
+import { TpGetSubscriptionRequest } from '@/functions/subscriptions/handler';
+import { notFound } from 'next/navigation';
+import { isProd } from '../../utils';
+import { auth } from '../api/auth/[...nextauth]/auth';
+import AccountWidget from '../components/AccountWidget';
+import Button from '../components/Button';
+import { StConsumerSubscription, StPage, StProduct } from '../model/types';
+import PagePublic from './PagePublic';
 
 type PpPage = {
   params: { username: string };
+  searchParams: { sub?: string };
 };
 
-export default async function Page({ params }: PpPage) {
+export default async function Page({ params, searchParams }: PpPage) {
   const session = await auth();
 
   const fetchPage = async () => {
@@ -20,9 +20,9 @@ export default async function Page({ params }: PpPage) {
       `${process.env.API_ENDPOINT}/pages/${params.username}`,
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        cache: "no-cache",
+        cache: 'no-cache',
       }
     );
 
@@ -35,12 +35,12 @@ export default async function Page({ params }: PpPage) {
 
   const fetchSubscription = async (username: string) => {
     const res = await fetch(`${process.env.API_ENDPOINT}/subscriptions`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${session?.accessToken}`,
       },
-      cache: "no-cache",
+      cache: 'no-cache',
       body: JSON.stringify({
         username,
       } as TpGetSubscriptionRequest),
@@ -58,42 +58,42 @@ export default async function Page({ params }: PpPage) {
     return data as StConsumerSubscription;
   };
 
+  const fetchProducts = async (pageId: string) => {
+    const res = await fetch(
+      `${process.env.API_ENDPOINT}/products?pageId=${pageId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+          ContentType: 'application/json',
+        },
+        cache: 'no-cache',
+      }
+    );
+    return (await res.json()) as StProduct[];
+  };
+
   const page = await fetchPage();
 
   if (!page) {
     return notFound();
   }
 
+  const products = await fetchProducts(page.id);
+
   let sub;
 
-  if (session?.user?.id) {
-    if (isProd()){
+  // Fetch subscription and access links if logged in
+  if (session?.accessToken) {
+    if (isProd()) {
       sub = await fetchSubscription(page.username as string);
-    }  else {
+    } else if (searchParams.sub) {
       sub = {
-        id: "1234",
-        consumerStripeCustomerId: "1234",
-        consumerStripeSubscriptionId: "1234",
+        id: '1234',
+        consumerStripeCustomerId: '1234',
+        consumerStripeSubscriptionId: '1234',
       };
     }
-  }
-
-  const telegram = Telegram.fromToken(process.env.BOT_TOKEN as string);
-
-  let link: string | undefined;
-
-  if (sub && isProd() && page.channelId) {
-    try {
-      const inviteLink = await telegram.api.createChatInviteLink({
-        chat_id: page.channelId,
-        member_limit: 1,
-      });
-      link = inviteLink.invite_link;
-    } catch (err) {
-      console.log(err);
-    }
-  } else {
-    link = "https://t.me/thisislink";
   }
 
   const myPage = page.userId === session?.user?.id;
@@ -103,14 +103,14 @@ export default async function Page({ params }: PpPage) {
       <div className="absolute top-0 right-0 p-2 flex flex-row gap-2">
         {myPage && (
           <Button variant="secondary" href={`/app/pages/${page.id}`}>
-            {" "}
-            Manage{" "}
+            {' '}
+            Manage{' '}
           </Button>
         )}
         <AccountWidget platformLogin={false} />
       </div>
       <div className="mt-8">
-        <PagePublic page={page} sub={sub} link={link} />
+        <PagePublic products={products} page={page} sub={sub} />
       </div>
     </div>
   );

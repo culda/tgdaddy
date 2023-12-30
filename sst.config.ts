@@ -194,6 +194,18 @@ export default {
         bind: [consumerSubscriptionsTable, pagesTable],
       });
 
+      const telegramAccessLinkHandler = new Function(
+        stack,
+        'TelegramAccessLinkHandler',
+        {
+          handler: 'functions/telegramAccessLink/handler.handler',
+          bind: [usersTable, productsTable, consumerSubscriptionsTable],
+          environment: {
+            BOT_TOKEN: process.env.BOT_TOKEN as string,
+          },
+        }
+      );
+
       const connectStripeHandler = new Function(stack, 'ConnectStripe', {
         handler: 'functions/connectStripe/handler.handler',
         bind: [usersTable],
@@ -284,6 +296,7 @@ export default {
           'POST /user': userHandler,
           'GET /user': userHandler,
           'POST /subscriptions': subscriptionsHandler,
+          'GET /telegramAccessLink': telegramAccessLinkHandler,
 
           // Auth routes
           'POST /forgotPassword': {
