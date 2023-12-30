@@ -42,7 +42,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
 
   return (
     <ContentLayout title="Add Telegram">
-      <Telegram edit isNew product={product} />;
+      <Telegram edit isNew product={product} />
     </ContentLayout>
   );
 };

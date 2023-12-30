@@ -42,10 +42,32 @@ async function handleUpdate(u: TelegramUpdate) {
       );
 
       if (Item) {
-        // const { code, pageId, productId } = unmarshall(
-        //   Attributes
-        // ) as StTelegramLinkCode;
+        await dynamoDb.send(
+          new UpdateItemCommand({
+            TableName: Table.TelegramLinkCodes.tableName,
+            Key: marshall({ code: text }),
+            UpdateExpression: 'SET channelId = :channelId',
+            ExpressionAttributeValues: {
+              ':channelId': { S: String(chat.id) },
+            },
+          })
+        );
+      }
+    }
+  }
 
+  if (context?.is('message')) {
+    const { text, chat } = context;
+
+    if (text?.startsWith('LINK-')) {
+      const { Item } = await dynamoDb.send(
+        new GetItemCommand({
+          TableName: Table.TelegramLinkCodes.tableName,
+          Key: marshall({ code: text }),
+        })
+      );
+
+      if (Item) {
         await dynamoDb.send(
           new UpdateItemCommand({
             TableName: Table.TelegramLinkCodes.tableName,

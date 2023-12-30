@@ -1,8 +1,8 @@
-import ContentLayout from "@/app/components/ContentLayout";
-import React from "react";
-import { StPage } from "@/app/model/types";
-import PageScene from "../../PageScene";
-import { auth } from "@/app/api/auth/[...nextauth]/auth";
+import ContentLayout from '@/app/components/ContentLayout';
+import React from 'react';
+import { StPage } from '@/app/model/types';
+import PageScene from '../../PageScene';
+import { auth } from '@/app/api/auth/[...nextauth]/auth';
 
 type PpParams = {
   params: { id: string };
@@ -16,9 +16,9 @@ export default async function Page({ params }: PpParams) {
       {
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
-          ContentType: "application/json",
+          ContentType: 'application/json',
         },
-        cache: "no-cache",
+        cache: 'no-cache',
       }
     );
     return (await res.json()) as StPage;
@@ -27,7 +27,7 @@ export default async function Page({ params }: PpParams) {
   const page = await fetchPage();
   return (
     <ContentLayout title="Edit Page">
-      <PageScene edit page={page} />
+      <PageScene edit page={page} products={[]} />
     </ContentLayout>
   );
 }

@@ -13,9 +13,7 @@ import { AuthorizerContext } from '../jwtAuth/handler';
 import { lambdaWrapperAuth } from '../lambdaWrapper';
 import { ddbGetPageById, dynamoDb } from '../utils';
 
-export type TpPutProductRequest = {
-  product: StProduct;
-};
+export type TpPutProductRequest = StProduct;
 
 export type TpPostProductRequest = {
   id: string;
@@ -31,7 +29,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       case 'PUT': {
         const body = checkNull(event.body, 400);
         console.log(event.requestContext.http.method, body);
-        const { product } = JSON.parse(body) as TpPutProductRequest;
+        const { ...product } = JSON.parse(body) as TpPutProductRequest;
 
         const page = checkNull(await ddbGetPageById(product.pageId), 400);
         checkPermission(userId, page.userId);

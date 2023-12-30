@@ -1,6 +1,7 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { SSTConfig } from 'sst';
 import { Api, Bucket, Function, NextjsSite, Table } from 'sst/constructs';
+import { isProd } from './utils';
 
 export default {
   config(_input) {
@@ -324,8 +325,14 @@ export default {
       const site = new NextjsSite(stack, 'site', {
         bind: [api],
         environment: {
-          NEXT_PUBLIC_API_ENDPOINT: api.url, // available on the client
-          API_ENDPOINT: api.url, // available on the server
+          NEXT_PUBLIC_API_ENDPOINT:
+            stack.stage === 'production'
+              ? (api.customDomainUrl as string)
+              : api.url, // available on the client
+          API_ENDPOINT:
+            stack.stage === 'production'
+              ? (api.customDomainUrl as string)
+              : api.url, // available on the server
         },
         customDomain:
           stack.stage === 'production' ? 'members.page' : 'dev.members.page',
