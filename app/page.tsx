@@ -48,11 +48,14 @@ export default function Home() {
         {/* Enter page name */}
         <section className="text-gray-600 body-font flex items-center justify-center">
           <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
-            <div className=" md:pl-24 md:pl-16 flex flex-col sm:items-start sm:text-left items-center text-center">
+            <div className=" lg:pl-24 md:pl-16 flex flex-col sm:items-start sm:text-left items-center text-center">
               <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
-                Monetize your Telegram audience in under 2 minutes
+                Paywall your digital content in 60 seconds
               </h1>
-              <p className="mb-8 leading-relaxed">Get your free landing page</p>
+              <p className="mb-8 leading-relaxed">
+                Create a landing page that is ready to convert subscribers
+                straight away. Your content, your prices.
+              </p>
               <div className="flex w-full sm:justify-start justify-center items-end">
                 <div className="hidden sm:flex relative mr-4 rounded-md border border-indigo-500 ">
                   <span className="flex items-center pl-3 text-gray-700 font-bold rounded-md">
@@ -132,10 +135,10 @@ export default function Home() {
                 </div>
                 <div className="flex-grow">
                   <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
-                    Quick setup
+                    Setup in under 1 minute
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Create your customized landing page in seconds and start
+                    Create your custom landing page in seconds and start
                     accepting subscribers straight away.
                   </p>
                 </div>
@@ -181,7 +184,8 @@ export default function Home() {
               </h1>
               <p className="md:w-2/3 mx-auto leading-relaxed text-base text-gray-500">
                 The best pricing for you depends on the number of monthly
-                subscribers your page has. Don't worry, you can change it later.
+                subscribers. Don't worry, you can change it later. 100%
+                moneyback guarantee
               </p>
             </div>
             <div className="flex flex-wrap -m-4">
