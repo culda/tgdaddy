@@ -60,17 +60,18 @@ export default async function Page({ params, searchParams }: PpPage) {
 
   const fetchProducts = async (pageId: string) => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/products?pageId=${pageId}`,
+      `${process.env.API_ENDPOINT}/getProducts?pageId=${pageId}`,
       {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`,
-          ContentType: 'application/json',
-        },
         cache: 'no-cache',
       }
     );
-    return (await res.json()) as StProduct[];
+    const data = await res.json();
+
+    if (!res.ok) {
+      return [];
+    }
+    return data as StProduct[];
   };
 
   const page = await fetchPage();
@@ -80,6 +81,7 @@ export default async function Page({ params, searchParams }: PpPage) {
   }
 
   const products = await fetchProducts(page.id);
+  console.log('pr', products);
 
   let sub;
 

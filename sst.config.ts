@@ -1,7 +1,6 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { SSTConfig } from 'sst';
 import { Api, Bucket, Function, NextjsSite, Table } from 'sst/constructs';
-import { isProd } from './utils';
 
 export default {
   config(_input) {
@@ -177,6 +176,11 @@ export default {
         bind: [pagesTable, productsTable, telegramLinkCodesTable],
       });
 
+      const getProductsHandler = new Function(stack, 'GetProductsHandler', {
+        handler: 'functions/getProducts/handler.handler',
+        bind: [pagesTable, productsTable, telegramLinkCodesTable],
+      });
+
       const userHandler = new Function(stack, 'UserHandler', {
         handler: 'functions/user/handler.handler',
         bind: [usersTable],
@@ -291,7 +295,10 @@ export default {
           },
           'PUT /products': productHandler,
           'POST /products': productHandler,
-          'GET /products': productHandler,
+          'GET /getProducts': {
+            function: getProductsHandler,
+            authorizer: 'none',
+          },
           'PUT /telegramCode': telegramCodeHandler,
           'GET /telegramCode': telegramCodeHandler,
           'POST /user': userHandler,

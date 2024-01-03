@@ -3,10 +3,9 @@ import { ApiResponse, checkNull, checkPermission } from '@/functions/errors';
 import {
   AttributeValue,
   PutItemCommand,
-  QueryCommand,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
 import { Table } from 'sst/node/table';
 import { AuthorizerContext } from '../jwtAuth/handler';
@@ -41,13 +40,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         console.log(event.requestContext.http.method, body);
         await ddbUpdateProduct(JSON.parse(body) as TpPostProductRequest);
         break;
-      }
-      case 'GET': {
-        const pageId = checkNull(event.queryStringParameters?.pageId, 400);
-        const page = checkNull(await ddbGetPageById(pageId), 400);
-        checkPermission(userId, page.userId);
-        const products = await ddbGetProducts(pageId);
-        return ApiResponse({ status: 200, body: products });
       }
       default:
         return ApiResponse({ status: 405 });
@@ -86,21 +78,6 @@ export async function ddbUpdateProduct({
       ExpressionAttributeValues: expressionAttributeValues,
     })
   );
-}
-
-export async function ddbGetProducts(pageId: string) {
-  const result = await dynamoDb.send(
-    new QueryCommand({
-      TableName: Table.Products.tableName,
-      IndexName: 'PageIdIndex',
-      KeyConditionExpression: 'pageId = :pageId',
-      ExpressionAttributeValues: {
-        ':pageId': { S: pageId },
-      },
-    })
-  );
-
-  return result.Items?.map((item) => unmarshall(item)) as StProduct[];
 }
 
 export async function ddbPutProduct(product: StProduct) {

@@ -28,17 +28,18 @@ export default async function Page({ params }: PpPage) {
 
   const fetchProducts = async () => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/products?pageId=${params.id}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`,
-          ContentType: 'application/json',
-        },
-        cache: 'no-cache',
-      }
+      `${process.env.API_ENDPOINT}/getProducts?pageId=${params.id}`,
+      {}
     );
-    return (await res.json()) as StProduct[];
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.log(res.status, data);
+      return [];
+    }
+
+    return data as StProduct[];
   };
 
   const page = await fetchPage();

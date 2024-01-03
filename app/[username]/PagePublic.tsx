@@ -25,10 +25,10 @@ type PpPage = {
   page: StPage;
   sub?: StConsumerSubscription;
   link?: string;
-  products: StProduct[];
+  products?: StProduct[];
 };
 
-export default function PagePublic({ page, products, sub, link }: PpPage) {
+export default function PagePublic({ page, products, sub }: PpPage) {
   const session = useSession();
   const router = useRouter();
   const snack = useSnackbar();
@@ -116,7 +116,7 @@ export default function PagePublic({ page, products, sub, link }: PpPage) {
 
       <section>
         <div className="p-4">
-          {products.map((product, index) => (
+          {products?.map((product, index) => (
             <div
               key={index}
               className="bg-neutral-50 rounded-md flex flex-row gap-2 justify-between items-center p-4"

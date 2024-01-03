@@ -8,7 +8,7 @@ const Page = async ({ params }: { params: { id: string; pid: string } }) => {
 
   const fetchProducts = async () => {
     const res = await fetch(
-      `${process.env.API_ENDPOINT}/products?pageId=${params.id}`,
+      `${process.env.API_ENDPOINT}/getProducts?pageId=${params.id}`,
       {
         method: 'GET',
         headers: {

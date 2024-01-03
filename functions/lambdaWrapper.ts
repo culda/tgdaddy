@@ -1,18 +1,19 @@
-import { ApiResponse, checkNull } from "@/functions/errors";
-import { TransactionCanceledException } from "@aws-sdk/client-dynamodb";
+import { ApiResponse, checkNull } from '@/functions/errors';
+import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
 import {
   APIGatewayProxyEventV2WithLambdaAuthorizer,
   APIGatewayProxyResultV2,
-} from "aws-lambda";
-import { AuthorizerContext } from "./jwtAuth/handler";
+} from 'aws-lambda';
+import { AuthorizerContext } from './jwtAuth/handler';
 
 export async function lambdaWrapper(
   eventHandler: () => Promise<APIGatewayProxyResultV2>
 ) {
   try {
-    return await eventHandler();
+    return eventHandler();
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("{")) {
+    console.log('error', error);
+    if (error instanceof Error && error.message.startsWith('{')) {
       const errorObject = JSON.parse(error.message);
       return ApiResponse({
         status: errorObject.statusCode || 500,
@@ -23,6 +24,9 @@ export async function lambdaWrapper(
       error?.CancellationReasons
     ) {
       console.log(error.CancellationReasons);
+      return ApiResponse({
+        status: 500,
+      });
     } else {
       return ApiResponse({
         status: 500,
@@ -42,7 +46,7 @@ export function lambdaWrapperAuth(
     );
     return eventHandler(userId);
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("{")) {
+    if (error instanceof Error && error.message.startsWith('{')) {
       const errorObject = JSON.parse(error.message);
       return ApiResponse({
         status: errorObject.statusCode || 500,
