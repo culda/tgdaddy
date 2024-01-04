@@ -20,6 +20,7 @@ import {
   StProduct,
 } from '../model/types';
 import PricingSection from './PricingSection';
+import FormattedText from '../components/FormattedText';
 
 type PpPage = {
   page: StPage;
@@ -32,8 +33,6 @@ export default function PagePublic({ page, products, sub }: PpPage) {
   const session = useSession();
   const router = useRouter();
   const snack = useSnackbar();
-
-  console.log(products);
 
   const joinPage = async (priceId: string) => {
     const joinRes = await fetch(
@@ -109,7 +108,6 @@ export default function PagePublic({ page, products, sub }: PpPage) {
             <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
               {page?.title}
             </h1>
-            <p className="mb-8 leading-relaxed">{page?.description}</p>
           </div>
         </div>
       </section>
@@ -123,7 +121,10 @@ export default function PagePublic({ page, products, sub }: PpPage) {
             >
               <div className="flex flex-col">
                 <h2 className="text-xl font-bold">{product.title}</h2>
-                <p className="text-gray-600">{product.description}</p>
+
+                <p className="text-gray-600">
+                  <FormattedText text={product.description} />
+                </p>
               </div>
               {sub && (
                 <Button
