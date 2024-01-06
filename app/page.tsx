@@ -52,11 +52,11 @@ export default function Home() {
           <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
             <div className=" lg:pl-24 md:pl-16 flex flex-col sm:items-start sm:text-left items-center text-center">
               <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
-                Paywall your digital content in 60 seconds
+                Get a paid Telegram channel in 60 seconds
               </h1>
               <p className="mb-8 leading-relaxed">
-                Create a landing page that is ready to convert straight away.
-                Your content, your prices.
+                Paywall your digital content with a landing page that is ready
+                to convert straight away. Your content, your prices.
               </p>
               <div className="flex w-full sm:justify-start justify-center items-end">
                 <div className="hidden sm:flex relative mr-4 rounded-md border border-indigo-500 ">
@@ -81,11 +81,8 @@ export default function Home() {
 
               <div className="text-rose-600 p-2 rounded flex items-center justify-center space-x-2">
                 <span className="animate-pulse">💸</span>
-                <span>$100 off for the first 500 customers (29 left)</span>
+                <span>$100 off for the first 500 customers (13 left)</span>
               </div>
-              {/* <p className="hidden sm:flex text-sm mt-2 text-gray-500 mb-8 w-full">
-                Don't worry, you can change it later.
-              </p> */}
             </div>
           </div>
         </section>
@@ -97,19 +94,19 @@ export default function Home() {
             <div className="flex flex-wrap -m-4 text-center">
               <div className="p-4 w-1/3">
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
-                  25
+                  32
                 </h2>
                 <p>Channels</p>
               </div>
               <div className="p-4 w-1/3">
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
-                  852
+                  1082
                 </h2>
                 <p>Subscribers</p>
               </div>
               <div className="p-4 w-1/3">
                 <h2 className="title-font font-medium sm:text-4xl text-xl text-gray-900">
-                  $4822
+                  $6822
                 </h2>
                 <p>Earned</p>
               </div>
@@ -129,7 +126,7 @@ export default function Home() {
                   height: '100%',
                   border: 0,
                 }}
-                src="https://www.tella.tv/video/clqw82nup00e60gi6hav9gq8b/embed?b=0&title=0&a=1&loop=0&autoPlay=true&t=0&muted=1"
+                src="https://www.tella.tv/video/clr1znisg006t0fl2bkca79uw/embed?b=0&title=0&a=1&loop=1&autoPlay=true&t=0&muted=1"
                 allowFullScreen
                 allowTransparency
               ></iframe>
@@ -141,7 +138,7 @@ export default function Home() {
                 </div>
                 <div className="flex-grow">
                   <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
-                    Setup in under 1 minute
+                    Paid Telegram channel in under 1 minute
                   </h2>
                   <p className="leading-relaxed text-base">
                     Create your custom landing page in seconds and start
