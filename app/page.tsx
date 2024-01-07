@@ -124,7 +124,7 @@ export default function Home() {
                   height: '100%',
                   border: 0,
                 }}
-                src="https://www.tella.tv/video/clr3ua8jg009w0fjthnj61o8k/embed?b=0&title=0&a=1&loop=1&autoPlay=true&t=0&muted=1"
+                src="https://www.tella.tv/video/clr3ua8jg009w0fjthnj61o8k/embed?b=0&title=0&a=1&loop=0&autoPlay=true&t=0&muted=1"
                 allowFullScreen
                 allowTransparency
               ></iframe>
