@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 
 const variantStyles = {
-  primary: 'text-white bg-indigo-500 hover:bg-indigo-600 border-0',
+  primary: 'text-white bg-blue-800 hover:bg-blue-900 border-0',
   secondary: 'text-black bg-orange-300 hover:bg-orange-400 border-0',
   text: 'bg-transparent hover:bg-gray-100 border border-transparent hover:border-gray-300',
 };
@@ -45,8 +45,8 @@ export default function Button({
 }: ButtonProps) {
   const content = loading ? <LoadingSpinner variant={variant} /> : children;
   const variantClassName = variantStyles[variant];
-  const buttonClassName = `flex flex-grow items-center justify-center py-2 px-4 h-10 text-gray-700 disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
-    active ? 'border-2 border-indigo-800 ' : ''
+  const buttonClassName = `flex items-center justify-center py-2 px-4 h-10 text-gray-700 disabled:bg-gray-400 focus:outline-none rounded text-${size} relative ${variantClassName} ${
+    active ? 'border-2 border-blue-800 ' : ''
   }`;
 
   if (href) {

@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
 /* @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
@@ -16,14 +10,33 @@
   }
 } */
 
+:root {
+  --foreground-rgb: 15, 15, 15;
+  --background-end-rgb: 173, 216, 230; /* Light blue */
+  --background-start-rgb: 255, 255, 255; /* Dark blue */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   /* background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb)); */
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  ); */
+}
+
+.gradient-bg {
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+}
+
+.thick-underline {
+  @apply border-b-8 border-blue-800;
+  display: inline-block; /* This is to ensure the border spans only the text width */
+  line-height: 1; /* Adjust line height to control the distance between text and underline */
 }
 
 .loader {

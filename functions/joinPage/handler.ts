@@ -178,7 +178,7 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
 function getFeePercentage(plan: StPlan): number {
   switch (plan) {
     case StPlan.Starter:
-      return 18;
+      return 12;
     case StPlan.Growth:
       return 8;
     case StPlan.Pro:

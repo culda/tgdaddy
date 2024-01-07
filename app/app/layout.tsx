@@ -1,9 +1,8 @@
-"use client";
-import Link from "next/link";
-import React, { Fragment, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import AccountWidget from "../components/AccountWidget";
-
+'use client';
+import Link from 'next/link';
+import React, { Fragment, useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
+import AccountWidget from '../components/AccountWidget';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <AccountWidget platformLogin />
         </div>
       </header>
-      <body >
+      <body>
         <div className="relative flex flex-col md:flex-row md:items-stretch max-md:px-5 ">
           {/* Hamburger Icon */}
           <button
@@ -44,12 +43,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Menu */}
           <nav
             className={`bg-white fixed inset-0 z-40 flex text-center items-center justify-center ${
-              isMenuOpen ? "translate-x-0" : "-translate-x-full"
+              isMenuOpen ? 'translate-x-0' : '-translate-x-full'
             } md:translate-x-0 md:w-1/3 lg:w-[35%] h-screen overflow-y-auto md:overflow-y-visible`}
           >
             <ul className="list-none p-0 m-0">
               <li className="mb-4" onClick={toggleMenu}>
-                <Link href={"/app"}>
+                <Link href={'/app'}>
                   <img
                     loading="lazy"
                     className="aspect-[2.22] object-contain object-center w-[102px] overflow-hidden"
