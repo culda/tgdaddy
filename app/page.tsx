@@ -75,7 +75,9 @@ export default function Home() {
                   placeholder="username"
                 />
               </div>
-              <Button className="shadow-xl">Get Started</Button>
+              <Button onClick={getStarted} className="shadow-xl">
+                Get Started
+              </Button>
             </div>
             <p className="text-blue-200 mt-2 text-sm">
               No credit card required. It's completely free to get started.
