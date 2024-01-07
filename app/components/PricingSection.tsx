@@ -1,4 +1,3 @@
-import { FaCheckCircle } from 'react-icons/fa';
 import Button from './Button';
 import PricingCheckpoint from './PricingCheckpoint';
 
@@ -27,7 +26,6 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
               </h1>
               <PricingCheckpoint text="12% transaction fee" />
               <PricingCheckpoint text="Unlimited subscribers" />
-              <PricingCheckpoint text="First 10 subscribers free" />
 
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started
@@ -58,6 +56,7 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
                 </span>
               </h1>
               <PricingCheckpoint text="8% transaction fee" />
+              <PricingCheckpoint text="Unlimited subscribers" />
               <PricingCheckpoint text="Best for $500+/mo pages" />
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started

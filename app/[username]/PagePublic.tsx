@@ -7,10 +7,10 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { FaArrowRight, FaLock } from 'react-icons/fa';
 import Button from '../components/Button';
+import FormattedText from '../components/FormattedText';
 import { useSnackbar } from '../components/SnackbarProvider';
 import { StConsumerSubscription, StPage, StProduct } from '../model/types';
 import PricingSection from './PricingSection';
-import FormattedText from '../components/FormattedText';
 
 type PpPage = {
   page: StPage;
@@ -98,11 +98,9 @@ export default function PagePublic({ page, products, sub }: PpPage) {
             <div className="absolute inset-0 rounded-full border-4 border-white shadow-xl"></div>
           </div>
         </div>
-        <div className="text-center lg:w-2/3 w-full">
-          <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
-            {page?.title}
-          </h1>
-        </div>
+        <h1 className="title-font text-center sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
+          {page?.title}
+        </h1>
       </section>
 
       <section>
@@ -153,7 +151,7 @@ export default function PagePublic({ page, products, sub }: PpPage) {
         <section className="text-gray-400 text-sm px-8 pb-16">
           <p>
             By subscribing you are agreeing to our{' '}
-            <a href="/privacyPolicy" target="_blank">
+            <a href="/privacyPolicy" target="_blank" className="underline">
               privacy policy
             </a>
             . The subscription is managed by Stripe and you can cancel anytime.

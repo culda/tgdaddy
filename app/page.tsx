@@ -112,6 +112,67 @@ export default function Home() {
           </div>
         </section>
 
+        {/* examples */}
+        {/* 
+        <section className="text-gray-600 body-font">
+          <div className="container px-5 py-24 mx-auto flex flex-wrap">
+            <div className="flex flex-col flex-wrap md:py-6 -mb-10 md:w-1/2 md:pl-12 md:text-left text-center">
+              <div className="flex flex-col mb-10 md:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5">
+                  <FaRocket className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Paid Telegram channel in under one minute
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Create your custom landing page in seconds and start
+                    accepting subscribers straight away.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col mb-10 md:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5">
+                  <FaLightbulb className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Track conversions and optimise
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Connect your pixel of choice and identity where the traffic
+                    and conversions are coming from.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col mb-10 md:items-start items-center">
+                <div className="w-12 h-12 inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-500 mb-5">
+                  <FaMoneyBill className="text-xl" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
+                    Sell adspace (coming soon)
+                  </h2>
+                  <p className="leading-relaxed text-base">
+                    Allow other creators to post ads on your page and earn
+                    commission
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full md:w-1/2 mb-10 md:mb-0 pb-[120%] md:pb-[60%] rounded-lg overflow-hidden relative border-2 border-gray-700">
+              <img
+                src="/images/marketingman.png"
+                loading="lazy"
+                className="object-cover object-center w-full h-full"
+                alt="marketing_landing_page"
+              ></img>
+            </div>
+          </div>
+        </section> */}
+
+        {/* features */}
         <section className="text-gray-600 body-font">
           <div className="container px-5 py-24 mx-auto flex flex-wrap">
             <div className="w-full md:w-1/2 mb-10 md:mb-0 pb-[120%] md:pb-[60%] rounded-lg overflow-hidden relative">
@@ -136,7 +197,7 @@ export default function Home() {
                 </div>
                 <div className="flex-grow">
                   <h2 className="text-gray-900 text-lg title-font font-medium mb-3">
-                    Paid Telegram channel in under 1 minute
+                    Paid Telegram channel in under one minute
                   </h2>
                   <p className="leading-relaxed text-base">
                     Create your custom landing page in seconds and start
