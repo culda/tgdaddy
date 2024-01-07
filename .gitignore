@@ -5,6 +5,7 @@
 .env.*
 tsconfig.tsbuildinfo
 .yarn/cache
+.yarn/install-state.gz
 .open-next/
 
 layers!

@@ -1,29 +1,29 @@
-"use client";
-import { StPlan, StUser } from "../../model/types";
-import { useState } from "react";
-import { TpPlanRequest } from "../../api/stripe/plan/route";
-import { useRouter } from "next/navigation";
+'use client';
+import { StPlan, StUser } from '../../model/types';
+import { useState } from 'react';
+import { TpPlanRequest } from '../../api/stripe/plan/route';
+import { useRouter } from 'next/navigation';
 
 const plans = [
   {
     name: StPlan.Starter,
-    fee: "18%",
+    fee: '12%',
   },
   {
     name: StPlan.Growth,
-    fee: "8%",
-    price: "$49 / mo",
+    fee: '8%',
+    price: '$49 / mo',
   },
   {
     name: StPlan.Pro,
-    fee: "5%",
-    price: "$99 / mo",
+    fee: '5%',
+    price: '$99 / mo',
     recommended: true,
   },
   {
     name: StPlan.Business,
-    fee: "1%",
-    price: "$199 / mo",
+    fee: '1%',
+    price: '$199 / mo',
   },
 ];
 
@@ -39,8 +39,8 @@ export default function Plans({ user }: PpPlans) {
   const handlePlanChange = async (creatorPlan: StPlan) => {
     setIsLoading(true);
 
-    const res = await fetch("/api/stripe/plan", {
-      method: "POST",
+    const res = await fetch('/api/stripe/plan', {
+      method: 'POST',
       body: JSON.stringify({
         user,
         creatorPlan,
@@ -83,7 +83,7 @@ export default function Plans({ user }: PpPlans) {
                 </div>
               )}
               {plan.recommended && (
-                <div className="text-black text-xs justify-center items-stretch bg-indigo-200 mt-1 py-2.5 px-2">
+                <div className="text-black text-xs justify-center items-stretch bg-blue-200 mt-1 py-2.5 px-2">
                   Recommended
                 </div>
               )}
@@ -101,7 +101,7 @@ export default function Plans({ user }: PpPlans) {
                   disabled={isLoading}
                   hidden={isLoading}
                   className={`radio-button ${
-                    !isLoading && "checked:bg-indigo-500"
+                    !isLoading && 'checked:bg-blue-500'
                   }`}
                 />
               ) : (

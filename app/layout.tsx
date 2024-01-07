@@ -1,12 +1,15 @@
-"use client";
-import React from "react";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import Script from "next/script";
-import SnackbarProvider from "./components/SnackbarProvider";
+'use client';
+import React from 'react';
+import { Alatsi } from 'next/font/google';
+import './globals.css';
+import { SessionProvider } from 'next-auth/react';
+import Script from 'next/script';
+import SnackbarProvider from './components/SnackbarProvider';
 
-const inter = Inter({ subsets: ["latin"] });
+const alatsi = Alatsi({
+  weight: '400',
+  subsets: ['latin'],
+});
 
 export default function RootLayout({
   children,
@@ -33,7 +36,7 @@ export default function RootLayout({
           }}
         ></Script>
       </head>
-      <body className={inter.className}>
+      <body className={alatsi.className}>
         <SnackbarProvider>
           <SessionProvider>{children}</SessionProvider>
         </SnackbarProvider>

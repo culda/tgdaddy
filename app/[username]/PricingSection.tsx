@@ -1,11 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../components/Button';
-import {
-  StConsumerSubscription,
-  StPagePrice,
-  StPriceFrequency,
-} from '../model/types';
+import { StPagePrice, StPriceFrequency } from '../model/types';
 
 const PricingSection = ({
   prices,
@@ -14,17 +10,16 @@ const PricingSection = ({
   prices: StPagePrice[];
   join: (priceId: string) => void;
 }) => {
-  const [selectedFrequency, setSelectedFrequency] = useState<StPriceFrequency>(
-    prices[0].frequency
+  const [selectedPrice, setSelectedPrice] = useState<StPagePrice>(prices[0]);
+
+  const monthlyPrice = useMemo(
+    () => prices?.find((p) => p.frequency === StPriceFrequency.Monthly),
+    [prices]
   );
 
-  const handleFrequencyChange = (frequency: StPriceFrequency) => {
-    setSelectedFrequency(frequency);
-  };
-
-  const selectedPrice = useMemo(
-    () => prices?.find((p) => p.frequency === selectedFrequency) as StPagePrice,
-    [prices, selectedFrequency]
+  const yearlyPrice = useMemo(
+    () => prices?.find((p) => p.frequency === StPriceFrequency.Yearly),
+    [prices]
   );
 
   return (
@@ -34,33 +29,37 @@ const PricingSection = ({
           Choose a membership plan
         </h1>
         <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-gray-500">
-          Instantly gain access to ALL products on this page. Cancel anytime.
+          Instantly become a member and gain access to the community.
         </p>
 
         <div className="flex flex-row gap-2 mx-auto mt-6">
-          <Button
-            variant="secondary"
-            active={selectedFrequency === StPriceFrequency.Monthly}
-            onClick={() => handleFrequencyChange(StPriceFrequency.Monthly)}
-          >
-            Monthly
-          </Button>
-          <Button
-            variant="secondary"
-            active={selectedFrequency === StPriceFrequency.Yearly}
-            onClick={() => handleFrequencyChange(StPriceFrequency.Yearly)}
-          >
-            Yearly
-          </Button>
+          {monthlyPrice && (
+            <Button
+              variant="secondary"
+              active={selectedPrice.frequency === StPriceFrequency.Monthly}
+              onClick={() => setSelectedPrice(monthlyPrice)}
+            >
+              Monthly
+            </Button>
+          )}
+          {yearlyPrice && (
+            <Button
+              variant="secondary"
+              active={selectedPrice.frequency === StPriceFrequency.Yearly}
+              onClick={() => setSelectedPrice(yearlyPrice)}
+            >
+              Yearly
+            </Button>
+          )}
         </div>
       </div>
 
       <div className="container px-5 py-8 mx-auto">
         <div className="flex justify-center items-center -m-2 gap-2">
-          <div key={selectedPrice.id} className="">
+          <div className="">
             <div className="h-full p-6 rounded-lg border-2 border-gray-300 flex flex-col relative overflow-hidden">
               <span className="text-sm tracking-widest title-font mb-1 font-medium">
-                {selectedFrequency}
+                {selectedPrice.frequency}
               </span>
               <header className="text-3xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
                 ${(selectedPrice.usd / 100).toFixed(2)}

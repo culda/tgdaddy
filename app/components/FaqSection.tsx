@@ -12,17 +12,17 @@ const FAQItem = ({
   return (
     <div>
       <button onClick={() => setIsOpen(!isOpen)} className="w-full text-left">
-        <div className="p-4 bg-white shadow rounded-md">
-          <h3 className="font-semibold text-lg text-blue-600">{question}</h3>
+        <div className="p-4 shadow-xl rounded-md">
+          <h3 className="font-semibold text-lg text-gray-800">{question}</h3>
+          <div
+            className={`${
+              isOpen ? '' : 'hidden'
+            } mt-2 p-4 text-gray-600 rounded-md`}
+          >
+            <p>{answer}</p>
+          </div>
         </div>
       </button>
-      <div
-        className={`${
-          isOpen ? '' : 'hidden'
-        } mt-2 p-4 bg-white shadow rounded-md`}
-      >
-        <p>{answer}</p>
-      </div>
     </div>
   );
 };
@@ -32,28 +32,32 @@ const FAQSection = () => {
     {
       question: 'What is Memberspage?',
       answer:
-        'Memberspage is a subscription management platform. It automates the process of creating and managing a membership business.',
+        'Memberspage is a subscription management platform. It allows creators to monetize their content with pay-to-access Telegram channels. Creators receive a custom landing page that acts as a paywall.',
     },
     {
       question: 'Who is Memberspage for?',
       answer:
         'Business coaches, fitness influencers, betting tipsters, trading gurus, real estate professionals, the list goes on. Memberspage is for anyone who creates or wants to create premium digital content. It allows creators to monetize their content.',
     },
-
     {
       question: 'How long is the onboarding process?',
       answer:
-        'It takes roughly 5 minutes to set up your custom page, link your channels, and start accepting payments.',
+        'It takes roughly 5 minutes from start to finish: set up your custom page, create and link your TG channels and groups, and start accepting payments.',
     },
     {
       question: 'How do I get paid?',
       answer:
-        'We use a payment processor called Stripe that will deposit your earnings directly into your bank account. You will need to create a Stripe account to receive payments. It only takes 1 minute',
+        'We use a payment processor called Stripe that will deposit your earnings directly into your bank account.',
+    },
+    {
+      question: 'How much does it cost?',
+      answer:
+        'It’s free to get started. You will pay absolutely nothing until you get paid subscribers and start earning money.',
     },
     {
       question: 'Do I need an existing audience?',
       answer:
-        'No, you don’t need an existing audience. You can start building your audience on Memberspage. You will receive a custom landing page that you can share on your socials. ',
+        'No, you don’t need an existing audience. You can start building your audience on Memberspage. Share your page on your socials and start growing your audience. It’s all free',
     },
     {
       question: 'Can I use an existing Telegram channel?',
@@ -62,7 +66,7 @@ const FAQSection = () => {
     {
       question: 'How is Memberspage different from Linktree?',
       answer:
-        'Memberspage manages all aspects of the subscriptions. You just link your content channels, choose a price, and we take care of the rest. Memberspage is a one-stop shop',
+        'Memberspage allows creators to earn passive income from subscriptions. It’s everything Linktree is and more because it also manages user memberships allowing creators to simply...create. You just link your content channels, choose a price, and we take care of the rest. Memberspage is a one-stop shop.',
     },
   ];
 
