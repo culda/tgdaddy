@@ -23,18 +23,6 @@ export default function RootLayout({
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-C4D1L2WWV5"
         ></Script>
-        <Script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag() {
-                window.dataLayer.push(arguments);
-              }
-              gtag("js", new Date());
-              gtag("config", "G-C4D1L2WWV5");
-            `,
-          }}
-        ></Script>
       </head>
       <body className={alatsi.className}>
         <SnackbarProvider>
