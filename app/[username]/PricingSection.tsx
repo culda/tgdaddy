@@ -23,7 +23,10 @@ const PricingSection = ({
   );
 
   return (
-    <section className="text-gray-600 body-font overflow-hidden mt-10">
+    <section
+      id="pricing"
+      className="text-gray-600 body-font overflow-hidden mt-10"
+    >
       <div className="flex flex-col text-center w-full ">
         <h1 className="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">
           Choose a membership plan

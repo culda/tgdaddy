@@ -1,3 +1,4 @@
+import { FaArrowRight } from 'react-icons/fa';
 import Button from './Button';
 import PricingCheckpoint from './PricingCheckpoint';
 
@@ -29,17 +30,6 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
 
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4 ml-auto"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7"></path>
-                </svg>
               </Button>
               <p className="text-xs text-gray-500 mt-3"></p>
             </div>
@@ -56,21 +46,11 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
                 </span>
               </h1>
               <PricingCheckpoint text="8% transaction fee" />
-              <PricingCheckpoint text="Unlimited subscribers" />
               <PricingCheckpoint text="Best for $500+/mo pages" />
+              <PricingCheckpoint text="Unlimited subscribers" />
+
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4 ml-auto"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7"></path>
-                </svg>
               </Button>
               <p className="text-xs text-gray-500 mt-3"></p>
             </div>
@@ -95,17 +75,6 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
 
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4 ml-auto"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7"></path>
-                </svg>
               </Button>
               <p className="text-xs text-gray-500 mt-3"></p>
             </div>
@@ -126,17 +95,6 @@ const PricingSection = ({ getStarted }: { getStarted: () => void }) => {
               <PricingCheckpoint text="Unlimited subscribers" />
               <Button className="flex-grow-0" onClick={getStarted}>
                 Get started
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4 ml-auto"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7"></path>
-                </svg>
               </Button>
               <p className="text-xs text-gray-500 mt-3"></p>
             </div>

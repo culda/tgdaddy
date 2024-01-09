@@ -14,6 +14,8 @@
   --foreground-rgb: 15, 15, 15;
   --background-end-rgb: 173, 216, 230; /* Light blue */
   --background-start-rgb: 255, 255, 255; /* Dark blue */
+  /* smooth scroll */
+  scroll-behavior: smooth;
 }
 
 body {

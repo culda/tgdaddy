@@ -1,14 +1,14 @@
-"use client";
-import ConnectTelegram from "../components/ConnectTelegram";
-import Button from "../components/Button";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useSnackbar } from "../components/SnackbarProvider";
-import { SubmitHandler, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { createHash } from "crypto";
-import { PpParams } from "./page";
+'use client';
+import ConnectTelegram from '../components/ConnectTelegram';
+import Button from '../components/Button';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useSnackbar } from '../components/SnackbarProvider';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { createHash } from 'crypto';
+import { PpParams } from './page';
 
 type TpFormValues = {
   email: string;
@@ -18,18 +18,18 @@ type TpFormValues = {
 const schema = yup
   .object()
   .shape({
-    email: yup.string().required("Enter your email").email(),
+    email: yup.string().required('Enter your email').email(),
     password: yup
       .string()
-      .required("Enter your password")
-      .min(8, "Password must be at least 8 characters"),
+      .required('Enter your password')
+      .min(8, 'Password must be at least 8 characters'),
   })
   .required();
 
 export default function Page({
-  platformLogin = "true",
+  platformLogin = 'true',
   callbackUrl,
-}: PpParams["searchParams"]) {
+}: PpParams['searchParams']) {
   const snack = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
   const { getValues, formState, register, handleSubmit } =
@@ -39,10 +39,10 @@ export default function Page({
 
   const onSubmit: SubmitHandler<TpFormValues> = async (values) => {
     setIsLoading(true);
-    const hashedPassword = createHash("sha256")
+    const hashedPassword = createHash('sha256')
       .update(values.password)
-      .digest("hex");
-    const result = await signIn("email", {
+      .digest('hex');
+    const result = await signIn('email', {
       redirect: false,
       email: values.email,
       password: hashedPassword,
@@ -55,39 +55,39 @@ export default function Page({
         callbackUrl ?? `${process.env.NEXT_PUBLIC_HOST}/app`;
     } else {
       snack({
-        key: "login-error",
-        text: result?.error ?? "Something went wrong",
-        variant: "error",
+        key: 'login-error',
+        text: result?.error ?? 'Something went wrong',
+        variant: 'error',
       });
     }
     setIsLoading(false);
   };
 
   const handleForgetPassowrd = async () => {
-    const email = getValues("email");
+    const email = getValues('email');
     try {
       await yup.string().required().email().validate(email);
       await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/forgotPassword`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: getValues("email"),
+          email: getValues('email'),
           platformLogin: platformLogin,
           callbackUrl: callbackUrl,
         }),
       });
       snack({
-        key: "forgot-password-success",
-        text: "Check your email for a reset code",
-        variant: "success",
+        key: 'forgot-password-success',
+        text: 'Check your email for a reset code',
+        variant: 'success',
       });
     } catch (err) {
       snack({
-        key: "forgot-password-error",
-        text: "Please enter a valid email",
-        variant: "error",
+        key: 'forgot-password-error',
+        text: 'Please enter a valid email',
+        variant: 'error',
       });
     }
   };
@@ -107,9 +107,9 @@ export default function Page({
               Email
             </label>
             <input
-              {...register("email")}
+              {...register('email')}
               className={`shadow appearance-none border ${
-                formState.errors.email ? "border-red-500" : ""
+                formState.errors.email ? 'border-red-500' : ''
               } rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline`}
               id="email"
               type="email"
@@ -129,9 +129,9 @@ export default function Page({
               Password
             </label>
             <input
-              {...register("password")}
+              {...register('password')}
               className={`shadow appearance-none border ${
-                formState.errors.password ? "border-red-500" : ""
+                formState.errors.password ? 'border-red-500' : ''
               } rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline`}
               id="password"
               type="password"
@@ -154,7 +154,7 @@ export default function Page({
           </div>
           <div className="mt-3 flex items-center justify-center">
             <Button loading={isLoading} type="submit">
-              Sign In
+              Sign In or Create Account
             </Button>
           </div>
         </form>
