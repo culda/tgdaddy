@@ -18,7 +18,7 @@ export default async function Page({ searchParams }: PpParams) {
       {
         id: nanoid(10),
         usd: 0,
-        frequency: StPriceFrequency.Monthly,
+        frequency: StPriceFrequency.Month,
       },
     ],
   };

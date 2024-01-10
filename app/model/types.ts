@@ -26,9 +26,9 @@ export type StPagePrice = {
 };
 
 export enum StPriceFrequency {
-  OneOff = 'oneoff',
-  Monthly = 'monthly',
-  Yearly = 'yearly',
+  Once = 'Once',
+  Week = 'Week',
+  Month = 'Month',
 }
 
 export type StUser = {
@@ -100,17 +100,4 @@ export type StTelegramLinkCode = {
   productId: string;
   pageId: string;
   channelId?: string;
-};
-
-export const frequencyToInterval = (
-  frequency: StPriceFrequency
-): Stripe.PriceCreateParams.Recurring.Interval => {
-  switch (frequency) {
-    case StPriceFrequency.Monthly:
-      return 'month';
-    case StPriceFrequency.Yearly:
-      return 'year';
-    default:
-      throw new Error('Invalid frequency');
-  }
 };

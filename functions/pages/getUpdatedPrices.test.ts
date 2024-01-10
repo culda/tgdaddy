@@ -1,20 +1,20 @@
-import { StPriceFrequency } from "@/app/model/types";
-import { getUpdatedPrices } from "./getUpdatedPrices";
+import { StPriceFrequency } from '@/app/model/types';
+import { getUpdatedPrices } from './getUpdatedPrices';
 
 const testCases = [
   {
     base: [],
     prices: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 1.99,
       },
     ],
     expected: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 1.99,
       },
     ],
@@ -22,22 +22,22 @@ const testCases = [
   {
     base: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 1.99,
       },
     ],
     prices: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 2.99,
       },
     ],
     expected: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 2.99,
       },
     ],
@@ -45,27 +45,27 @@ const testCases = [
   {
     base: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 1.99,
       },
     ],
     prices: [
       {
-        id: "2",
-        frequency: StPriceFrequency.Monthly,
+        id: '2',
+        frequency: StPriceFrequency.Month,
         usd: 2.99,
       },
     ],
     expected: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Monthly,
+        id: '1',
+        frequency: StPriceFrequency.Month,
         usd: 1.99,
       },
       {
-        id: "2",
-        frequency: StPriceFrequency.Monthly,
+        id: '2',
+        frequency: StPriceFrequency.Month,
         usd: 2.99,
       },
     ],
@@ -73,34 +73,34 @@ const testCases = [
   {
     base: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Yearly,
+        id: '1',
+        frequency: StPriceFrequency.Week,
         usd: 1.99,
       },
       {
-        id: "2",
-        frequency: StPriceFrequency.Monthly,
+        id: '2',
+        frequency: StPriceFrequency.Month,
         usd: 2.99,
       },
     ],
     prices: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Yearly,
+        id: '1',
+        frequency: StPriceFrequency.Week,
         usd: 2.99,
       },
     ],
     expected: [
       {
-        id: "1",
-        frequency: StPriceFrequency.Yearly,
+        id: '1',
+        frequency: StPriceFrequency.Week,
         usd: 2.99,
       },
     ],
   },
 ];
 
-describe("getUpdatedPrices", () => {
+describe('getUpdatedPrices', () => {
   testCases.forEach(({ base, prices, expected }) => {
     it(`should return ${JSON.stringify(expected)} when base is ${JSON.stringify(
       base

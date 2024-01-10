@@ -68,7 +68,7 @@ const testCases = [
         {
           id: '1',
           usd: 100,
-          frequency: StPriceFrequency.Monthly,
+          frequency: StPriceFrequency.Month,
         },
       ],
     },
@@ -77,7 +77,7 @@ const testCases = [
         {
           id: '1',
           usd: 100,
-          frequency: StPriceFrequency.Monthly,
+          frequency: StPriceFrequency.Month,
         },
       ],
     },
@@ -89,7 +89,7 @@ const testCases = [
         {
           id: '1',
           usd: 100,
-          frequency: StPriceFrequency.Monthly,
+          frequency: StPriceFrequency.Month,
         },
       ],
     },
@@ -98,7 +98,7 @@ const testCases = [
         {
           id: '1',
           usd: 105,
-          frequency: StPriceFrequency.Monthly,
+          frequency: StPriceFrequency.Month,
         },
       ],
     },
@@ -107,7 +107,7 @@ const testCases = [
         {
           id: '1',
           usd: 105,
-          frequency: StPriceFrequency.Monthly,
+          frequency: StPriceFrequency.Month,
         },
       ],
     },

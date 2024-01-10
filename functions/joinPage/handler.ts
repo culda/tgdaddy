@@ -2,7 +2,7 @@ import {
   StConnectStatus,
   StPagePrice,
   StPlan,
-  frequencyToInterval,
+  StPriceFrequency,
 } from '@/app/model/types';
 import { ApiResponse, checkNull } from '@/functions/errors';
 import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
@@ -27,12 +27,6 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
   AuthorizerContext
 > = async (event) => {
   return lambdaWrapperAuth(event, async (userId: string) => {
-    if (!event.body) {
-      return ApiResponse({
-        status: 400,
-      });
-    }
-
     const body = checkNull(event.body, 400);
     console.log(body);
 
@@ -50,11 +44,11 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
     }
     const creatorUser = await ddbGetUserById(page.userId);
     const creatorStripeAccountId = creatorUser?.creatorStripeAccountId;
-    const prices: StPagePrice | undefined = page?.prices?.find(
+    const selectedPrice: StPagePrice | undefined = page?.prices?.find(
       (p) => p.id === priceId
     );
 
-    if (!prices) {
+    if (!selectedPrice) {
       return ApiResponse({
         status: 400,
         message: 'Invalid price ID',
@@ -115,25 +109,41 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
         stripeAccount: creatorStripeAccountId,
       }
     );
+
     let price = existingPrices.data.find(
       (p) =>
-        p.unit_amount === prices.usd &&
-        p.recurring?.interval === frequencyToInterval(prices.frequency)
+        p.unit_amount === selectedPrice.usd &&
+        p.recurring?.interval === frequencyToInterval(selectedPrice.frequency)
     );
 
     if (!price) {
       // Create a new price if no matching price is found
-      price = await client.prices.create(
-        {
-          product: product.id,
-          unit_amount: prices.usd,
-          currency: 'usd',
-          recurring: { interval: frequencyToInterval(prices.frequency) },
-        },
-        {
-          stripeAccount: creatorStripeAccountId,
-        }
-      );
+      if (selectedPrice.frequency === StPriceFrequency.Once) {
+        price = await client.prices.create(
+          {
+            product: product.id,
+            unit_amount: selectedPrice.usd,
+            currency: 'usd',
+          },
+          {
+            stripeAccount: creatorStripeAccountId,
+          }
+        );
+      } else {
+        price = await client.prices.create(
+          {
+            product: product.id,
+            unit_amount: selectedPrice.usd,
+            currency: 'usd',
+            recurring: {
+              interval: frequencyToInterval(selectedPrice.frequency),
+            },
+          },
+          {
+            stripeAccount: creatorStripeAccountId,
+          }
+        );
+      }
     }
 
     console.log('New checkout session', userId, pageId);
@@ -145,7 +155,10 @@ export const handler: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
       {
         payment_method_types: ['card'],
         line_items: [{ price: price.id, quantity: 1 }],
-        mode: 'subscription',
+        mode:
+          selectedPrice.frequency === StPriceFrequency.Once
+            ? 'payment'
+            : 'subscription',
         success_url: redirectUrl,
         cancel_url: redirectUrl,
         customer: customerId,
@@ -187,3 +200,16 @@ function getFeePercentage(plan: StPlan): number {
       return 1;
   }
 }
+
+const frequencyToInterval = (
+  frequency: StPriceFrequency
+): Stripe.PriceCreateParams.Recurring.Interval => {
+  switch (frequency) {
+    case StPriceFrequency.Month:
+      return 'month';
+    case StPriceFrequency.Week:
+      return 'week';
+    default:
+      throw new Error('Invalid frequency');
+  }
+};

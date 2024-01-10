@@ -4,7 +4,7 @@ import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 const variantStyles = {
   primary: 'text-white bg-blue-800 hover:bg-blue-900 border-0',
   secondary: 'text-black bg-orange-300 hover:bg-orange-400 border-0',
-  text: 'bg-transparent hover:bg-gray-100 border border-transparent hover:border-gray-300',
+  text: 'bg-transparent hover:bg-gray-100 hover:border-gray-300',
 };
 
 type Size = 'sm' | 'md' | 'lg';
