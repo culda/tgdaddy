@@ -1,6 +1,7 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { SSTConfig } from 'sst';
 import { Api, Bucket, Function, NextjsSite, Table } from 'sst/constructs';
+import { DEV_DOMAIN, PROD_DOMAIN } from './constants';
 
 export default {
   config(_input) {
@@ -342,7 +343,15 @@ export default {
               : api.url, // available on the server
         },
         customDomain:
-          stack.stage === 'production' ? 'members.page' : 'dev.members.page',
+          stack.stage === 'production'
+            ? {
+                domainName: PROD_DOMAIN,
+                domainAlias: `www.${PROD_DOMAIN}`,
+              }
+            : {
+                domainName: `${DEV_DOMAIN}`,
+                domainAlias: `www.${DEV_DOMAIN}`,
+              },
       });
 
       stack.addOutputs({

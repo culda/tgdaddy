@@ -62,8 +62,9 @@ export default function Home() {
               60 seconds
             </h1>
             <p className="mb-8 leading-relaxed">
-              Earn passive income from your audience by creating a paid Telegram
-              channel. You create content, we take care of the rest.
+              Earn passive income with a fully automated subscription management
+              platform built on Telegram. You create content, we take care of
+              the rest.
             </p>
             <div className="flex w-full justify-center items-end">
               <div className="hidden sm:flex relative mr-4 rounded-md border border-gray-200 bg-blue-800 focus-within:ring-2 focus-within:ring-white focus-within:border-transparent shadow-xl">
