@@ -34,6 +34,7 @@ export default function RootLayout({
         />
         <meta property="og:url" content="https://members.page" />
         <meta property="og:image" content="https://members.page/logo.webp" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-C4D1L2WWV5"
