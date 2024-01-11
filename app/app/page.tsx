@@ -1,11 +1,11 @@
-import { isProd } from "../../utils";
-import { auth } from "../api/auth/[...nextauth]/auth";
-import Button from "../components/Button";
-import ContentLayout from "../components/ContentLayout";
-import { StConnectStatus, StPage, StUser } from "../model/types";
-import Pages from "./Pages";
-import { getFakeRevenueData } from "./fakeRevenueData";
-import { fetchRevenueData } from "./fetchRevenueData";
+import { isProd } from '../../utils';
+import { auth } from '../api/auth/[...nextauth]/auth';
+import Button from '../components/Button';
+import ContentLayout from '../components/ContentLayout';
+import { StConnectStatus, StPage, StUser } from '../model/types';
+import Pages from './Pages';
+import { getFakeRevenueData } from './fakeRevenueData';
+import { fetchStripeData } from './fetchRevenueData';
 
 export default async function Page() {
   const session = await auth();
@@ -13,26 +13,26 @@ export default async function Page() {
   const pagesRes = await fetch(`${process.env.API_ENDPOINT}/pages`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
-      ContentType: "application/json",
+      ContentType: 'application/json',
     },
-    cache: "no-cache",
+    cache: 'no-cache',
   });
   const pages: StPage[] = await pagesRes.json();
 
   const userRes = await fetch(`${process.env.API_ENDPOINT}/user`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
-      ContentType: "application/json",
+      ContentType: 'application/json',
     },
   });
   const user = (await userRes.json()) as StUser;
 
-  let revenueData;
+  let stripeData;
 
   if (isProd() && user.creatorStripeAccountId) {
-    revenueData = await fetchRevenueData(user.creatorStripeAccountId);
+    stripeData = await fetchStripeData(user.creatorStripeAccountId);
   } else if (!isProd()) {
-    revenueData = getFakeRevenueData();
+    stripeData = getFakeRevenueData();
   }
 
   return (
@@ -50,9 +50,10 @@ export default async function Page() {
           </div>
         )}
       <Pages
-        chartData={revenueData?.chart}
+        chartData={stripeData?.chart}
         pages={pages}
-        totalRevenue={revenueData?.total}
+        totalRevenue={stripeData?.total}
+        members={stripeData?.members}
       />
     </ContentLayout>
   );

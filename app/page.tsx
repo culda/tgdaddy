@@ -119,6 +119,42 @@ export default function Home() {
           </div>
         </section>
 
+        {/* views */}
+
+        <section>
+          <div className=" text-white py-12">
+            <div className="container mx-auto px-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="relative">
+                  <img
+                    src="/images/user-view.webp"
+                    alt="User View"
+                    className="rounded-lg shadow-lg transform hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute top-0 left-0 mt-4 ml-4">
+                    <span className="px-2 py-1 bg-blue-500 text-white rounded-full text-xs">
+                      User View
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <img
+                    src="/images/creator-view.webp"
+                    alt="Creator View"
+                    className="rounded-lg shadow-lg transform hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute top-0 left-0 mt-4 ml-4">
+                    <span className="px-2 py-1 bg-green-500 text-white rounded-full text-xs">
+                      Creator View
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* features */}
         <section className="text-gray-600 body-font">
           <div className="container px-5 py-24 mx-auto flex flex-wrap">

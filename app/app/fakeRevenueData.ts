@@ -1,14 +1,19 @@
-import dayjs from "dayjs";
-import { TpRevenueChartData, TpTotalRevenue } from "../components/RevenueChart";
+import dayjs from 'dayjs';
+import {
+  TpMembers,
+  TpRevenueChartData,
+  TpTotalRevenue,
+} from '../components/RevenueChart';
 
 export const getFakeRevenueData = (): {
   chart: TpRevenueChartData;
   total: TpTotalRevenue;
+  members: TpMembers;
 } => {
   const now = dayjs();
-  const oneDayAgo = now.subtract(1, "day");
-  const sevenDaysAgo = now.subtract(7, "day");
-  const thirtyDaysAgo = now.subtract(30, "day");
+  const oneDayAgo = now.subtract(1, 'day');
+  const sevenDaysAgo = now.subtract(7, 'day');
+  const thirtyDaysAgo = now.subtract(30, 'day');
   // Initialize data sets
   let revenue: TpRevenueChartData = {
     day: {
@@ -35,9 +40,9 @@ export const getFakeRevenueData = (): {
 
   // Populate labels for each dataset
   for (let i = 0; i < 30; i++) {
-    revenue.day.labels!.push(thirtyDaysAgo.add(i, "day").format("DD"));
+    revenue.day.labels!.push(thirtyDaysAgo.add(i, 'day').format('DD'));
     if (i % 2 === 0) {
-      revenue.day2.labels!.push(thirtyDaysAgo.add(i, "day").format("DD"));
+      revenue.day2.labels!.push(thirtyDaysAgo.add(i, 'day').format('DD'));
     }
   }
 
@@ -61,5 +66,12 @@ export const getFakeRevenueData = (): {
   totalRevenue.week = dayRevenue.slice(-7).reduce((a, b) => a + b, 0);
   totalRevenue.month = totalRevenue.day;
 
-  return { chart: revenue, total: totalRevenue };
+  // Mock member data
+  const members: TpMembers = {
+    day: 12,
+    week: 80,
+    month: 300,
+  };
+
+  return { chart: revenue, total: totalRevenue, members };
 };

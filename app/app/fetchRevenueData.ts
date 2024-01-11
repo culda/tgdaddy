@@ -1,14 +1,20 @@
-import dayjs from "dayjs";
-import { TpRevenueChartData, TpTotalRevenue } from "../components/RevenueChart";
-import { client } from "../api/stripe/stripe";
+import dayjs from 'dayjs';
+import {
+  TpMembers,
+  TpRevenueChartData,
+  TpTotalRevenue,
+} from '../components/RevenueChart';
+import { client } from '../api/stripe/stripe';
 
-export async function fetchRevenueData(
-  accountId: string
-): Promise<{ chart: TpRevenueChartData; total: TpTotalRevenue }> {
+export async function fetchStripeData(accountId: string): Promise<{
+  chart: TpRevenueChartData;
+  total: TpTotalRevenue;
+  members: TpMembers;
+}> {
   const now = dayjs();
-  const oneDayAgo = now.subtract(1, "day");
-  const sevenDaysAgo = now.subtract(7, "day");
-  const thirtyDaysAgo = now.subtract(30, "day");
+  const oneDayAgo = now.subtract(1, 'day');
+  const sevenDaysAgo = now.subtract(7, 'day');
+  const thirtyDaysAgo = now.subtract(30, 'day');
 
   // Fetch charges
   const charges = await client.charges.list(
@@ -21,6 +27,24 @@ export async function fetchRevenueData(
       stripeAccount: accountId,
     }
   );
+
+  // Fetch customers
+  const customers = await client.customers.list(
+    {
+      created: {
+        gte: thirtyDaysAgo.unix(), // Fetch customers created in the last 30 days
+      },
+    },
+    {
+      stripeAccount: accountId,
+    }
+  );
+
+  let members: TpMembers = {
+    day: 0,
+    week: 0,
+    month: 0,
+  };
 
   // Initialize data sets
   let revenue: TpRevenueChartData = {
@@ -48,9 +72,9 @@ export async function fetchRevenueData(
 
   // Populate labels for each dataset
   for (let i = 0; i < 30; i++) {
-    revenue.day.labels!.push(thirtyDaysAgo.add(i, "day").format("DD"));
+    revenue.day.labels!.push(thirtyDaysAgo.add(i, 'day').format('DD'));
     if (i % 2 === 0) {
-      revenue.day2.labels!.push(thirtyDaysAgo.add(i, "day").format("DD"));
+      revenue.day2.labels!.push(thirtyDaysAgo.add(i, 'day').format('DD'));
     }
   }
 
@@ -58,7 +82,7 @@ export async function fetchRevenueData(
   const addToEarnings = (date: number, amount: number) => {
     const usd = amount / 100;
     const transactionDate = dayjs.unix(date);
-    const diffInDays = now.diff(transactionDate, "day");
+    const diffInDays = now.diff(transactionDate, 'day');
 
     // Add to daily dataset
     if (diffInDays < intervals.day.length) {
@@ -80,9 +104,22 @@ export async function fetchRevenueData(
     }
     totalRevenue.month += usd; // All transactions are within the last 30 days
   };
+
   // Process charges
   charges.data.forEach((charge) => {
     addToEarnings(charge.created, charge.amount);
+  });
+
+  // Process customers
+  customers.data.forEach((customer) => {
+    const joinDate = dayjs.unix(customer.created);
+    if (joinDate.isAfter(oneDayAgo)) {
+      members.day++;
+    }
+    if (joinDate.isAfter(sevenDaysAgo)) {
+      members.week++;
+    }
+    members.month++; // All customers are within the last 30 days
   });
 
   // Assign calculated data to the revenue object
@@ -92,5 +129,6 @@ export async function fetchRevenueData(
   return {
     chart: revenue,
     total: totalRevenue,
+    members,
   };
 }

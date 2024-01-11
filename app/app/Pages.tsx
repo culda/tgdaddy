@@ -1,25 +1,36 @@
-"use client";
-import { FaArrowRight } from "react-icons/fa";
-import { isFalseyOrEmptyArray } from "../../utils";
-import Button from "../components/Button";
+'use client';
+import { FaArrowRight } from 'react-icons/fa';
+import { isFalseyOrEmptyArray } from '../../utils';
+import Button from '../components/Button';
 import RevenueChart, {
+  TpMembers,
   TpRevenueChartData,
   TpTotalRevenue,
-} from "../components/RevenueChart";
-import { StPage } from "../model/types";
+} from '../components/RevenueChart';
+import { StPage } from '../model/types';
 
 type PpPages = {
   pages?: StPage[];
   chartData?: TpRevenueChartData;
   totalRevenue?: TpTotalRevenue;
+  members?: TpMembers;
 };
 
-export default function Pages({ chartData, pages, totalRevenue }: PpPages) {
+export default function Pages({
+  chartData,
+  pages,
+  totalRevenue,
+  members,
+}: PpPages) {
   return (
-    <div className="mt-16">
+    <div className="mt-8">
       <div title="💸 Revenue">
-        {chartData && totalRevenue && (
-          <RevenueChart data={chartData} total={totalRevenue} />
+        {chartData && totalRevenue && members && (
+          <RevenueChart
+            data={chartData}
+            total={totalRevenue}
+            members={members}
+          />
         )}
       </div>
       <div className="flex flex-col gap-2 mt-8">
@@ -31,9 +42,9 @@ export default function Pages({ chartData, pages, totalRevenue }: PpPages) {
         {!isFalseyOrEmptyArray(pages) &&
           pages.map((page) => (
             <Button
-              variant={"secondary"}
+              variant={'secondary'}
               key={page.id}
-              href={`/app/pages/${page.id.split("/")[0]}`}
+              href={`/app/pages/${page.id.split('/')[0]}`}
             >
               {page.username}
             </Button>
