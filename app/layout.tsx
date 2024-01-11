@@ -19,6 +19,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <title>Memberspage - Monetize your Audience</title>
+        <meta
+          name="description"
+          content="Subscription management platform for digital content creators"
+        />
+        <meta
+          property="og:title"
+          content="Memberspage - Monetize your Audience"
+        />
+        <meta
+          property="og:description"
+          content="Subscription management platform for digital content creators"
+        />
+        <meta property="og:url" content="https://members.page" />
+        <meta property="og:image" content="https://members.page/logo.webp" />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-C4D1L2WWV5"

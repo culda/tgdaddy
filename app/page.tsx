@@ -289,6 +289,7 @@ export default function Home() {
                       <img
                         className="text-sm w-6 h-6"
                         src="/images/telegram-logo.svg"
+                        alt="telegram"
                       ></img>
                       Creators
                     </div>
@@ -304,6 +305,7 @@ export default function Home() {
                       <img
                         className="text-sm w-6 h-6"
                         src="/images/telegram-logo.svg"
+                        alt="telegram"
                       ></img>
                       Subscribers
                     </div>
