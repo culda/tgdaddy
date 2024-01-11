@@ -11,12 +11,13 @@ import FormattedText from '../components/FormattedText';
 import { useSnackbar } from '../components/SnackbarProvider';
 import { StConsumerSubscription, StPage, StProduct } from '../model/types';
 import PricingSection from './PricingSection';
+import ProductsSection from './ProductsSection';
 
 type PpPage = {
   page: StPage;
   sub?: StConsumerSubscription;
   link?: string;
-  products?: StProduct[];
+  products: StProduct[];
 };
 
 export default function PagePublic({ page, products, sub }: PpPage) {
@@ -103,34 +104,11 @@ export default function PagePublic({ page, products, sub }: PpPage) {
         </h1>
       </section>
 
-      <section>
-        <div className="p-4">
-          {products?.map((product, index) => (
-            <div
-              key={index}
-              className="bg-neutral-50 rounded-md flex flex-row gap-2 justify-between items-center p-4 shadow-xl relative" // Add 'relative' class
-            >
-              <div className="flex flex-col">
-                <h2 className="text-xl font-bold">{product.title}</h2>
-                <p className="text-gray-600">
-                  <FormattedText text={product.description} />
-                </p>
-              </div>
-              {!sub ? (
-                <FaLock className="text-2xl" />
-              ) : (
-                <Button
-                  className="max-w-20"
-                  disabled={!sub}
-                  onClick={() => goToChannel(product.id)}
-                >
-                  <FaArrowRight />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+      <ProductsSection
+        goToChannel={goToChannel}
+        products={products}
+        sub={!!sub}
+      />
 
       {/* Pricing */}
       {!sub && <PricingSection prices={page.prices} join={joinPage} />}

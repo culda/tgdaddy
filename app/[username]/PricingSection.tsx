@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { FaCheckCircle } from 'react-icons/fa';
 import Button from '../components/Button';
 import { StPagePrice, StPriceFrequency } from '../model/types';
-import PricingCheckpoint from '../components/PricingCheckpoint';
 
 const PricingSection = ({
   prices,
@@ -32,9 +30,6 @@ const PricingSection = ({
     <section id="pricing" className="text-gray-600 body-font overflow-hidden">
       <div className="container px-5 py-8 mx-auto ">
         <div className="flex flex-col text-center w-full ">
-          {/* <h1 className="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">
-          Choose a membership plan
-        </h1> */}
           <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-gray-500">
             Instantly become a member and gain access to the community.
           </p>
