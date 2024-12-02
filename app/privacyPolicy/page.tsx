@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function Page() {
   return (
@@ -6,7 +6,7 @@ export default function Page() {
       <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
       <div className="text-gray-700">
         <p>
-          <strong>Last Updated:</strong> 2023-12-12
+          <strong>Last Updated:</strong> 2024-03-06
         </p>
         <h2>1. Introduction</h2>
         <p>

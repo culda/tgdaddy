@@ -35,6 +35,7 @@ type TpImage = {
 
 export type TpPageValues = {
   username: string;
+  description: string;
   title: string;
   prices: StPagePrice[];
 };
@@ -48,6 +49,7 @@ const schema = yup.object().shape({
       /^[A-Za-z0-9\-\_]+$/,
       'Username can only contain letters, numbers, and the following characters: - _'
     ),
+  description: yup.string().required().max(500),
   title: yup.string().required('Title is required'),
   prices: yup
     .array()
@@ -246,6 +248,18 @@ const PageScene = ({ page, products, isNew = false, edit = false }: PpPage) => {
               registerProps={register('title')}
               editMode={edit}
               defaultValue={page?.title}
+            />
+          </div>
+        </PageSection>
+        <PageSection title="Description">
+          <p>Short description of who you are</p>
+          <div className="mt-4">
+            <TextField
+              errorMessage={formState.errors.description?.message}
+              registerProps={register('description')}
+              textarea
+              editMode={edit}
+              defaultValue={page?.description}
             />
           </div>
         </PageSection>

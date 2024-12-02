@@ -102,6 +102,7 @@ export default function PagePublic({ page, products, sub }: PpPage) {
         <h1 className="title-font text-center sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
           {page?.title}
         </h1>
+        <p>{page?.description}</p>
       </section>
 
       <ProductsSection
